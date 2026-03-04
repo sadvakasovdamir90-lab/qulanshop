@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Страница товара | QulanShop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-orange-600 cursor-pointer" onclick="location.href='index.html'">QulanShop</h1>
+            <div class="flex items-center space-x-6">
+                <a href="index.html" class="text-sm font-bold hover:text-orange-600 italic">На главную</a>
+                <div class="relative cursor-pointer">
+                    <i class="fas fa-shopping-cart text-xl text-orange-600"></i>
+                    <span class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full px-1.5 font-bold">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-3xl shadow-sm overflow-hidden p-4 md:p-10">
+            <div class="flex flex-col md:flex-row gap-10">
+                
+                <div class="w-full md:w-1/2">
+                    <div class="bg-gray-100 rounded-2xl h-80 md:h-[500px] flex items-center justify-center border border-gray-50">
+                        <i class="fas fa-image text-8xl text-gray-200"></i>
+                    </div>
+                </div>
+
+                <div class="w-full md:w-1/2 space-y-6">
+                    <div>
+                        <h1 class="text-2xl md:text-4xl font-bold italic mb-2" id="prod-title">Название товара</h1>
+                        <div class="flex items-center space-x-4">
+                            <span class="text-green-500 font-bold text-sm italic"><i class="fas fa-check-circle mr-1"></i> В наличии</span>
+                            <span class="text-gray-400 text-sm italic">Артикул: 102938</span>
+                        </div>
+                    </div>
+
+                    <div class="border-y border-gray-100 py-6">
+                        <p class="text-3xl md:text-5xl font-black text-orange-600 mb-2">15 500 ₸</p>
+                        <p class="text-gray-400 text-sm line-through italic">18 000 ₸</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h3 class="font-bold text-lg italic">Описание:</h3>
+                        <p class="text-gray-600 leading-relaxed italic" id="prod-desc">
+                            Бұл тауардың толық сипаттамасы осы жерде болады. Сатушы тауар туралы барлық ақпаратты (сапасы, өлшемі, қолдану тәсілі) осы жерге жазады.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4 pt-6">
+                        <button class="flex-1 bg-orange-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-orange-700 transition shadow-lg shadow-orange-200 italic">
+                            <i class="fas fa-cart-plus mr-2"></i> <span id="btn-add">Добавить в корзину</span>
+                        </button>
+                        <button class="px-6 py-4 border-2 border-gray-100 rounded-2xl hover:border-red-500 hover:text-red-500 transition">
+                            <i class="far fa-heart text-xl"></i>
+                        </button>
+                    </div>
+
+                    <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                        <div class="flex items-center text-blue-700 font-bold mb-1 italic">
+                            <i class="fas fa-truck mr-2"></i> Доставка
+                        </div>
+                        <p class="text-blue-600 text-xs italic">Доставка по всему району Құлан. Оплата при получении.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-gray-100 py-10 mt-10">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-gray-400 text-sm italic">© 2026 QulanShop. Все права защищены.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Тіл жүйесін осы бетке де қосамыз
+        function applyLanguage() {
+            const lang = localStorage.getItem('qulan_lang') || 'ru';
+            const isKz = lang === 'kz';
+
+            if(isKz) {
+                document.getElementById('btn-add').innerText = "Себетке салу";
+                document.getElementById('prod-title').innerText = "Тауардың атауы";
+                document.getElementById('prod-desc').innerText = "Тауар туралы толық мәлімет...";
+            }
+        }
+        window.onload = applyLanguage;
+    </script>
+</body>
+</html>

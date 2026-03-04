@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QulanShop — Интернет-магазин</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .slider-container { display: flex; transition: transform 0.5s ease-in-out; }
+        .slide { min-width: 100%; }
+        .dropdown-animate { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, opacity 0.3s ease; opacity: 0; }
+        .dropdown-animate.active { max-height: 600px; opacity: 1; }
+        .category-item { transform: translateY(-10px); transition: transform 0.3s ease; }
+        .active .category-item { transform: translateY(0); }
+        .product-card { transition: opacity 0.3s ease, transform 0.3s ease; }
+        .footer-link:hover { color: #ea580c; padding-left: 4px; }
+        .footer-link { transition: all 0.3s; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between py-4 gap-4">
+                <div class="text-2xl md:text-3xl font-bold text-orange-600 cursor-pointer" onclick="location.reload()">QulanShop</div>
+                <div class="flex-1 max-w-2xl relative hidden md:block">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400"><i class="fas fa-search"></i></span>
+                    <input type="text" id="search-input" class="w-full border-2 border-gray-100 rounded-xl py-2 pl-10 pr-4 outline-none focus:border-orange-500 transition" placeholder="Поиск товаров...">
+                </div>
+                <div class="flex items-center space-x-4 md:space-x-8">
+                    <div class="relative">
+                        <div onclick="toggleLangMenu()" class="text-sm font-bold cursor-pointer hover:text-orange-600 border px-3 py-1.5 rounded-lg flex items-center bg-white shadow-sm italic">
+                            <i class="fas fa-globe mr-2 text-orange-500"></i>
+                            <span id="current-lang-text">Рус / Қаз</span>
+                        </div>
+                        <div id="lang-menu" class="dropdown-animate absolute top-full right-0 mt-2 w-32 bg-white rounded-xl shadow-xl border border-gray-100 z-[100]">
+                            <div onclick="setLanguage('ru')" class="px-4 py-3 hover:bg-orange-50 cursor-pointer border-b border-gray-50 font-medium italic">Русский</div>
+                            <div onclick="setLanguage('kz')" class="px-4 py-3 hover:bg-orange-50 cursor-pointer font-medium italic">Қазақша</div>
+                        </div>
+                    </div>
+                    <a href="profile.html" class="flex flex-col items-center hover:text-orange-600 transition">
+                        <i class="far fa-user text-xl"></i>
+                        <span class="text-[10px] mt-1 font-medium italic" id="txt-cabinet">Кабинет</span>
+                    </a>
+                    <div class="flex flex-col items-center hover:text-orange-600 cursor-pointer relative">
+                        <i class="far fa-heart text-xl"></i>
+                        <span class="text-[10px] mt-1 font-medium italic" id="txt-fav">Избранное</span>
+                    </div>
+                    <div class="flex flex-col items-center hover:text-orange-600 cursor-pointer relative">
+                        <i class="fas fa-shopping-cart text-xl text-orange-600"></i>
+                        <span class="text-[10px] mt-1 font-medium italic" id="txt-cart">Корзина</span>
+                        <span class="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] rounded-full px-1.5 font-bold">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="container mx-auto px-4 mt-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="md:col-span-3 h-48 md:h-80 rounded-2xl relative overflow-hidden shadow-lg">
+                <div class="slider-container h-full" id="slider">
+                    <div class="slide bg-orange-500 flex items-center justify-center text-white text-3xl font-bold italic">АКЦИИ КУЛАН ШОП!</div>
+                    <div class="slide bg-red-500 flex items-center justify-center text-white text-3xl font-bold italic">СКИДКИ ДЛЯ АУЫЛА!</div>
+                    <div class="slide bg-green-600 flex items-center justify-center text-white text-3xl font-bold italic">НОВЫЙ ГОД 2026!</div>
+                </div>
+            </div>
+            <div class="hidden md:flex h-80 bg-orange-100 border-2 border-orange-200 rounded-2xl items-center justify-center text-orange-700 text-xl font-bold text-center p-6 shadow-sm">
+                <span id="txt-small-banner" class="italic italic">ТЕЗ ЖЕТКІЗУ <br> ҚҰЛАН БОЙЫНША</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="container mx-auto px-4 mt-10 relative">
+        <div class="inline-block relative w-full md:w-auto" onmouseleave="hideCategoriesDesktop()">
+            <button onclick="toggleCategories()" onmouseenter="showCategoriesDesktop()" class="bg-orange-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-orange-700 transition inline-flex items-center w-full md:w-auto justify-center italic">
+                <i class="fas fa-bars mr-3"></i> <span id="txt-cat-btn">Категории товаров</span>
+                <i class="fas fa-chevron-down ml-3 text-xs transition-transform duration-300" id="cat-chevron"></i>
+            </button>
+            <div id="category-menu" class="dropdown-animate mt-1 bg-white rounded-2xl shadow-2xl border border-gray-100 italic absolute z-40 w-full md:w-80">
+                <div class="py-2">
+                    <div class="category-item flex items-center px-6 py-4 hover:bg-orange-50 cursor-pointer border-b border-gray-50">
+                        <i class="fas fa-plug w-8 text-pink-500 text-xl"></i>
+                        <span class="font-bold ml-4" id="cat-1">Красота и здоровье</span>
+                    </div>
+                    <div class="category-item flex items-center px-6 py-4 hover:bg-orange-50 cursor-pointer border-b border-gray-50">
+                        <i class="fas fa-utensils w-8 text-gray-600 text-xl"></i>
+                        <span class="font-bold ml-4" id="cat-2">Посуда для кухни</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container mx-auto px-4 mt-12 mb-20">
+        <h2 class="text-xl md:text-2xl font-bold mb-6 italic" id="txt-hits">Хиты продаж</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="products-container">
+            <div class="product-card bg-white rounded-2xl p-3 shadow-sm hover:shadow-md transition border border-gray-100 relative group cursor-pointer" onclick="location.href='product.html'">
+                <div class="w-full h-32 md:h-40 bg-gray-50 rounded-xl mb-3 flex items-center justify-center text-orange-200">
+                    <i class="fas fa-box-open text-4xl"></i>
+                </div>
+                <p class="text-orange-600 font-bold text-lg">5 500 ₸</p>
+                <h3 class="product-name text-sm font-medium h-10 overflow-hidden italic leading-tight mb-2">Название товара</h3>
+                <button class="w-full bg-orange-600 text-white py-2 rounded-lg font-bold text-sm hover:bg-orange-700 transition italic btn-add-cart">В корзину</button>
+            </div>
+        </div>
+    </section>
+
+   <footer class="bg-white border-t border-gray-200 pt-16 pb-8 mt-20">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-12 text-center md:text-left">
+            
+            <div class="space-y-4">
+                <h4 class="text-3xl font-extrabold text-orange-600 italic tracking-tighter">QulanShop</h4>
+                <p class="text-gray-500 text-sm leading-relaxed italic">
+                    Крупнейший и надежный интернет-магазин в селе Кулан. <br>Мы выбираем качество и скорость!
+                </p>
+                <div class="flex justify-center md:justify-start space-x-4 pt-2">
+                    <a href="#" class="w-10 h-10 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 text-white rounded-full flex items-center justify-center hover:scale-110 transition shadow-lg">
+                        <i class="fab fa-instagram text-xl"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center hover:scale-110 transition shadow-lg">
+                        <i class="fab fa-whatsapp text-xl"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center hover:scale-110 transition shadow-lg">
+                        <i class="fab fa-telegram-plane text-xl"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-lg mb-6 text-gray-800 uppercase tracking-widest italic" id="footer-useful">Полезное</h4>
+                <ul class="space-y-4 text-gray-600 font-medium italic">
+                    <li><a href="#" class="footer-link hover:text-orange-600 transition-all">Доставка и оплата</a></li>
+                    <li><a href="#" class="footer-link hover:text-orange-600 transition-all">Возврат товара</a></li>
+                    <li><a href="#" class="footer-link hover:text-orange-600 transition-all">Подарочные карты</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-lg mb-6 text-gray-800 uppercase tracking-widest italic">Компания</h4>
+                <ul class="space-y-4 text-gray-600 font-medium italic">
+                    <li><a href="#" class="footer-link hover:text-orange-600 transition-all">О нас</a></li>
+                    <li><a href="#" class="footer-link hover:text-orange-600 transition-all">Контакты</a></li>
+                    <li><a href="#" class="footer-link hover:text-orange-600 transition-all">Адрес магазина</a></li>
+                </ul>
+            </div>
+
+            <div class="bg-orange-50 p-6 rounded-2xl border border-orange-100">
+                <h4 class="font-bold text-orange-700 mb-2 italic">График работы:</h4>
+                <p class="text-orange-800 text-sm font-bold">Ежедневно: 09:00 - 20:00</p>
+                <p class="text-orange-600 text-xs mt-2 italic">Заказы на сайте принимаются 24/7</p>
+            </div>
+        </div>
+
+        <div class="border-t border-gray-100 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-gray-400 text-xs italic">© 2026 QulanShop. Все права защищены.</p>
+            <div class="flex space-x-6">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" class="h-4 opacity-50 hover:opacity-100 transition" alt="Visa">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" class="h-6 opacity-50 hover:opacity-100 transition" alt="Mastercard">
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+<div id="ai-chat-wrapper" class="fixed bottom-8 right-8 z-[100]">
+    <button onclick="toggleAIChat()" class="relative group">
+        <div class="absolute -inset-1 bg-orange-600 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
+        <div class="relative bg-orange-600 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-robot text-3xl"></i>
+            <span class="absolute top-0 right-0 flex h-4 w-4">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-4 w-4 bg-red-500"></span>
+            </span>
+        </div>
+    </button>
+
+    <div id="ai-chat-window" class="hidden absolute bottom-20 right-0 w-[350px] md:w-[400px] bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 overflow-hidden flex flex-col transform transition-all duration-300">
+        <div class="bg-gradient-to-r from-orange-600 to-orange-500 p-5 text-white flex justify-between items-center shadow-lg">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/20 p-2 rounded-lg">
+                    <i class="fas fa-robot text-2xl"></i>
+                </div>
+                <div>
+                    <p class="font-bold italic text-sm leading-none">Qulan AI Assistant</p>
+                    <p class="text-[10px] text-orange-100 mt-1 italic">Онлайн • Көмекке дайын</p>
+                </div>
+            </div>
+            <button onclick="toggleAIChat()" class="hover:rotate-90 transition-transform duration-300 p-2 text-xl">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div id="chat-messages" class="h-96 overflow-y-auto p-5 space-y-4 bg-gray-50/50 text-sm italic">
+            <div class="flex justify-start">
+                <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 max-w-[85%] text-gray-700 leading-relaxed">
+                    Қайырлы күн! ✨ Мен **Qulan AI** көмекшісімін. <br><br>Тауар іздеуге, жеткізу туралы білуге немесе менеджермен байланысуға көмектесе аламын. Не істейміз?
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 bg-white border-t border-gray-100">
+            <div class="relative flex items-center">
+                <input type="text" id="chat-input" 
+                    class="w-full border-2 border-gray-100 rounded-2xl py-3 pl-4 pr-12 outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-50 transition-all text-sm" 
+                    placeholder="Сұрағыңызды жазыңыз...">
+                <button onclick="sendMessage()" class="absolute right-2 bg-orange-600 text-white w-10 h-10 rounded-xl hover:bg-orange-700 transition flex items-center justify-center">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+    <script>
+        // --- 1. ТІЛ ЖҮЙЕСІ ЖӘНЕ СЛАЙДЕР ---
+        const slider = document.getElementById('slider');
+        let slideIndex = 0;
+        setInterval(() => { slideIndex = (slideIndex + 1) % 3; slider.style.transform = `translateX(-${slideIndex * 100}%)`; }, 4000);
+
+        function toggleLangMenu() { document.getElementById('lang-menu').classList.toggle('active'); }
+        function setLanguage(lang) { localStorage.setItem('qulan_lang', lang); applyLanguage(lang); document.getElementById('lang-menu').classList.remove('active'); }
+
+        function applyLanguage(lang) {
+            const isKz = lang === 'kz';
+            document.getElementById('current-lang-text').innerText = isKz ? "Қазақша" : "Русский";
+            document.getElementById('txt-cabinet').innerText = isKz ? "Кабинет" : "Кабинет";
+            document.getElementById('txt-fav').innerText = isKz ? "Таңдаулы" : "Избранное";
+            document.getElementById('txt-cart').innerText = isKz ? "Себет" : "Корзина";
+            document.getElementById('txt-cat-btn').innerText = isKz ? "Тауарлар категориясы" : "Категории товаров";
+            document.getElementById('txt-hits').innerText = isKz ? "Хит тауарлар" : "Хиты продаж";
+            document.querySelectorAll('.btn-add-cart').forEach(btn => btn.innerText = isKz ? "Себетке салу" : "В корзину");
+        }
+
+        // --- 2. КАТЕГОРИЯЛАР ---
+        const catMenu = document.getElementById('category-menu');
+        function toggleCategories() { catMenu.classList.toggle('active'); }
+        function showCategoriesDesktop() { if(window.innerWidth > 768) catMenu.classList.add('active'); }
+        function hideCategoriesDesktop() { if(window.innerWidth > 768) catMenu.classList.remove('active'); }
+
+        // --- 3. GEMINI AI CHAT ENGINE ---
+        const GEMINI_API_KEY = "AIzaSyBU1eWfKxsuIJshtMzUlR4YKucfuRTvWog";
+        const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+        function toggleAIChat() { document.getElementById('ai-chat-window').classList.toggle('hidden'); }
+
+        async function queryGemini(userMessage) {
+            const isRussian = /[а-яА-Я]/.test(userMessage);
+            const systemInstruction = `Ты Qulan AI, помощник магазина QulanShop. Отвечай кратко, дружелюбно, с эмодзи. Язык: ${isRussian ? 'русский' : 'казахский'}. Если не знаешь ответа, верни: SPECIALIST_REQUIRED. Текст: ${userMessage}`;
+            try {
+                const response = await fetch(GEMINI_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: systemInstruction }] }] })
+                });
+                const data = await response.json();
+                return data.candidates[0].content.parts[0].text.trim();
+            } catch (e) { return null; }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const container = document.getElementById('chat-messages');
+            if (!input.value.trim()) return;
+            const text = input.value.trim();
+            
+            container.innerHTML += `<div class="flex justify-end mb-3"><div class="bg-orange-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] shadow-md text-sm italic">${text}</div></div>`;
+            input.value = '';
+            container.scrollTop = container.scrollHeight;
+
+            const aiReply = await queryGemini(text);
+            if (aiReply === "SPECIALIST_REQUIRED" || !aiReply) {
+                handleHumanChoice(true);
+            } else {
+                container.innerHTML += `<div class="flex justify-start mb-3"><div class="bg-white border p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-md text-sm italic text-gray-700">${aiReply}</div></div>`;
+            }
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function handleHumanChoice(choice) {
+            const container = document.getElementById('chat-messages');
+            if (choice) {
+                const chatData = { id: "#" + Math.floor(Math.random()*9000), message: "Көмек қажет", time: new Date().toLocaleTimeString().slice(0,5) };
+                localStorage.setItem('qulan_new_chat', JSON.stringify(chatData));
+                localStorage.setItem('new_chat_request', 'true');
+                container.innerHTML += `<div class="bg-orange-50 p-3 rounded-xl text-xs border border-orange-200 italic">Маманға хабарлама жіберілді. Админ-чатты тексеріңіз.</div>`;
+            }
+        }
+
+        window.onload = () => { applyLanguage(localStorage.getItem('qulan_lang') || 'ru'); };
+        document.getElementById('chat-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
+    </script>
+</body>
+</html>

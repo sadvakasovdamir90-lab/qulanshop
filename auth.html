@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QulanShop - Авторизация</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
+            
+            <div id="reg-block">
+                <h2 class="text-2xl font-bold mb-6 text-center text-orange-600">Регистрация</h2>
+                <div class="space-y-4">
+                    <input type="text" placeholder="ФИО" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-orange-500">
+                    <input type="text" placeholder="Номер телефона или email" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-orange-500">
+                    <input type="password" placeholder="Пароль" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-orange-500">
+                    <input type="password" placeholder="Повторите пароль" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-orange-500">
+                    
+                    <button onclick="showOtp('reg')" class="w-full bg-orange-600 text-white py-3 rounded-lg font-bold hover:bg-orange-700">Зарегистрироваться</button>
+                    
+                    <p class="text-center text-sm">Уже есть аккаунт? <a href="#" onclick="showForm('login')" class="text-orange-600 font-bold">Войти</a></p>
+                </div>
+            </div>
+
+            <div id="login-block" class="hidden">
+                <h2 class="text-2xl font-bold mb-6 text-center text-orange-600">Вход</h2>
+                <div class="space-y-4">
+                    <input type="text" placeholder="Номер телефона или почта" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-orange-500">
+                    <input type="password" placeholder="Пароль" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-orange-500">
+                    
+                    <div class="text-right">
+                        <a href="#" onclick="showForm('forgot')" class="text-sm text-gray-500 hover:text-orange-600">Забыли пароль?</a>
+                    </div>
+
+                    <button class="w-full bg-orange-600 text-white py-3 rounded-lg font-bold hover:bg-orange-700">Войти</button>
+                    
+                    <p class="text-center text-sm">Нет аккаунта? <a href="#" onclick="showForm('reg')" class="text-orange-600 font-bold">Зарегистрироваться</a></p>
+                </div>
+            </div>
+
+            <div id="forgot-block" class="hidden">
+                <h2 class="text-2xl font-bold mb-6 text-center text-orange-600">Восстановление</h2>
+                <div class="space-y-4">
+                    <input type="text" placeholder="Номер телефона или почта" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-orange-500">
+                    <button onclick="showOtp('forgot')" class="w-full bg-orange-600 text-white py-3 rounded-lg font-bold hover:bg-orange-700">Отправить код</button>
+                    <button onclick="showForm('login')" class="w-full text-gray-500 text-sm italic">Вернуться назад</button>
+                </div>
+            </div>
+
+            <div id="otp-block" class="hidden text-center">
+                <h2 class="text-xl font-bold mb-4">Введите 6-значный код</h2>
+                <div class="flex justify-between mb-4 space-x-2">
+                    <input type="text" maxlength="1" class="w-10 h-12 border-2 rounded-lg text-center text-xl font-bold focus:border-orange-500 outline-none otp-input">
+                    <input type="text" maxlength="1" class="w-10 h-12 border-2 rounded-lg text-center text-xl font-bold focus:border-orange-500 outline-none otp-input">
+                    <input type="text" maxlength="1" class="w-10 h-12 border-2 rounded-lg text-center text-xl font-bold focus:border-orange-500 outline-none otp-input">
+                    <input type="text" maxlength="1" class="w-10 h-12 border-2 rounded-lg text-center text-xl font-bold focus:border-orange-500 outline-none otp-input">
+                    <input type="text" maxlength="1" class="w-10 h-12 border-2 rounded-lg text-center text-xl font-bold focus:border-orange-500 outline-none otp-input">
+                    <input type="text" maxlength="1" class="w-10 h-12 border-2 rounded-lg text-center text-xl font-bold focus:border-orange-500 outline-none otp-input">
+                </div>
+                
+                <div class="text-sm text-gray-500 mb-6">
+                    Повторная отправка через: <span id="timer" class="text-orange-600 font-bold">01:00</span>
+                </div>
+
+                <div class="space-y-3">
+                    <button id="resend-btn" disabled class="w-full py-2 text-sm text-gray-400 font-semibold italic">Отправить код повторно</button>
+                    <button onclick="goBackFromOtp()" class="w-full bg-gray-200 py-2 rounded-lg text-sm">Изменить данные</button>
+                    <button class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700">Отправить</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

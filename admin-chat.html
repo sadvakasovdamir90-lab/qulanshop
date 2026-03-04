@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <title>Админ Панель - QulanShop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 h-screen flex">
+    <div class="w-1/3 bg-white border-r flex flex-col">
+        <div class="p-4 bg-orange-600 text-white font-bold flex justify-between items-center">
+            <span>Кіріс хаттар</span>
+            <i class="fas fa-circle text-xs text-white animate-pulse" id="notify-dot"></i>
+        </div>
+        <div id="client-list" class="overflow-y-auto">
+            <div class="p-4 border-b hover:bg-orange-50 cursor-pointer bg-orange-50 border-l-4 border-orange-600">
+                <div class="font-bold">Клиент #8271</div>
+                <div class="text-xs text-gray-500">Сәлеметсіз бе, жеткізу қанша?</div>
+            </div>
+        </div>
+    </div>
+    <div class="flex-1 flex flex-col bg-gray-50">
+        <div id="messages-container" class="flex-1 p-6 overflow-y-auto space-y-4">
+             </div>
+        <div class="p-4 bg-white border-t flex gap-3">
+            <input type="text" id="admin-input" class="flex-1 border-2 border-gray-100 rounded-xl px-4 py-2 focus:border-orange-500 outline-none" placeholder="Жауап жазыңыз...">
+            <button onclick="adminSendMessage()" class="bg-orange-600 text-white px-6 py-2 rounded-xl font-bold">Жіберу</button>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

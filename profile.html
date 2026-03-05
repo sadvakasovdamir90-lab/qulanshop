@@ -37,12 +37,14 @@
     <div class="bg-white rounded-xl shadow-sm p-3 md:p-4 border border-gray-100">
         <h3 class="text-gray-400 text-[9px] md:text-[10px] font-bold uppercase mb-3 px-3 italic tracking-wider">Личные данные</h3>
         
-        <nav class="mobile-scroll md:space-y-1 flex md:block pb-2 md:pb-0">
+    <nav class="mobile-scroll md:space-y-1 flex md:block pb-2 md:pb-0">
             <button onclick="showTab(event, 'tab-profile')" class="nav-btn whitespace-nowrap w-auto md:w-full text-left px-4 py-2 rounded-lg bg-orange-50 text-orange-600 font-bold transition text-xs md:text-sm">Редактор профиля</button>
             <button onclick="showTab(event, 'tab-orders')" class="nav-btn whitespace-nowrap w-auto md:w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 transition text-xs md:text-sm">Мои заказы</button>
             <button onclick="showTab(event, 'tab-coupons')" class="nav-btn whitespace-nowrap w-auto md:w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 transition text-xs md:text-sm">Купоны</button>
             <button onclick="showTab(event, 'tab-cart')" class="nav-btn whitespace-nowrap w-auto md:w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 transition text-xs md:text-sm">Корзина</button>
-            <button onclick="showTab(event, 'tab-wishlist')" class="nav-btn whitespace-nowrap w-auto md:w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 transition text-xs md:text-sm italic uppercase font-bold">Должник</button>
+            <button onclick="showTab(event, 'tab-reviews')" class="nav-btn whitespace-nowrap w-auto md:w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 transition text-xs md:text-sm ">Ваш отзывы</button>
+            <button onclick="showTab(event, 'tab-wish list')" class="nav-btn whitespace-nowrap w-auto md:w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 transition text-xs md:text-sm ">Список желаний</button> 
+            <button onclick="showTab(event, 'tab-wishlist')" class="nav-btn whitespace-nowrap w-auto md:w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 transition text-xs md:text-sm ">Должник</button>   
         </nav>
 
         <h3 class="text-gray-400 text-[9px] md:text-[10px] font-bold uppercase mt-4 mb-3 px-3 italic tracking-wider border-t md:border-none pt-3 md:pt-0">Безопасность</h3>
@@ -96,6 +98,16 @@
                     <h2 class="text-xl font-bold mb-2">Ваша корзина пуста</h2>
                     <button onclick="location.href='index.html'" class="mt-4 bg-orange-600 text-white px-6 py-2 rounded-lg font-bold">В магазин</button>
                 </div>
+                
+                <div id="tab-wish list" class="tab-content hidden bg-white rounded-xl shadow-sm p-10 md:p-20 text-center border border-gray-100">
+                    <i class="fas fa-heart-broken text-6xl md:text-8xl text-gray-200 mb-6"></i>
+                    <h2 class="text-xl font-bold mb-2">У вас нет желаемых товаров</h2>
+                </div>
+
+                <div id="tab-reviews" class="tab-content hidden bg-white rounded-xl shadow-sm p-10 md:p-20 text-center border border-gray-100">
+                    <i class="fas fa-comment-slash text-6xl md:text-8xl text-gray-200 mb-6"></i>
+                    <h2 class="text-xl font-bold mb-2">У вас нет отзывов</h2>
+                </div>
 
                <div id="tab-wishlist" class="tab-content hidden bg-white rounded-xl shadow-sm p-4 md:p-8 border border-gray-100">
     <div class="flex items-center gap-4 mb-8">
@@ -120,10 +132,10 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="flex items-center gap-4 p-5 bg-gray-50 rounded-2xl border border-gray-100">
-                <div class="bg-white p-3 rounded-xl text-gray-400"><i class="fas fa-hashtag"></i></div>
+                <div class="bg-white p-3 rounded-xl text-orange-400"><i class="fas fa-hashtag"></i></div>
                 <div>
-                    <p class="text-[10px] text-gray-400 font-bold uppercase">Номер заказа</p>
-                    <p class="font-bold text-gray-700 italic">#QS-774188</p>
+                    <p class="text-[10px] text-gray-400  font-bold uppercase">Номер заказа</p>
+                    <p class="font-bold text-gray-700  italic">#QS-774188</p>
                 </div>
             </div>
             <div class="flex items-center gap-4 p-5 bg-gray-50 rounded-2xl border border-gray-100">
@@ -155,28 +167,33 @@
 
 <div id="payment-modal" class="hidden fixed inset-0 bg-black/60 z-[200] flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-white rounded-[2.5rem] max-w-md w-full p-8 shadow-2xl relative border border-orange-100">
-        <button onclick="closePayment()" class="absolute top-6 right-6 text-gray-400 hover:text-black transition-transform hover:rotate-90">
+        <button onclick="closePayment(false)" class="absolute top-6 right-6 text-gray-400 hover:text-black transition-transform hover:rotate-0">
             <i class="fas fa-times text-xl"></i>
         </button>
         <h2 class="text-2xl font-black italic text-orange-600 mb-6 uppercase text-center">Оплата задолженности</h2>
         <div class="space-y-4 mb-8">
             <div class="p-4 bg-orange-50 rounded-2xl border border-orange-100 text-center">
                 <p class="text-[10px] text-orange-400 font-bold uppercase mb-1">Получатель:</p>
-                <p class="font-bold text-gray-800 italic uppercase">ИП "QulanShop - Sadvakasov"</p>
+                <p class="font-bold text-gray-800 italic uppercase">ИП "QulanShop"</p>
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <a href="https://kaspi.kz" target="_blank" class="flex flex-col items-center p-5 border-2 border-gray-50 rounded-3xl hover:border-red-500 transition-all hover:bg-red-50 group">
-                    <img src="https://kaspi.kz/img/logo_main.png" class="h-6 mb-2 grayscale group-hover:grayscale-0" alt="Kaspi">
-                    <span class="text-[10px] font-black text-red-600 uppercase">Kaspi Pay</span>
+                    <img src="images/kaspi.png" class="h-16 mb-2" alt="Kaspi">
+                    <span class="text-[12px] font-black text-red-600 uppercase">Kaspi Kz</span>
                 </a>
                 <a href="https://halykbank.kz" target="_blank" class="flex flex-col items-center p-5 border-2 border-gray-50 rounded-3xl hover:border-green-500 transition-all hover:bg-green-50 group">
-                    <img src="https://halykbank.kz/storage/app/media/logos/halyk-logo.png" class="h-6 mb-2 grayscale group-hover:grayscale-0" alt="Halyk">
-                    <span class="text-[10px] font-black text-green-600 uppercase">Halyk Bank</span>
+                    <img src="images/halyk.png" class="h-16 mb-2" alt="Halyk">
+                    <span class="text-[12px] font-black text-green-600 uppercase">Halyk Bank</span>
+                    
+                <a href="НАПРАВЛЕНИЯ ДОЛГА" target="_blank" class="flex flex-col items-center p-5 border-2 border-gray-50 rounded-3xl hover:border-red-500 transition-all hover:bg-red-50 group">
+                    <span class="text-[12px] font-black text-red-600 italic uppercase">НАЛИЧНЫЕ</span>
+                </a>
+
                 </a>
             </div>
         </div>
         <p class="text-[11px] text-gray-400 text-center italic mb-6">После оплаты отправьте скриншот чека в чат поддержки. ИП зарегистрировано в с. Кулан.</p>
-        <button onclick="closePayment()" class="w-full bg-orange-600 text-white py-4 rounded-2xl font-bold hover:bg-orange-700 shadow-lg uppercase tracking-widest">Я оплатил(а)</button>
+        <button onclick="closePayment(true)" class="w-full bg-orange-600 text-white py-4 rounded-2xl font-bold hover:bg-orange-700 shadow-lg uppercase tracking-widest">Я оплатил(а)</button>
     </div>
 </div>
 
@@ -264,6 +281,41 @@
             </div>
         </div>
     </div>
+    
+    <div id="custom-toast" class="fixed top-5 left-1/2 -translate-x-1/2 md:left-auto md:right-5 md:translate-x-0 z-[300] pointer-events-none opacity-0 transform -translate-y-10 transition-all duration-500 w-[90%] md:w-auto">
+    <div class="bg-white border-l-4 border-orange-500 shadow-2xl rounded-2xl p-4 md:p-5 flex items-center gap-4 min-w-full md:min-w-[350px] pointer-events-auto">
+        <div class="bg-orange-100 p-2 md:p-3 rounded-full shrink-0">
+            <i class="fas fa-check-circle text-orange-600 text-lg md:text-xl"></i>
+        </div>
+        <div class="flex-1">
+            <h4 class="font-bold text-gray-900 text-sm">Заявка отправлена</h4>
+            <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 leading-tight">Квитанция на проверке. Статус обновится скоро.</p>
+        </div>
+        <button onclick="hideToast()" class="text-gray-400 p-1">
+            <i class="fas fa-times text-sm"></i>
+        </button>
+    </div>
+</div>
+
+    <style>
+/* Анимация: Пайда болу және үлкею */
+@keyframes modalShow {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Осы класты біз JS арқылы қосамыз */
+.animate-modal {
+    animation: modalShow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+    </style>
 
     <script>
         function showTab(event, tabId) {
@@ -410,7 +462,7 @@ async function queryGemini(userMessage) {
         Информация о магазине: 
         - График: 09:00 - 20:00 (ежедневно). 
         - Доставка: по всему району Кулан. 
-        - Владелец: ИП "QulanShop - Sadvakasov".
+        - Владелец: ИП "QulanShop".
         - Оплата: Kaspi Pay, Halyk Bank.
         Отвечай кратко, дружелюбно, используй эмодзи. 
         Если клиент спрашивает на казахском, отвечай на казахском. Если на русском — на русском.
@@ -514,13 +566,77 @@ function updateDebtStatus() {
 
 function openPayment() { document.getElementById('payment-modal').classList.remove('hidden'); }
 
-function closePayment() {
-    document.getElementById('payment-modal').classList.add('hidden');
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('debt-start-date').innerText = today;
-    updateDebtStatus();
-    alert("Квитанция отправлена на проверку! Статус обновится скоро.");
+function openPayment() {
+    const modal = document.getElementById('payment-modal');
+    const modalContent = modal.querySelector('div'); // Ішіндегі ақ блок
+
+    // 1. Модалканы көрсету
+    modal.classList.remove('hidden');
+    
+    // 2. Анимация класын қосу
+    modalContent.classList.add('animate-modal');
 }
+
+function showToast() {
+    const toast = document.getElementById('custom-toast');
+    
+    // Показываем уведомление
+    toast.classList.remove('hidden', 'opacity-0', 'translate-x-10');
+    toast.classList.add('opacity-100', 'translate-x-0');
+
+    // Через 5 секунд скрываем
+    setTimeout(() => {
+        toast.classList.replace('opacity-100', 'opacity-0');
+        toast.classList.replace('translate-x-0', 'translate-x-10');
+    }, 5000);
+}
+
+function closePayment(showAlert = false) {
+    const modal = document.getElementById('payment-modal');
+    const modalContent = modal.querySelector('div');
+
+    // Закрываем модальное окно
+    modal.classList.add('hidden');
+    if (modalContent) modalContent.classList.remove('animate-modal');
+
+    if (showAlert) {
+        // Обновляем дату (если нужно)
+        const today = new Date().toLocaleDateString('ru-RU');
+        const debtElement = document.getElementById('debt-start-date');
+        if (debtElement) debtElement.innerText = today;
+
+        // Вызываем наше красивое уведомление вместо alert
+        showToast();
+        
+        // Если есть функция обновления статуса, запускаем её
+        if (typeof updateDebtStatus === "function") {
+            updateDebtStatus();
+        }
+    }
+}
+function closePayment(showAlert = false) {
+    const modal = document.getElementById('payment-modal');
+    const modalContent = modal.querySelector('div');
+
+    // 1. Модалканы жабамыз
+    modal.classList.add('hidden');
+    if (modalContent) modalContent.classList.remove('animate-modal');
+
+    // 2. Егер "Я оплатил" басылса, тек уведомление шығарамыз
+    if (showAlert) {
+        // ДАТАНЫ ӨЗГЕРТЕТІН КОДТЫ ӨШІРДІК (енді дата орнында қалады)
+        
+        // Статусты жаңарту функциясы (егер керек болса)
+        if (typeof updateDebtStatus === "function") {
+            updateDebtStatus();
+        }
+        
+        // Әдемі хабарламаны көрсету
+        showToast();
+    }
+}
+
+
 
 // Бет жүктелгенде іске қосу
 window.addEventListener('DOMContentLoaded', updateDebtStatus);
@@ -531,6 +647,25 @@ document.getElementById('chat-input')?.addEventListener('keypress', function (e)
         sendMessage();
     }
 });
+
+function showToast() {
+    const toast = document.getElementById('custom-toast');
+    
+    // Анимацияны қосу (Жоғарыдан төмен түсу)
+    toast.classList.remove('opacity-0', '-translate-y-10');
+    toast.classList.add('opacity-100', 'translate-y-0');
+
+    // 4 секундтан кейін жасыру
+    setTimeout(hideToast, 4000);
+}
+
+function hideToast() {
+    const toast = document.getElementById('custom-toast');
+    if (toast) {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', '-translate-y-10');
+    }
+}
 
     </script>
 </body>

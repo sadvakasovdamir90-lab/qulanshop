@@ -19,33 +19,32 @@
 </head>
 <body class="bg-gray-50 font-sans">
 
-  <header class="bg-white shadow-sm py-4 mb-4 md:mb-6 sticky top-0 z-[1000] overflow-visible">
-    <div class="container mx-auto px-4 flex justify-between items-center relative">
+  <header class="bg-white shadow-sm py-4 mb-4 md:mb-6 relative z-[2000] overflow-visible" style="pointer-events: none;">
+    <div class="container mx-auto px-4 flex justify-between items-center relative" style="pointer-events: none;">
         
-        <div class="relative z-[1001] shrink-0">
+        <div class="relative z-[2001] shrink-0" style="pointer-events: auto;">
             <h1 class="text-xl font-bold text-orange-600 cursor-pointer p-2 -m-2" 
-                onclick="window.location.href='index.html'"
-                style="pointer-events: auto !important;">
+                onclick="window.location.assign('index.html')"
+                style="display: block; -webkit-tap-highlight-color: transparent;">
                 QulanShop
             </h1>
         </div>
 
-        <div class="flex-1 flex justify-end px-2 min-w-0 items-center">
-            <span class="text-[11px] sm:text-xs md:text-sm font-bold text-gray-800 leading-tight text-right whitespace-nowrap md:max-w-none overflow-hidden overflow-ellipsis">
+        <div class="flex-1 flex justify-end px-2 min-w-0 items-center" style="pointer-events: none;">
+            <span class="text-[11px] sm:text-xs md:text-sm font-bold text-gray-800 leading-tight text-right whitespace-nowrap italic">
                 Садвакасов Дамир Бекзатович
             </span>
         </div>
 
-        <div class="shrink-0 relative z-[1002]">
+        <div class="shrink-0 relative z-[2002]" style="pointer-events: auto;">
             <a href="auth.html" 
-               class="text-gray-400 hover:text-red-500 transition-all p-3 -mr-3 flex items-center justify-center shrink-0"
-               style="display: flex !important; pointer-events: auto !important; cursor: pointer !important; -webkit-tap-highlight-color: transparent;">
+               class="text-gray-400 hover:text-red-500 transition-all p-3 -mr-3 flex items-center justify-center"
+               style="display: flex !important; -webkit-tap-highlight-color: transparent;">
                 <i class="fas fa-sign-out-alt text-lg md:text-xl"></i>
             </a>
         </div>
     </div>
 </header>
-
     <main class="container mx-auto px-2 md:px-4 pb-20">
         <div class="flex flex-col md:flex-row gap-4 md:gap-6">
             
@@ -704,3 +703,4 @@ function hideToast() {
     </script>
 </body>
 </html>
+

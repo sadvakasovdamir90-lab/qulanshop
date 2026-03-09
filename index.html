@@ -58,7 +58,7 @@
                 </a>
             </div>
 
-            <div class="w-full md:w-auto md:flex-1 relative order-3 md:order-2 md:mx-6 pb-3 md:pb-0">
+          <div class="w-full md:w-auto md:flex-1 relative order-3 md:order-2 md:mx-6 pb-3 md:pb-0">
     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none h-10 md:h-full">
         <i class="fas fa-search text-gray-400 text-sm md:text-base"></i>
     </div>
@@ -73,20 +73,27 @@
     </div>
 </header>
 
-    <section class="container mx-auto px-4 mt-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="md:col-span-3 h-48 md:h-80 rounded-2xl relative overflow-hidden shadow-lg">
-                <div class="slider-container h-full" id="slider">
-                    <div class="slide bg-orange-500 flex items-center justify-center text-white text-3xl font-bold italic">АКЦИИ КУЛАН ШОП!</div>
-                    <div class="slide bg-red-500 flex items-center justify-center text-white text-3xl font-bold italic">СКИДКИ ДЛЯ АУЫЛА!</div>
-                    <div class="slide bg-green-600 flex items-center justify-center text-white text-3xl font-bold italic">НОВЫЙ ГОД 2026!</div>
+  <section class="container mx-auto px-4 mt-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="md:col-span-3 h-48 md:h-80 rounded-2xl relative overflow-hidden shadow-lg">
+            <div class="slider-container h-full flex" id="slider">
+                <div class="slide min-w-full h-full">
+                    <img src="images/banner.jpg" alt="Баннер 1" class="w-full h-full object-cover">
+                </div>
+                <div class="slide min-w-full h-full">
+                    <img src="images/banner1.jpg" alt="Баннер 2" class="w-full h-full object-cover">
+                </div>
+                <div class="slide min-w-full h-full">
+                    <img src="images/banner.jpg" alt="Баннер 3" class="w-full h-full object-cover">
                 </div>
             </div>
-            <div class="hidden md:flex h-80 bg-orange-100 border-2 border-orange-200 rounded-2xl items-center justify-center text-orange-700 text-xl font-bold text-center p-6 shadow-sm">
-                <span id="txt-small-banner" class="italic italic">ТЕЗ ЖЕТКІЗУ <br> ҚҰЛАН БОЙЫНША</span>
-            </div>
         </div>
-    </section>
+
+        <div class="hidden md:block h-80 rounded-2xl overflow-hidden shadow-sm border-2 border-orange-100">
+            <img src="images/banner1000.jpg" alt="Жеткізу" class="w-full h-full object-cover">
+        </div>
+    </div>
+</section>
 
    <section class="container mx-auto px-4 mt-12 mb-20 relative">
     <div class="inline-block relative w-full md:w-auto">
@@ -467,13 +474,33 @@ function searchProducts(query) {
     }
 }
         
-        
+
+function addToCart(productName, productPrice, productImage) {
+    // 1. Себетті жадыдан (LocalStorage) оқу
+    let cart = JSON.parse(localStorage.getItem('qulanCart')) || [];
+    
+    // 2. Жаңа тауарды тізімге қосу
+    cart.push({ 
+        name: productName, 
+        price: productPrice, 
+        image: productImage 
+    });
+    
+    // 3. Жаңартылған себетті қайта сақтау
+    localStorage.setItem('qulanCart', JSON.stringify(cart));
+    
+    // 4. Пайдаланушыға хабарлама көрсету
+    alert("Товар добавлен в корзину!");
+    
+    // (Қосымша) Егер басты бетте себет иконкасы болса, санын жаңарту функциясын осында шақыруға болады
+    if (typeof updateCartCounter === "function") updateCartCounter();
+}
+
+
     </script>
 </body>
 
 </html>
-
-
 
 
 

@@ -127,41 +127,62 @@
             preview.innerText = val ? Number(val).toLocaleString() + " ₸" : "0 ₸";
         }
 
-        async function generateGiftPDF() {
-            const amount = document.getElementById('amount-input').value;
-            if (!amount || amount < 100) { alert("Сумманы жазыңыз!"); return; }
-            
-            const btn = document.getElementById('buy-btn');
-            const element = document.getElementById('gift-card-preview');
-            const codeElem = document.getElementById('card-code-text');
+       async function generateGiftPDF() {
+    const amount = document.getElementById('amount-input').value;
+    if (!amount || amount < 100) { 
+        alert("Сумманы жазыңыз!"); 
+        return; 
+    }
 
-            btn.innerText = "Генерация...";
-            btn.disabled = true;
+    const btn = document.getElementById('buy-btn');
+    const element = document.getElementById('gift-card-preview');
+    const codeElem = document.getElementById('card-code-text');
 
-            const uniqueCode = `QS-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
-            const originalCodeText = codeElem.innerText;
-            codeElem.innerText = uniqueCode;
+    btn.innerText = "Скачивание...";
+    btn.disabled = true;
 
-            // PDF жасағанда сапасын мобильді экрандарға сай реттеу
-            const opt = {
-                margin: 5,
-                filename: `QulanShop_${amount}₸.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-            };
+    // Уникалды код жасау
+    const uniqueCode = `QS-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const originalCodeText = codeElem.innerText;
+    codeElem.innerText = uniqueCode;
 
-            try {
-                await html2pdf().set(opt).from(element).save();
-                window.open(`https://wa.me/77073332211?text=${encodeURIComponent('Сәлеметсіз бе! Мен ' + amount + ' ₸ сомасына сыйлық картасын рәсімдедім. Код: ' + uniqueCode)}`, '_blank');
-            } catch (err) {
-                alert("Қате шықты!");
-            } finally {
-                codeElem.innerText = originalCodeText;
-                btn.innerText = "Оформить карту";
-                btn.disabled = false;
-            }
+    // ТЕЛЕФОНДА ТОЛЫҚ ШЫҒУЫ ҮШІН БАПТАУЛАР
+    const opt = {
+        margin: 10,
+        filename: `QulanShop_${amount}₸.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+            scale: 3,           // Сапасы өте жоғары болады
+            useCORS: true, 
+            letterRendering: true,
+            width: 800,         // Картаны виртуалды түрде 800px ендікте түсіреді (телефон өлшеміне қарамастан)
+            windowWidth: 800    // Осы жер PDF-тің кесіліп қалмауын қамтамасыз етеді
+        },
+        jsPDF: { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: 'landscape' 
         }
+    };
+
+    try {
+        // PDF жасау және автоматты түрде жүктеу (save() функциясы жүктейді)
+        await html2pdf().set(opt).from(element).save();
+        
+        // WhatsApp-қа бағыттау (PDF жүктелгеннен кейін)
+        setTimeout(() => {
+            const message = encodeURIComponent(`Сәлеметсіз бе! Мен ${amount} ₸ сомасына сыйлық картасын рәсімдедім. Код: ${uniqueCode}`);
+            window.open(`https://wa.me/77073332211?text=${message}`, '_blank');
+        }, 1500);
+
+    } catch (err) {
+        alert("Қате шықты! Браузеріңіз PDF жасауға рұқсат бермей тұр.");
+    } finally {
+        codeElem.innerText = originalText;
+        btn.innerText = "Оформить карту";
+        btn.disabled = false;
+    }
+}
     </script>
 </body>
 </html>

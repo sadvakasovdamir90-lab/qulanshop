@@ -29,32 +29,29 @@
         <div class="bg-white rounded-3xl shadow-sm overflow-hidden p-4 md:p-10">
             <div class="flex flex-col md:flex-row gap-10">
                 
-                <div class="w-full md:w-1/2">
-                    <div class="bg-gray-100 rounded-2xl h-80 md:h-[500px] flex items-center justify-center border border-gray-50">
-                        <i class="fas fa-image text-8xl text-gray-200"></i>
-                    </div>
-                </div>
+                <div id="prod-img-container" class="bg-gray-100 rounded-2xl h-80 md:h-[500px] flex items-center justify-center border border-gray-50 overflow-hidden">
+    <i class="fas fa-image text-8xl text-gray-200"></i>
+</div>
 
                 <div class="w-full md:w-1/2 space-y-6">
                     <div>
                         <h1 class="text-2xl md:text-4xl font-bold italic mb-2" id="prod-title">Название товара</h1>
                         <div class="flex items-center space-x-4">
                             <span class="text-green-500 font-bold text-sm italic"><i class="fas fa-check-circle mr-1"></i> В наличии</span>
-                            <span class="text-gray-400 text-sm italic">Артикул: 102938</span>
+                           <span id="prod-article" class="text-gray-400 text-sm italic">Артикул: 0</span>
                         </div>
                     </div>
 
                     <div class="border-y border-gray-100 py-6">
-    <p class="text-3xl md:text-5xl font-black text-orange-600 mb-2" id="product-price">15 500 ₸</p>
-    <p class="text-gray-400 text-sm line-through italic">18 000 ₸</p>
+    <p class="text-3xl md:text-5xl font-black text-orange-600 mb-2" id="product-price">0 ₸</p>
+    <p class="text-gray-400 text-sm line-through italic">0 ₸</p>
 </div>
 
-                    <div class="space-y-4">
-                        <h3 class="font-bold text-lg italic">Описание:</h3>
-                        <p class="text-gray-600 leading-relaxed italic" id="prod-desc">
-                            Бұл тауардың толық сипаттамасы осы жерде болады. Сатушы тауар туралы барлық ақпаратты (сапасы, өлшемі, қолдану тәсілі) осы жерге жазады.
-                        </p>
-                    </div>
+                    <div class="mt-10 space-y-6">
+    <h3 class="text-xl font-black italic uppercase border-b-2 border-orange-600 inline-block">Характеристики</h3>
+    <div id="product-specs-list" class="space-y-4 pt-4">
+        </div>
+</div>
 <div class="flex flex-col gap-3 pt-6">
     <div class="flex flex-col sm:flex-row gap-3">
         <button onclick="addToCart(1, 'Название товара', 5500, 'fa-box-open')" 
@@ -510,6 +507,88 @@ function closeAllModals() {
     // Беттің айналуын (scroll) қайта іске қосу
     document.body.style.overflow = 'auto';
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. URL-ден ID аламыз
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+
+    // 2. Базаны аламыз (Админ панель 'products' деп сақтайды)
+    const products = JSON.parse(localStorage.getItem('products')) || [];
+    
+    // 3. Тауарды табамыз
+    const p = products.find(item => item.id == productId);
+
+    if (p) {
+        // --- АТЫ МЕН БАҒАСЫ ---
+        document.getElementById('prod-title').innerText = p.name;
+        document.getElementById('product-price').innerText = Number(p.price).toLocaleString() + " ₸";
+        
+        // --- АРТИКУЛ ---
+        const articleElem = document.getElementById('prod-article');
+        if (articleElem) {
+            articleElem.innerText = "Артикул: " + (p.article || 'Нет артикула');
+        }
+
+        // --- СУРЕТ (ОСЫ ЖЕР МАҢЫЗДЫ) ---
+        const imgContainer = document.getElementById('prod-img-container');
+        if (p.img && imgContainer) {
+            imgContainer.innerHTML = `<img src="${p.img}" class="w-full h-full object-contain p-4" alt="${p.name}">`;
+        }
+
+        // --- ЕСКІ БАҒА (СКИДКА) ---
+        const oldPriceElem = document.querySelector('.line-through');
+        if (oldPriceElem) {
+            if (p.oldPrice && parseInt(p.oldPrice) > parseInt(p.price)) {
+                oldPriceElem.innerText = Number(p.oldPrice).toLocaleString() + " ₸";
+                oldPriceElem.classList.remove('hidden');
+            } else {
+                oldPriceElem.classList.add('hidden');
+            }
+        }
+
+        // --- ХАРАКТЕРИСТИКАЛАР ---
+        const specsList = document.getElementById('product-specs-list');
+        if (specsList) {
+            if (p.specs && p.specs.length > 0) {
+                specsList.innerHTML = p.specs.map(s => `
+                    <div class="flex justify-between items-end gap-2 border-b border-gray-50 pb-2 mb-2">
+                        <span class="text-gray-400 text-sm italic font-medium whitespace-nowrap">${s.key}</span>
+                        <div class="flex-1 border-b border-dotted border-gray-200 mb-1 mx-1"></div>
+                        <span class="text-gray-900 font-bold text-sm italic text-right">${s.val}</span>
+                    </div>
+                `).join('');
+            } else {
+                specsList.innerHTML = '<p class="text-gray-400 italic text-sm text-center">Характеристики не заполнены.</p>';
+            }
+        }
+
+        // --- СЕБЕТ БАТЫРМАСЫН ЖАҢАРТУ ---
+        const cartBtn = document.querySelector('button[onclick*="addToCart"]');
+        if (cartBtn) {
+            cartBtn.setAttribute('onclick', `addToCart('${p.id}', '${p.name}', ${p.price}, '${p.img}')`);
+        }
+    } else {
+        console.error("Товар не найден в базе!");
+    }
+});
+
+// МОДАЛЬДАР ЖӘНЕ БАСҚА ФУНКЦИЯЛАР (ӨЗГЕРІССІЗ ҚАЛАДЫ)
+function openPaymentModal() {
+    document.getElementById('payment-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+function closePaymentModal() {
+    document.getElementById('payment-modal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+// ... басқа төлем функцияларыңды осы жерге қоса бер ...
+
+
+
+
+
+
 
     </script>
 

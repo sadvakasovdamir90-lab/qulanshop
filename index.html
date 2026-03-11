@@ -136,27 +136,9 @@
 
    <section class="container mx-auto px-4 mt-12 mb-20">
     <h2 class="text-xl md:text-2xl font-bold mb-6 italic" id="txt-hits">Хиты продаж</h2>
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="products-container">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="products-container"></div>
         
-        <div class="product-card bg-white rounded-[2rem] p-3 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 relative group cursor-pointer" 
-             onclick="goToProduct('product.html')">
-            
-            <div class="w-full h-32 md:h-40 bg-slate-800 rounded-2xl mb-4 flex items-center justify-center text-orange-400 overflow-hidden relative group-hover:bg-slate-900 transition-colors">
-                <i class="fas fa-box-open text-4xl group-hover:scale-110 transition-transform duration-300"></i>
-                
-                <div class="absolute inset-0 bg-orange-600/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            </div>
-
-            <p class="text-orange-600 font-black text-xl italic mb-1">5 500 ₸</p>
-            
-            <h3 class="product-name text-sm font-bold h-10 overflow-hidden italic leading-tight mb-3 text-gray-800">
-                Название товара
-            </h3>
-
-            <button onclick="event.stopPropagation(); addToCart(1, 'Товар', 5500, 'fa-box-open')" 
-                    class="w-full bg-orange-600 text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-orange-700 active:scale-95 transition-all shadow-md shadow-orange-100">
-                В корзину
-            </button>
+    
         </div>
 
     </div>
@@ -206,9 +188,9 @@
             <div>
                 <h4 class="font-bold text-lg mb-6 text-gray-800 uppercase tracking-widest italic" id="footer-useful">Полезное</h4>
                 <ul class="space-y-4 text-gray-600 font-medium italic">
-                    <li><a href="#" class="footer-link hover:text-orange-600 transition-all">Доставка и оплата</a></li>
-                    <li><a href="#" class="footer-link hover:text-orange-600 transition-all">Возврат товара</a></li>
-                    <li><a href="#" class="footer-link hover:text-orange-600 transition-all">Подарочные карты</a></li>
+                    <li><a href="delivery.html" class="footer-link hover:text-orange-600 transition-all">Доставка и оплата</a></li>
+                    <li><a href="return.html" class="footer-link hover:text-orange-600 transition-all">Возврат товара</a></li>
+                    <li><a href="gift-cards.html" class="footer-link hover:text-orange-600 transition-all">Подарочные карты</a></li>
                 </ul>
             </div>
 
@@ -495,6 +477,118 @@ function addToCart(productName, productPrice, productImage) {
     // (Қосымша) Егер басты бетте себет иконкасы болса, санын жаңарту функциясын осында шақыруға болады
     if (typeof updateCartCounter === "function") updateCartCounter();
 }
+
+
+
+// 1. Тауарларды базадан (localStorage) жүктеу функциясы
+function loadProductsFromAdmin() {
+    const container = document.getElementById('products-container');
+    if (!container) return;
+
+    // Админ панель сақтайтын 'products' кілтінен деректерді аламыз
+    let products = JSON.parse(localStorage.getItem('products')) || [];
+
+    // Егер тауар болса, ішін тазалап, жаңаларын саламыз
+    if (products.length > 0) {
+        container.innerHTML = ''; // Ескі статикалық тауарларды өшіру
+
+        products.forEach(p => {
+            // Жеңілдік (скидка) бар-жоғын тексеру
+            const hasDiscount = p.oldPrice && parseInt(p.oldPrice) > parseInt(p.price);
+            const discountPercent = hasDiscount ? Math.round((1 - p.price / p.oldPrice) * 100) : 0;
+
+            container.innerHTML += `
+                <div class="product-card bg-white rounded-[2rem] p-3 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 relative group cursor-pointer" 
+                     onclick="location.href='product.html?id=${p.id}'">
+                    
+                    ${hasDiscount ? `
+                        <div class="absolute top-4 left-4 bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded-lg z-10 animate-pulse">
+                            -${discountPercent}%
+                        </div>
+                    ` : ''}
+
+                    <div class="w-full h-32 md:h-40 bg-slate-100 rounded-2xl mb-4 flex items-center justify-center overflow-hidden">
+                        <img src="${p.img || 'images/no-photo.jpg'}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                             onerror="this.src='https://via.placeholder.com/150?text=No+Photo'">
+                    </div>
+
+                    <div class="flex items-baseline gap-2 mb-1">
+                        <p class="text-orange-600 font-black text-xl italic">${Number(p.price).toLocaleString()} ₸</p>
+                        ${hasDiscount ? `<p class="text-gray-400 text-xs line-through italic">${Number(p.oldPrice).toLocaleString()} ₸</p>` : ''}
+                    </div>
+                    
+                    <h3 class="product-name text-sm font-bold h-10 overflow-hidden italic leading-tight mb-3 text-gray-800">
+                        ${p.name}
+                    </h3>
+
+                    <button onclick="event.stopPropagation(); addToCart('${p.name}', ${p.price}, '${p.img}')" 
+                            class="w-full bg-orange-600 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-orange-700 active:scale-95 transition-all">
+                        В корзину
+                    </button>
+                </div>
+            `;
+        });
+    }
+}
+
+// Бет жүктелгенде функцияны іске қосу
+document.addEventListener('DOMContentLoaded', loadProductsFromAdmin);
+
+
+function renderProducts() {
+    const container = document.getElementById('products-container');
+    if (!container) return;
+
+    // 1. Админ панельдің базасын оқимыз
+    const products = JSON.parse(localStorage.getItem('products')) || [];
+
+    // 2. Егер база бос болса, экранды тазалаймыз
+    if (products.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full text-center py-20">
+                <i class="fas fa-box-open text-6xl text-gray-200 mb-4"></i>
+                <p class="text-gray-400 italic">Товары временно отсутствуют...</p>
+            </div>
+        `;
+        return;
+    }
+
+    // 3. Егер тауарлар болса, оларды экранға шығарамыз
+    container.innerHTML = products.map(p => {
+        const hasDiscount = p.oldPrice && parseInt(p.oldPrice) > parseInt(p.price);
+        
+        return `
+            <div class="product-card bg-white rounded-[2rem] p-3 shadow-sm hover:shadow-xl transition-all border border-gray-100 relative group cursor-pointer" 
+                 onclick="location.href='product.html?id=${p.id}'">
+                
+                ${hasDiscount ? `<div class="absolute top-4 left-4 bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded-lg z-10">SALE</div>` : ''}
+
+                <div class="w-full h-32 md:h-40 bg-gray-50 rounded-2xl mb-4 flex items-center justify-center overflow-hidden">
+                    <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/150'">
+                </div>
+
+                <div class="flex items-baseline gap-2 mb-1">
+                    <p class="text-orange-600 font-black text-xl italic">${Number(p.price).toLocaleString()} ₸</p>
+                    ${hasDiscount ? `<p class="text-gray-400 text-[10px] line-through italic">${Number(p.oldPrice).toLocaleString()} ₸</p>` : ''}
+                </div>
+                
+                <h3 class="product-name text-[11px] font-bold h-8 overflow-hidden italic leading-tight mb-3 text-gray-800">${p.name}</h3>
+
+                <button onclick="event.stopPropagation(); addToCart('${p.name}', ${p.price}, '${p.img}')" 
+                        class="w-full bg-orange-600 text-white py-2 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-orange-700 transition-all">
+                    В корзину
+                </button>
+            </div>
+        `;
+    }).reverse().join(''); // Жаңа қосылған тауар бірінші тұрады
+}
+
+// Бет жүктелгенде және басқа беттен қайтып келгенде жаңарту
+document.addEventListener('DOMContentLoaded', renderProducts);
+window.addEventListener('focus', renderProducts);
+
+
+
 
 
     </script>

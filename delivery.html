@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Доставка и оплата | QulanShop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-orange-600 cursor-pointer" onclick="location.href='index.html'">QulanShop</h1>
+            <button onclick="location.href='index.html'" class="text-sm font-bold text-gray-600 hover:text-orange-600 transition">
+                <i class="fas fa-arrow-left mr-2"></i>Назад
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 md:py-16">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-16">
+                <h1 class="text-3xl md:text-5xl font-black italic uppercase tracking-tighter mb-4">Доставка и Оплата</h1>
+                <p class="text-gray-500 italic">Максимально быстро и удобно для жителей района Кулан.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <div class="space-y-6">
+                    <div class="flex items-center gap-4 mb-2">
+                        <div class="w-12 h-12 bg-orange-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-orange-200">
+                            <i class="fas fa-truck-fast text-xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-black italic uppercase italic">Доставка</h2>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-4">
+                        <div class="flex gap-4">
+                            <i class="fas fa-map-marker-alt text-orange-600 mt-1"></i>
+                            <div>
+                                <h4 class="font-bold italic">По селу Кулан</h4>
+                                <p class="text-sm text-gray-500 italic">Доставка осуществляется в день заказа. Стоимость: **Бесплатно** при заказе от 5 000 ₸.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <i class="fas fa-shuttle-van text-orange-600 mt-1"></i>
+                            <div>
+                                <h4 class="font-bold italic">По району</h4>
+                                <p class="text-sm text-gray-500 italic">Отправляем в ближайшие ауылы (Жарлысу, Корагаты, Ақермен и др.) в течение 24 часов.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <i class="fas fa-box text-orange-600 mt-1"></i>
+                            <div>
+                                <h4 class="font-bold italic">Самовывоз</h4>
+                                <p class="text-sm text-gray-500 italic">Можете забрать сами из нашего магазина по адресу: ул. Жибек Жолы, 12.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="flex items-center gap-4 mb-2">
+                        <div class="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
+                            <i class="fas fa-wallet text-xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-black italic uppercase italic">Оплата</h2>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-4">
+                        <div class="flex items-center gap-4 p-3 bg-red-50 rounded-2xl border border-red-100">
+                            <img src="images/kaspi.png" class="w-8 h-8 rounded-lg" onerror="this.style.display='none'">
+                            <span class="font-bold italic text-sm text-red-700 uppercase">Kaspi Gold / QR</span>
+                        </div>
+                        <div class="flex items-center gap-4 p-3 bg-green-50 rounded-2xl border border-green-100">
+                            <img src="images/halyk.png" class="w-8 h-8 rounded-lg" onerror="this.style.display='none'">
+                            <span class="font-bold italic text-sm text-green-700 uppercase">Halyk Pay</span>
+                        </div>
+                        <div class="flex items-center gap-4 p-3 bg-orange-50 rounded-2xl border border-orange-100">
+                            <div class="w-8 h-8 bg-orange-200 rounded-lg flex items-center justify-center text-orange-700">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <span class="font-bold italic text-sm text-orange-700 uppercase">Наличными при получении</span>
+                        </div>
+                        <div class="flex items-center gap-4 p-3 bg-blue-50 rounded-2xl border border-blue-100">
+                            <div class="w-8 h-8 bg-blue-200 rounded-lg flex items-center justify-center text-blue-700">
+                                <i class="fas fa-percent"></i>
+                            </div>
+                            <span class="font-bold italic text-sm text-blue-700 uppercase">Рассрочка 0-0-12</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="mt-12 bg-gray-900 text-white p-8 rounded-[3rem] relative overflow-hidden shadow-2xl">
+                <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="text-center md:text-left">
+                        <h3 class="text-xl font-black italic uppercase mb-2">Безопасная сделка</h3>
+                        <p class="text-gray-400 text-sm italic">Вы платите только после того, как проверите товар при получении. Никаких рисков!</p>
+                    </div>
+                    <button onclick="window.location.href='index.html'" class="bg-orange-600 text-white px-8 py-4 rounded-2xl font-bold uppercase italic tracking-widest hover:bg-orange-700 transition active:scale-95">
+                        В каталог
+                    </button>
+                </div>
+                <i class="fas fa-shield-alt absolute -right-4 -bottom-4 text-white/5 text-9xl"></i>
+            </div>
+        </div>
+    </main>
+
+    <footer class="py-10 text-center text-gray-400 text-xs italic">
+        © 2026 QulanShop • Жибек Жолы 12, Кулан
+    </footer>
+
+</body>
+</html>

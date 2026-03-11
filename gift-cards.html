@@ -143,8 +143,13 @@
         }
 
    async function generateGiftPDF() {
-    const amount = document.getElementById('amount-input').value;
-    if (!amount || amount < 100) { alert("Сумманы жазыңыз!"); return; }
+    const amountInput = document.getElementById('amount-input');
+    const amount = amountInput.value;
+
+    if (!amount || amount < 100) {
+        alert("Сумманы жазыңыз!");
+        return;
+    }
 
     const btn = document.getElementById('buy-btn');
     const element = document.getElementById('gift-card-preview');
@@ -158,18 +163,20 @@
     const originalCodeText = codeElem.innerText;
     codeElem.innerText = uniqueCode;
 
-    // PDF БАПТАУЛАРЫ
+    // МОБИЛЬДІ ТЕЛЕФОНДАР ҮШІН АРНАЙЫ БАПТАУ
     const opt = {
-        margin: 10,
+        margin: [20, 10, 20, 10], // Парақ шетінен орын
         filename: `QulanShop_${amount}₸.pdf`,
         image: { type: 'jpeg', quality: 1 },
         html2canvas: { 
-            scale: 3,           // Сапасы өте жоғары болады
-            useCORS: true,
-            logging: false,
+            scale: 2, 
+            useCORS: true, 
             letterRendering: true,
-            scrollX: 0,
-            scrollY: 0
+            // МІНЕ ОСЫ ЖЕР МАҢЫЗДЫ:
+            windowWidth: 1200, // Браузерге экранды 1200px деп елестет дейміз
+            width: element.offsetWidth,
+            height: element.offsetHeight,
+            scrollY: -window.scrollY // Экран төмен түсіп тұрса да, картаны басынан түсіру үшін
         },
         jsPDF: { 
             unit: 'mm', 
@@ -179,24 +186,18 @@
     };
 
     try {
-        // КАРТАНЫ ПАРАҚҚА ТОЛЫҚ СЫЙҒЫЗУ ЛОГИКАСЫ
-        const doc = await html2pdf().set(opt).from(element).toPdf().get('pdf').then(function (pdf) {
-            const pageSize = pdf.internal.pageSize;
-            const pageWidth = pageSize.getWidth();
-            const pageHeight = pageSize.getHeight();
-            
-            // Картаны парақтың еніне қарай автоматты масштабтау
-            // html2pdf мұны автоматты істейді, бірақ біз кесілмеуін қадағалаймыз
-        }).save();
-        
+        // PDF-ті құрастыру және сақтау
+        await html2pdf().set(opt).from(element).save();
+
+        // WhatsApp-қа бағыттау
         setTimeout(() => {
             const message = encodeURIComponent(`Сәлеметсіз бе! Мен ${amount} ₸ сомасына сыйлық картасын рәсімдедім. Код: ${uniqueCode}`);
             window.open(`https://wa.me/77073332211?text=${message}`, '_blank');
-        }, 1500);
+        }, 2000);
 
     } catch (err) {
-        console.error(err);
-        alert("Қате шықты!");
+        console.error("PDF Error:", err);
+        alert("Қате шықты! Басқа браузермен көріңіз.");
     } finally {
         codeElem.innerText = originalCodeText;
         btn.innerText = "Оформить карту";

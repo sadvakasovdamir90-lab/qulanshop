@@ -142,7 +142,7 @@
             preview.innerText = val ? Number(val).toLocaleString() + " ₸" : "0 ₸";
         }
 
-   async function generateGiftPDF() {
+async function generateGiftPDF() {
     const amountInput = document.getElementById('amount-input');
     const amount = amountInput.value;
 
@@ -163,20 +163,20 @@
     const originalCodeText = codeElem.innerText;
     codeElem.innerText = uniqueCode;
 
-    // МОБИЛЬДІ ТЕЛЕФОНДАР ҮШІН АРНАЙЫ БАПТАУ
+    // PDF БАПТАУЛАРЫ
     const opt = {
-        margin: [20, 10, 20, 10], // Парақ шетінен орын
+        margin: [20, 15, 20, 15],
         filename: `QulanShop_${amount}₸.pdf`,
         image: { type: 'jpeg', quality: 1 },
         html2canvas: { 
             scale: 2, 
             useCORS: true, 
+            logging: false,
             letterRendering: true,
-            // МІНЕ ОСЫ ЖЕР МАҢЫЗДЫ:
-            windowWidth: 1200, // Браузерге экранды 1200px деп елестет дейміз
-            width: element.offsetWidth,
-            height: element.offsetHeight,
-            scrollY: -window.scrollY // Экран төмен түсіп тұрса да, картаны басынан түсіру үшін
+            // scrollY: 0 және windowWidth — бос парақ мәселесін шешеді
+            scrollY: 0,
+            scrollX: 0,
+            windowWidth: 1200 
         },
         jsPDF: { 
             unit: 'mm', 
@@ -186,10 +186,10 @@
     };
 
     try {
-        // PDF-ті құрастыру және сақтау
-        await html2pdf().set(opt).from(element).save();
+        // html2pdf-тің өзіне элементті бермес бұрын, оның позициясын басына қоямыз
+        const worker = html2pdf().set(opt).from(element).toContainer().toCanvas().toImg().toPdf();
+        await worker.save();
 
-        // WhatsApp-қа бағыттау
         setTimeout(() => {
             const message = encodeURIComponent(`Сәлеметсіз бе! Мен ${amount} ₸ сомасына сыйлық картасын рәсімдедім. Код: ${uniqueCode}`);
             window.open(`https://wa.me/77073332211?text=${message}`, '_blank');
@@ -197,7 +197,7 @@
 
     } catch (err) {
         console.error("PDF Error:", err);
-        alert("Қате шықты! Басқа браузермен көріңіз.");
+        alert("Қате шықты! Парақты жаңартып, қайта көріңіз.");
     } finally {
         codeElem.innerText = originalCodeText;
         btn.innerText = "Оформить карту";

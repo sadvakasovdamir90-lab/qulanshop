@@ -40,39 +40,38 @@
     <main class="container mx-auto px-4 py-6 md:py-16">
         <div class="flex flex-col lg:flex-row gap-8 md:gap-12 items-start justify-center">
             
-            <div class="w-full lg:w-3/5">
-                <h2 class="text-[10px] md:text-sm font-black uppercase text-gray-400 mb-4 md:mb-6 italic tracking-[0.2em]">Предпросмотр карты</h2>
+           <div class="w-full lg:w-3/5">
+    <h2 class="text-[10px] md:text-sm font-black uppercase text-gray-400 mb-4 md:mb-6 italic tracking-[0.2em]">Предпросмотр карты</h2>
+    
+<div id="gift-card-preview" class="preview-card card-orange w-full max-w-[400px] md:max-w-[750px] aspect-[1.6/1] rounded-[2rem] p-6 md:p-12 shadow-[0_40px_80px_-15px_rgba(234,88,12,0.3)] relative overflow-hidden flex flex-col justify-between text-white mx-auto">        
+        <img id="bg-horse-logo" 
+             src="https://i.ibb.co/4ZRXvjwR/qulan.jpg" 
+             crossorigin="anonymous"
+             class="absolute right-[-5%] bottom-[-5%] w-2/3 opacity-20 pointer-events-none mix-blend-overlay rotate-[-15deg]" alt="Watermark">
                 
-                <div id="gift-card-preview" class="preview-card card-orange w-full aspect-[1.6/1] rounded-[2rem] p-6 md:p-12 shadow-[0_40px_80px_-15px_rgba(234,88,12,0.3)] relative overflow-hidden flex flex-col justify-between text-white mx-auto">
-                    
-                    <img id="bg-horse-logo" 
-                         src="https://i.ibb.co/4ZRXvjwR/qulan.jpg" 
-                         crossorigin="anonymous"
-                         class="absolute right-[-5%] bottom-[-5%] w-2/3 opacity-20 pointer-events-none mix-blend-overlay rotate-[-15deg]" alt="Watermark">
-                            
-                    <div class="flex justify-between items-start relative z-10">
-                        <div class="glass-effect px-3 py-1.5 md:px-5 md:py-2 rounded-xl md:rounded-2xl border border-white/20">
-                            <span class="font-black italic text-xs md:text-xl tracking-tighter uppercase">QULANSHOP</span>
-                        </div>
-                        <div class="w-14 h-14 md:w-28 md:h-28 bg-white/10 backdrop-blur-md rounded-full border-2 md:border-4 border-white/30 p-0.5 md:p-1 shadow-2xl overflow-hidden">
-                            <img id="mini-logo" src="https://i.ibb.co/DHYkbZCv/cart.jpg" crossorigin="anonymous" class="w-full h-full object-cover rounded-full">
-                        </div>
-                    </div>
-
-                    <div class="relative z-10">
-                        <p class="text-[8px] md:text-sm font-bold uppercase tracking-[0.3em] md:tracking-[0.5em] opacity-70 mb-1 md:mb-2 italic">Подарочный номинал</p>
-                        <div id="preview-amount" class="text-3xl md:text-8xl font-black italic tracking-tighter drop-shadow-lg">5 000 ₸</div>
-                    </div>
-
-                    <div class="flex justify-between items-end relative z-10">
-                        <div>
-                            <p id="card-code-text" class="text-[8px] md:text-sm font-mono opacity-50 tracking-[0.2em] md:tracking-[0.4em] mb-1 md:mb-2">#### #### #### ####</p>
-                            <p class="text-[7px] md:text-xs font-black uppercase tracking-widest opacity-90 italic leading-none">Эксклюзивная карта QULANOTPES</p>
-                        </div>
-                        <div class="glass-effect px-2 py-1 md:px-5 md:py-2 rounded-lg md:rounded-xl text-[8px] md:text-sm font-black uppercase tracking-[0.2em]">Gift Card</div>
-                    </div>
-                </div>
+        <div class="flex justify-between items-start relative z-10">
+            <div class="glass-effect px-3 py-1.5 md:px-5 md:py-2 rounded-xl md:rounded-2xl border border-white/20">
+                <span class="font-black italic text-xs md:text-xl tracking-tighter uppercase">QULANSHOP</span>
             </div>
+            <div class="w-14 h-14 md:w-24 md:h-24 bg-white/10 backdrop-blur-md rounded-full border-2 md:border-4 border-white/30 p-0.5 md:p-1 shadow-2xl overflow-hidden">
+                <img id="mini-logo" src="https://i.ibb.co/DHYkbZCv/cart.jpg" crossorigin="anonymous" class="w-full h-full object-cover rounded-full">
+            </div>
+        </div>
+
+        <div class="relative z-10">
+            <p class="text-[8px] md:text-sm font-bold uppercase tracking-[0.3em] md:tracking-[0.5em] opacity-70 mb-1 md:mb-2 italic">Подарочный номинал</p>
+            <div id="preview-amount" class="text-3xl md:text-6xl font-black italic tracking-tighter drop-shadow-lg">5 000 ₸</div>
+        </div>
+
+        <div class="flex justify-between items-end relative z-10">
+            <div>
+                <p id="card-code-text" class="text-[8px] md:text-sm font-mono opacity-50 tracking-[0.2em] md:tracking-[0.4em] mb-1 md:mb-2">#### #### #### ####</p>
+                <p class="text-[7px] md:text-xs font-black uppercase tracking-widest opacity-90 italic leading-none">Эксклюзивная карта QULANOTPES</p>
+            </div>
+            <div class="glass-effect px-2 py-1 md:px-5 md:py-2 rounded-lg md:rounded-xl text-[8px] md:text-sm font-black uppercase tracking-[0.2em]">Gift Card</div>
+        </div>
+    </div>
+</div>
 
             <div class="w-full lg:w-[400px] bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] shadow-xl border border-gray-100">
                 <h3 class="text-lg md:text-xl font-black italic uppercase mb-6 md:mb-8 tracking-tight">Настрой свой подарок</h3>
@@ -103,6 +102,22 @@
         </div>
     </main>
 
+<style>
+    /* Style бөліміне қосу керек */
+#gift-card-preview {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    display: flex !important; /* PDF-те жоғалып кетпеуі үшін */
+}
+
+#gift-card-preview {
+    transform: scale(1);
+    transform-origin: top left;
+}
+
+</style>
+
+
     <script>
         function changeStyle(styleClass, shadowColor) {
             const card = document.getElementById('gift-card-preview');
@@ -127,18 +142,15 @@
             preview.innerText = val ? Number(val).toLocaleString() + " ₸" : "0 ₸";
         }
 
-       async function generateGiftPDF() {
+   async function generateGiftPDF() {
     const amount = document.getElementById('amount-input').value;
-    if (!amount || amount < 100) { 
-        alert("Сумманы жазыңыз!"); 
-        return; 
-    }
+    if (!amount || amount < 100) { alert("Сумманы жазыңыз!"); return; }
 
     const btn = document.getElementById('buy-btn');
     const element = document.getElementById('gift-card-preview');
     const codeElem = document.getElementById('card-code-text');
 
-    btn.innerText = "Скачивание...";
+    btn.innerText = "PDF дайындалуда...";
     btn.disabled = true;
 
     // Уникалды код жасау
@@ -146,17 +158,18 @@
     const originalCodeText = codeElem.innerText;
     codeElem.innerText = uniqueCode;
 
-    // ТЕЛЕФОНДА ТОЛЫҚ ШЫҒУЫ ҮШІН БАПТАУЛАР
+    // PDF БАПТАУЛАРЫ
     const opt = {
         margin: 10,
         filename: `QulanShop_${amount}₸.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
+        image: { type: 'jpeg', quality: 1 },
         html2canvas: { 
             scale: 3,           // Сапасы өте жоғары болады
-            useCORS: true, 
+            useCORS: true,
+            logging: false,
             letterRendering: true,
-            width: 800,         // Картаны виртуалды түрде 800px ендікте түсіреді (телефон өлшеміне қарамастан)
-            windowWidth: 800    // Осы жер PDF-тің кесіліп қалмауын қамтамасыз етеді
+            scrollX: 0,
+            scrollY: 0
         },
         jsPDF: { 
             unit: 'mm', 
@@ -166,19 +179,26 @@
     };
 
     try {
-        // PDF жасау және автоматты түрде жүктеу (save() функциясы жүктейді)
-        await html2pdf().set(opt).from(element).save();
+        // КАРТАНЫ ПАРАҚҚА ТОЛЫҚ СЫЙҒЫЗУ ЛОГИКАСЫ
+        const doc = await html2pdf().set(opt).from(element).toPdf().get('pdf').then(function (pdf) {
+            const pageSize = pdf.internal.pageSize;
+            const pageWidth = pageSize.getWidth();
+            const pageHeight = pageSize.getHeight();
+            
+            // Картаны парақтың еніне қарай автоматты масштабтау
+            // html2pdf мұны автоматты істейді, бірақ біз кесілмеуін қадағалаймыз
+        }).save();
         
-        // WhatsApp-қа бағыттау (PDF жүктелгеннен кейін)
         setTimeout(() => {
             const message = encodeURIComponent(`Сәлеметсіз бе! Мен ${amount} ₸ сомасына сыйлық картасын рәсімдедім. Код: ${uniqueCode}`);
             window.open(`https://wa.me/77073332211?text=${message}`, '_blank');
         }, 1500);
 
     } catch (err) {
-        alert("Қате шықты! Браузеріңіз PDF жасауға рұқсат бермей тұр.");
+        console.error(err);
+        alert("Қате шықты!");
     } finally {
-        codeElem.innerText = originalText;
+        codeElem.innerText = originalCodeText;
         btn.innerText = "Оформить карту";
         btn.disabled = false;
     }

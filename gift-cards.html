@@ -3,287 +3,371 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>QulanShop | Создай подарок</title>
+    <title>Создай свой подарок | QulanShop</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Caveat:wght@700&display=swap');
-        
-        body { font-family: 'Inter', sans-serif; background: #f8fafc; -webkit-tap-highlight-color: transparent; }
-        
-        /* Градиенттер */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #fdfdfd; -webkit-tap-highlight-color: transparent; }
         .card-orange { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
         .card-black { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
         .card-purple { background: linear-gradient(135deg, #7c3aed 0%, #4c1d95 100%); }
         .card-green { background: linear-gradient(135deg, #10b981 0%, #047857 100%); }
-        
         .glass-effect { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
-        .handwritten { font-family: 'Caveat', cursive !important; font-size: 32px; color: #334155; line-height: 1.2; }
-
-        /* Контейнер для идеального PDF (800px) */
-        #export-container {
-            width: 800px !important;
-            background: white;
-            padding: 40px;
-            border-radius: 40px;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-            transform-origin: top center;
+        .preview-card { transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        /* Мобильді телефондарға арналған арнайы реттеулер */
+        @media (max-width: 640px) {
+            .preview-card { border-radius: 1.5rem !important; padding: 1.5rem !important; }
         }
-
-        /* Адаптация: Масштабтау логикасы */
-        #preview-wrapper {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            overflow: visible;
-        }
-
-        .input-group:focus-within { border-color: #f97316; }
     </style>
 </head>
 <body class="bg-slate-50">
 
-    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 py-3 border-b border-gray-100 px-6">
-        <div class="container mx-auto flex justify-between items-center max-w-7xl">
-            <h1 class="text-xl md:text-2xl font-black text-orange-600 italic tracking-tighter" onclick="location.reload()">QULANSHOP</h1>
-            <button onclick="location.href='index.html'" class="text-[10px] font-black uppercase text-gray-400">Назад</button>
-        </div>
-    </header>
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 py-3 md:py-4 border-b border-gray-100 px-4">
+    <div class="container mx-auto flex justify-between items-center">
+        <h1 class="text-xl md:text-2xl font-black text-orange-600 italic cursor-pointer active:scale-95 transition-transform" onclick="location.href='index.html'">
+            QULANSHOP
+        </h1>
+        
+        <button onclick="location.href='index.html'" class="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black active:text-orange-600 transition-all flex items-center gap-1">
+            <i class="fas fa-chevron-left text-[8px]"></i> Назад
+        </button>
+    </div>
+</header>
 
-    <main class="container mx-auto px-4 py-8 md:py-12 max-w-7xl">
-        <div class="flex flex-col lg:flex-row gap-10 items-start justify-center">
+    <main class="container mx-auto px-4 py-6 md:py-16">
+        <div class="flex flex-col lg:flex-row gap-8 md:gap-12 items-start justify-center">
             
-            <div class="w-full lg:w-2/3" id="preview-section">
-                <div id="preview-wrapper">
-                    <div id="export-container" class="shadow-2xl">
-                        <div id="gift-card-preview" class="card-orange w-full aspect-[1.6/1] rounded-[2.5rem] p-10 relative overflow-hidden flex flex-col justify-between text-white shadow-lg">
-                            <img src="https://i.ibb.co/4ZRXvjwR/qulan.jpg" crossorigin="anonymous" class="absolute right-[-5%] bottom-[-5%] w-2/3 opacity-20 mix-blend-overlay rotate-[-15deg]">
-                            
-                            <div class="flex justify-between items-start relative z-10">
-                                <div class="glass-effect px-5 py-2 rounded-2xl border border-white/20">
-                                    <span class="font-black italic text-xl uppercase tracking-widest">QULANSHOP</span>
-                                </div>
-                                <div class="w-24 h-24 bg-white/10 backdrop-blur-md rounded-full border-4 border-white/30 p-1 overflow-hidden">
-                                    <img src="https://i.ibb.co/DHYkbZCv/cart.jpg" crossorigin="anonymous" class="w-full h-full object-cover rounded-full">
-                                </div>
-                            </div>
-
-                            <div class="relative z-10">
-                                <p class="text-sm font-bold uppercase tracking-[0.5em] opacity-70 mb-1 italic">Номинал карты</p>
-                                <div id="preview-amount" class="text-7xl font-black italic tracking-tighter drop-shadow-lg">5 000 ₸</div>
-                            </div>
-
-                            <div class="flex justify-between items-end relative z-10">
-                                <div>
-                                    <p id="card-code-text" class="text-xl font-mono opacity-60 tracking-[0.4em] mb-2">#### #### #### ####</p>
-                                    <p id="to-user-display" class="text-xs font-black uppercase tracking-widest opacity-90 italic hidden">Кому: <span id="found-user-name" class="text-yellow-300"></span></p>
-                                </div>
-                                <div class="glass-effect px-5 py-2 rounded-xl text-sm font-black uppercase tracking-widest">Gift Card</div>
-                            </div>
-                        </div>
-
-                        <div style="background: #f8fafc; border: 4px dashed #e2e8f0; padding: 40px; border-radius: 30px; position: relative;">
-                            <span style="position: absolute; top: -15px; left: 30px; background: #ea580c; color: white; padding: 4px 20px; border-radius: 12px; font-size: 12px; font-weight: 900; text-transform: uppercase;">Пожелание</span>
-                            <p id="preview-message" class="handwritten">Пусть этот подарок принесет радость! ✨</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="control-panel" class="w-full lg:w-[420px] bg-white p-6 md:p-8 rounded-[3rem] shadow-xl border border-gray-100 flex-shrink-0">
-                <h3 class="text-xl font-black uppercase mb-8 italic tracking-tight text-slate-800">Настройка подарка</h3>
+           <div class="w-full lg:w-3/5">
+    <h2 class="text-[10px] md:text-sm font-black uppercase text-gray-400 mb-4 md:mb-6 italic tracking-[0.2em]">Предпросмотр карты</h2>
+    
+<div id="gift-card-preview" class="preview-card card-orange w-full max-w-[400px] md:max-w-[750px] aspect-[1.6/1] rounded-[2rem] p-6 md:p-12 shadow-[0_40px_80px_-15px_rgba(234,88,12,0.3)] relative overflow-hidden flex flex-col justify-between text-white mx-auto">        
+        <img id="bg-horse-logo" 
+             src="https://i.ibb.co/4ZRXvjwR/qulan.jpg" 
+             crossorigin="anonymous"
+             class="absolute right-[-5%] bottom-[-5%] w-2/3 opacity-20 pointer-events-none mix-blend-overlay rotate-[-15deg]" alt="Watermark">
                 
-                <div class="mb-6">
-                    <label class="text-[10px] font-black text-gray-400 uppercase block mb-3 tracking-widest">1. Номер телефона (Казахстан)</label>
-                    <div class="input-group flex items-center bg-gray-50 border-2 border-gray-100 rounded-2xl h-16 overflow-hidden transition-all">
-                        <div class="h-full px-4 flex items-center justify-center bg-gray-200 text-gray-500 font-black text-lg select-none border-r border-gray-200">
-                            +7
-                        </div>
-                        <input type="tel" id="rec-phone" oninput="handlePhoneInput(this.value)" maxlength="10" placeholder="7071234567" class="w-full h-full bg-transparent px-4 font-black text-lg outline-none tracking-widest text-slate-800">
-                    </div>
-                    
-                    <div id="user-status-box" class="mt-3 hidden p-4 rounded-xl border-2 flex items-center gap-3 transition-all">
-                        <div id="status-icon" class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"></div>
-                        <div>
-                            <p id="status-name" class="font-black text-sm"></p>
-                            <p id="status-text" class="text-[9px] font-bold uppercase tracking-widest"></p>
-                        </div>
-                    </div>
-                </div>
+
+
+             
+        <div class="flex justify-between items-start relative z-10">
+            <div class="glass-effect px-3 py-1.5 md:px-5 md:py-2 rounded-xl md:rounded-2xl border border-white/20">
+                <span class="font-black italic text-xs md:text-xl tracking-tighter uppercase">QULANSHOP</span>
+            </div>
+            <div class="w-14 h-14 md:w-24 md:h-24 bg-white/10 backdrop-blur-md rounded-full border-2 md:border-4 border-white/30 p-0.5 md:p-1 shadow-2xl overflow-hidden">
+                <img id="mini-logo" src="https://i.ibb.co/DHYkbZCv/cart.jpg" crossorigin="anonymous" class="w-full h-full object-cover rounded-full">
+            </div>
+        </div>
+
+        
+        <div class="relative z-10">
+            <p class="text-[8px] md:text-sm font-bold uppercase tracking-[0.3em] md:tracking-[0.5em] opacity-70 mb-1 md:mb-2 italic">Подарочный номинал</p>
+            <div id="preview-amount" class="text-3xl md:text-6xl font-black italic tracking-tighter drop-shadow-lg">5 000 ₸</div>
+        </div>
+
+        <div class="flex justify-between items-end relative z-10">
+            <div>
+                
+                <p id="card-code-text" class="text-[8px] md:text-sm font-mono opacity-50 tracking-[0.2em] md:tracking-[0.4em] mb-1 md:mb-2">#### #### #### ####</p>
+                <p id="preview-to-box" class="hidden text-[8px] md:text-xs font-black uppercase tracking-widest opacity-90 italic">Кому: <span id="preview-to-name" class="text-yellow-300"></span></p>
+                <p class="text-[7px] md:text-xs font-black uppercase tracking-widest opacity-90 italic leading-none">Эксклюзивная карта QULANOTPES</p>
+                
+            </div>
+            <div class="glass-effect px-2 py-1 md:px-5 md:py-2 rounded-lg md:rounded-xl text-[8px] md:text-sm font-black uppercase tracking-[0.2em]">Gift Card</div>
+        </div>
+    </div>
+
+<div class="wishes-container">
+    <span class="wishes-label">Пожелание</span>
+    
+    <div id="to-display-wishes" class="hidden mb-2">
+        <p class="text-xs font-black text-slate-400 uppercase tracking-widest break-words">
+            Кому: <span id="found-user-wishes" class="text-orange-600"></span>
+        </p>
+    </div>
+
+    <p id="preview-message" class="handwritten text-3xl text-slate-700 leading-snug whitespace-normal break-words">
+        Пусть этот подарок принесет радость! ✨
+    </p>
+</div>
+    
+</div>
+
+
+
+            <div class="w-full lg:w-[400px] bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] shadow-xl border border-gray-100">
+                <h3 class="text-lg md:text-xl font-black italic uppercase mb-6 md:mb-8 tracking-tight">Настрой свой подарок</h3>
+                
+<div class="mb-6 px-1">
+    <label class="text-[10px] font-black uppercase text-gray-400 mb-3 block tracking-widest">Введите номер телефона</label>
+    <div class="flex items-center bg-gray-50 border-2 border-gray-100 rounded-2xl h-16 overflow-hidden transition-all focus-within:border-orange-500">
+        <div class="h-full px-5 flex items-center bg-gray-200 text-gray-600 font-black text-lg select-none">
+            +7
+        </div>
+        <input type="tel" id="rec-phone" oninput="checkUser(this.value)" maxlength="10" placeholder="7071234567" class="w-full h-full bg-transparent px-4 font-black text-xl outline-none tracking-widest text-slate-800">
+    </div>
+
+    <div id="user-status-box" class="hidden mt-3 p-4 rounded-xl border-2 flex items-center gap-3 transition-all">
+        <div id="status-icon" class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold"></div>
+        <div>
+            <p id="status-name" class="font-black text-sm"></p>
+            <p id="status-text" class="text-[9px] font-bold uppercase"></p>
+        </div>
+    </div>
+</div>
+
+<div class="mb-6">
+    <label class="text-[10px] font-black uppercase text-gray-400 mb-3 block tracking-widest">Пожелание</label>
+    <textarea oninput="document.getElementById('preview-message').innerText = this.value || 'Пусть этот подарок принесет радость! ✨'" placeholder="Напишите добрые слова..." class="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 font-bold text-sm h-24 outline-none focus:border-orange-500 resize-none"></textarea>
+</div>
+
 
                 <div class="mb-6">
-                    <label class="text-[10px] font-black text-gray-400 uppercase block mb-3">2. Текст пожелания</label>
-                    <textarea oninput="document.getElementById('preview-message').innerText = this.value || 'Пусть этот подарок принесет радость! ✨'" placeholder="Напишите добрые слова..." class="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 font-bold text-sm h-24 outline-none focus:border-orange-500 resize-none transition-all"></textarea>
-                </div>
-
-                <div class="mb-6">
-                    <label class="text-[10px] font-black text-gray-400 uppercase block mb-3">3. Выбери стиль</label>
+                    <label class="text-[10px] font-black uppercase text-gray-400 mb-3 block tracking-widest">1. Выбери стиль</label>
                     <div class="grid grid-cols-4 gap-3">
-                        <button onclick="updateStyle('card-orange')" class="w-full aspect-square rounded-full card-orange border-4 border-white shadow-lg active:scale-90 transition-all"></button>
-                        <button onclick="updateStyle('card-black')" class="w-full aspect-square rounded-full card-black border-4 border-white shadow-lg active:scale-90 transition-all"></button>
-                        <button onclick="updateStyle('card-purple')" class="w-full aspect-square rounded-full card-purple border-4 border-white shadow-lg active:scale-90 transition-all"></button>
-                        <button onclick="updateStyle('card-green')" class="w-full aspect-square rounded-full card-green border-4 border-white shadow-lg active:scale-90 transition-all"></button>
+                        <button onclick="changeStyle('card-orange', 'rgba(234, 88, 12, 0.3)')" class="w-full aspect-square rounded-full card-orange border-2 md:border-4 border-white shadow-lg active:scale-90 transition-transform"></button>
+                        <button onclick="changeStyle('card-black', 'rgba(15, 23, 42, 0.3)')" class="w-full aspect-square rounded-full card-black border-2 md:border-4 border-white shadow-lg active:scale-90 transition-transform"></button>
+                        <button onclick="changeStyle('card-purple', 'rgba(124, 58, 237, 0.3)')" class="w-full aspect-square rounded-full card-purple border-2 md:border-4 border-white shadow-lg active:scale-90 transition-transform"></button>
+                        <button onclick="changeStyle('card-green', 'rgba(16, 185, 129, 0.3)')" class="w-full aspect-square rounded-full card-green border-2 md:border-4 border-white shadow-lg active:scale-90 transition-transform"></button>
                     </div>
                 </div>
 
-                <div class="mb-8">
-                    <label class="text-[10px] font-black text-gray-400 uppercase block mb-3">4. Сумма (₸)</label>
-                    <input type="number" id="amt-input" oninput="updateAmount(this)" placeholder="5000" class="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-5 font-black text-2xl outline-none focus:border-orange-500 transition-all">
+                <div class="mb-6">
+                    <label class="text-[10px] font-black uppercase text-gray-400 mb-3 block tracking-widest">2. Сумма (₸)</label>
+                    <div class="relative">
+                        <input type="number" id="amount-input" oninput="updateAmount(this)" placeholder="5000" class="w-full bg-gray-50 border-2 border-gray-100 rounded-xl md:rounded-2xl py-4 md:py-5 px-5 md:px-6 outline-none font-black text-xl md:text-2xl focus:border-orange-500 transition-all">
+                        <span class="absolute right-5 top-1/2 -translate-y-1/2 font-black text-gray-300 italic text-lg">₸</span>
+                    </div>
+                    <p id="error-text" class="text-[9px] text-red-500 font-bold mt-2 hidden uppercase italic">Макс. 100 000 ₸!</p>
                 </div>
 
-                <button id="buy-btn" onclick="generateGiftPDF()" disabled class="w-full bg-gray-100 text-gray-400 py-6 rounded-3xl font-black uppercase italic tracking-widest transition-all cursor-not-allowed">
-                    Оформить подарок
+                <button id="buy-btn" onclick="generateGiftPDF()" class="w-full bg-gray-900 text-white py-5 md:py-6 rounded-2xl md:rounded-3xl font-black uppercase italic tracking-[0.2em] shadow-xl hover:bg-orange-600 transition-all active:scale-95">
+                    Оформить карту
                 </button>
             </div>
         </div>
     </main>
 
+<style>
+    /* Style бөліміне қосу керек */
+#gift-card-preview {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    display: flex !important; /* PDF-те жоғалып кетпеуі үшін */
+}
+
+#gift-card-preview {
+    transform: scale(1);
+    transform-origin: top left;
+}
+
+
+.wishes-container {
+    background: #f8fafc; 
+    border: 4px dashed #e2e8f0; 
+    padding: 30px; 
+    border-radius: 30px; 
+    position: relative;
+    margin-top: 25px;
+    width: 100%;
+    
+    /* МЫНАУ МӘТІН КӨРІНУІ ҮШІН МАҢЫЗДЫ */
+    display: block;          /* Блоктық стиль */
+    height: auto;           /* Биіктік автоматты (мәтінге қарай өседі) */
+    min-height: 100px;      /* Ең аз биіктік */
+    overflow: visible;      /* Сыртқа шықса да көріне берсін */
+    
+    /* Сөздерді тасымалдау */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: normal;     /* Сөздерді ортасынан емес, шетінен бөледі */
+}
+
+.wishes-label {
+    position: absolute; 
+    top: -16px; 
+    left: 30px; 
+    background: #ea580c; 
+    color: white; 
+    padding: 4px 20px; 
+    border-radius: 12px; 
+    font-size: 12px; 
+    font-weight: 900; 
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+/* МОБИЛЬДІ НҰСҚА */
+@media (max-width: 640px) {
+    .wishes-container {
+        padding: 30px 20px 20px 20px; /* Үстінен көбірек орын (Label үшін) */
+        border-width: 2px;
+        border-radius: 20px;
+    }
+    
+    .wishes-label {
+        font-size: 10px;
+        top: -10px;
+        left: 20px;
+    }
+
+    #preview-message {
+        font-size: 20px !important; /* Телефонда оқуға ыңғайлы өлшем */
+        line-height: 1.4;
+        display: block;
+        width: 100%;
+    }
+}
+</style>
+
+
     <script>
-        // --- 1. БАЗА ДАННЫХ (Mock Database) ---
-        const userDatabase = {
-            "7071112233": "Дамир С.",
-            "7712730000": "Алихан А.",
-            "7470001122": "Аружан Б.",
-            "7000000000": "Главарь Г."
-        };
-
-        let foundUserName = "";
-
-        // --- 2. НӨМІРДІ ТЕКСЕРУ ЖӘНЕ КАРТА НӨМІРІН ЖАСАУ ---
-        function handlePhoneInput(val) {
-            const cleanPhone = val.replace(/\D/g, '');
-            document.getElementById('rec-phone').value = cleanPhone;
-
-            const box = document.getElementById('user-status-box');
-            const nameDisp = document.getElementById('status-name');
-            const textDisp = document.getElementById('status-text');
-            const icon = document.getElementById('status-icon');
-            const btn = document.getElementById('buy-btn');
-            const cardCode = document.getElementById('card-code-text');
-            const cardNameBox = document.getElementById('to-user-display');
-
-            if (cleanPhone.length === 10) {
-                box.classList.remove('hidden');
-                
-                if (userDatabase[cleanPhone]) {
-                    // ТАБЫЛДЫ
-                    foundUserName = userDatabase[cleanPhone];
-                    box.className = "mt-3 p-4 rounded-xl border-2 border-green-200 bg-green-50 flex items-center gap-3";
-                    icon.className = "w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white";
-                    icon.innerHTML = '<i class="fas fa-check"></i>';
-                    nameDisp.innerText = foundUserName;
-                    nameDisp.className = "font-black text-sm text-green-700";
-                    textDisp.innerText = "Пользователь найден";
-                    textDisp.className = "text-[9px] font-bold text-green-500 uppercase";
-
-                    // Картаға атын шығару
-                    cardNameBox.classList.remove('hidden');
-                    document.getElementById('found-user-name').innerText = foundUserName;
-
-                    // Уникалды 16 таңбалы карта нөмірін генерациялау
-                    cardCode.innerText = generateCardNumber();
-
-                    // Батырманы қосу
-                    btn.disabled = false;
-                    btn.className = "w-full bg-orange-600 text-white py-6 rounded-3xl font-black uppercase italic tracking-widest shadow-xl active:scale-95 cursor-pointer";
-                } else {
-                    // ТАБЫЛМАДЫ
-                    foundUserName = "";
-                    box.className = "mt-3 p-4 rounded-xl border-2 border-red-200 bg-red-50 flex items-center gap-3";
-                    icon.className = "w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white";
-                    icon.innerHTML = '<i class="fas fa-times"></i>';
-                    nameDisp.innerText = "Не существует";
-                    nameDisp.className = "font-black text-sm text-red-700";
-                    textDisp.innerText = "Пользователь не найден";
-                    textDisp.className = "text-[9px] font-bold text-red-500 uppercase";
-
-                    cardNameBox.classList.add('hidden');
-                    cardCode.innerText = "#### #### #### ####";
-                    btn.disabled = true;
-                    btn.className = "w-full bg-gray-100 text-gray-400 py-6 rounded-3xl font-black uppercase italic tracking-widest cursor-not-allowed";
-                }
-            } else {
-                box.classList.add('hidden');
-                cardNameBox.classList.add('hidden');
-                btn.disabled = true;
-                btn.className = "w-full bg-gray-100 text-gray-400 py-6 rounded-3xl font-black uppercase italic tracking-widest cursor-not-allowed";
-            }
-        }
-
-        function generateCardNumber() {
-            let res = '';
-            for(let i=0; i<4; i++) {
-                res += Math.floor(1000 + Math.random() * 9000) + (i < 3 ? ' ' : '');
-            }
-            return res;
-        }
-
-        // --- 3. АДАПТАЦИЯ (Scaling) ---
-        function scaleContainer() {
-            const wrapper = document.getElementById('preview-wrapper');
-            const container = document.getElementById('export-container');
-            if(!wrapper || !container) return;
-            const wWidth = wrapper.clientWidth;
-            if(wWidth < 800) {
-                const scale = wWidth / 800;
-                container.style.transform = `scale(${scale})`;
-                container.style.marginBottom = `-${container.offsetHeight * (1 - scale)}px`;
-            } else {
-                container.style.transform = 'scale(1)';
-                container.style.marginBottom = '0';
-            }
-        }
-        window.addEventListener('resize', scaleContainer);
-        window.addEventListener('load', scaleContainer);
-
-        // --- 4. БАЗАЛЫҚ ФУНКЦИЯЛАР ---
-        function updateStyle(cls) {
-            document.getElementById('gift-card-preview').className = `${cls} w-full aspect-[1.6/1] rounded-[2.5rem] p-10 relative overflow-hidden flex flex-col justify-between text-white border border-white/10 shadow-lg`;
+        function changeStyle(styleClass, shadowColor) {
+            const card = document.getElementById('gift-card-preview');
+            card.classList.remove('card-orange', 'card-black', 'card-purple', 'card-green');
+            card.classList.add(styleClass);
+            card.style.boxShadow = `0 40px 80px -15px ${shadowColor}`;
         }
 
         function updateAmount(input) {
+            const preview = document.getElementById('preview-amount');
+            const errorText = document.getElementById('error-text');
             let val = input.value;
-            if (val > 100000) { val = 100000; input.value = 100000; }
-            document.getElementById('preview-amount').innerText = val ? Number(val).toLocaleString() + " ₸" : "0 ₸";
-        }
-
-        async function generateGiftPDF() {
-            const amount = document.getElementById('amt-input').value;
-            if (!amount) return alert("Введите сумму!");
-
-            const btn = document.getElementById('buy-btn');
-            const container = document.getElementById('export-container');
             
-            btn.innerText = "Создаем шедевр..."; btn.disabled = true;
-
-            // PDF үшін масштабты уақытша алып тастау
-            const originalTransform = container.style.transform;
-            container.style.transform = 'scale(1)';
-
-            const opt = {
-                margin: 10,
-                filename: `QulanShop_Gift_${amount}.pdf`,
-                image: { type: 'jpeg', quality: 1 },
-                html2canvas: { scale: 2, useCORS: true, backgroundColor: null, width: 800, windowWidth: 800 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            try {
-                await html2pdf().set(opt).from(container).save();
-                const phone = "7" + document.getElementById('rec-phone').value;
-                window.open(`https://wa.me/${phone}?text=${encodeURIComponent('Привет, ' + foundUserName + '! Тебе пришел сюрприз от QulanShop! 🎁')}`, '_blank');
-            } catch (e) {
-                alert("Ошибка!");
-            } finally {
-                container.style.transform = originalTransform;
-                btn.innerText = "Оформить подарок";
-                btn.disabled = false;
+            if (val > 100000) {
+                val = 100000;
+                input.value = 100000;
+                errorText.classList.remove('hidden');
+            } else {
+                errorText.classList.add('hidden');
             }
+            
+            preview.innerText = val ? Number(val).toLocaleString() + " ₸" : "0 ₸";
         }
+
+
+// Болашақта бұл жерге серверден келетін деректерді қосамыз
+// Әзірге "тіркелгендер" ретінде мыналарды қалдырамыз:
+const registeredUsers = {
+   
+};
+
+function checkUser(val) {
+    // Тек сандарды алу
+    const phone = val.replace(/\D/g, ''); 
+    document.getElementById('rec-phone').value = phone;
+
+    const box = document.getElementById('user-status-box');
+    const nameDisp = document.getElementById('status-name');
+    const statusTxt = document.getElementById('status-text');
+    const btn = document.getElementById('buy-btn');
+
+    // Картадағы элементтер
+    const cardToBox = document.getElementById('preview-to-box');
+    const cardName = document.getElementById('preview-to-name');
+
+    if (phone.length === 10) {
+        box.classList.remove('hidden');
+
+        // БАЗАДАН ТЕКСЕРУ (Тек тіркелгендер)
+        if (registeredUsers[phone]) {
+            const userName = registeredUsers[phone];
+            
+            // ТАБЫЛДЫ - СТИЛЬДЕР
+            box.className = "mt-3 p-4 rounded-xl border-2 border-green-200 bg-green-50 flex items-center gap-3";
+            nameDisp.innerText = userName; // Аты + Т. шығады
+            nameDisp.className = "font-black text-sm text-green-700";
+            statusTxt.innerText = "Клиент тіркелген ✅";
+            statusTxt.className = "text-[9px] font-bold text-green-500 uppercase tracking-widest";
+
+            // Картаға жазу
+            cardToBox.classList.remove('hidden');
+            cardName.innerText = userName;
+
+            // Батырманы ашу
+            btn.disabled = false;
+            btn.className = "w-full bg-orange-500 text-white py-6 rounded-3xl font-black uppercase italic shadow-xl active:scale-95";
+        } else {
+            // ТІРКЕЛМЕГЕН
+            box.className = "mt-3 p-4 rounded-xl border-2 border-red-200 bg-red-50 flex items-center gap-3";
+            nameDisp.innerText = "Пользователь не найден";
+            nameDisp.className = "font-black text-sm text-red-700";
+            statusTxt.innerText = "Тіркелу қажет ❌";
+            statusTxt.className = "text-[9px] font-bold text-red-500 uppercase tracking-widest";
+
+            // Картадан жасыру
+            cardToBox.classList.add('hidden');
+
+            // Батырманы жабу
+            btn.disabled = true;
+            btn.className = "w-full bg-gray-200 text-gray-400 py-6 rounded-3xl font-black uppercase italic cursor-not-allowed";
+        }
+    } else {
+        box.classList.add('hidden');
+        btn.disabled = true;
+    }
+}
+
+
+// handlePhoneInput ішіне, табылған кездегі бөлімге (if userDatabase[cleanPhone])
+const wishesToBox = document.getElementById('to-display-wishes');
+const wishesToName = document.getElementById('found-user-wishes');
+
+if (userDatabase[cleanPhone]) {
+    // ... бар кодтар ...
+    wishesToBox.classList.remove('hidden');
+    wishesToName.innerText = userDatabase[cleanPhone]; // "Дамир С." болып жазылады
+} else {
+    // ... табылмай қалған жағдай ...
+    wishesToBox.classList.add('hidden');
+}
+
+
+async function generateGiftPDF() {
+    const amount = document.getElementById('amount-input').value;
+    const btn = document.getElementById('buy-btn');
+    const element = document.getElementById('gift-card-preview'); // Тек картаны немесе бүкіл блокты таңда
+    const codeElem = document.getElementById('card-code-text');
+
+    btn.innerText = "Создаем...";
+    btn.disabled = true;
+
+    // Уникалды карта номері
+    const uniqueNumber = generateCardNumber(); // Төмендегі көмекші функцияны қолдан
+    const originalCode = codeElem.innerText;
+    codeElem.innerText = uniqueNumber;
+
+    const opt = {
+        margin: 10,
+        filename: `QulanShop_Gift_${amount}.pdf`,
+        image: { type: 'jpeg', quality: 1 },
+        html2canvas: { scale: 3, useCORS: true, width: 800, windowWidth: 800, scrollY: 0 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    try {
+        await html2pdf().set(opt).from(element).save();
+        const phone = "7" + document.getElementById('rec-phone').value;
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent('Привет, ' + foundName + '! Тебе подарок от QulanShop! 🎁')}`);
+    } catch (e) {
+        alert("Ошибка!");
+    } finally {
+        codeElem.innerText = originalCode;
+        btn.innerText = "Оформить карту";
+        btn.disabled = false;
+    }
+}
+
+// КАРТА НОМЕРІН ЖАСАУ (#### #### .... орнына)
+function generateCardNumber() {
+    let res = '';
+    for(let i=0; i<4; i++) {
+        res += Math.floor(1000 + Math.random() * 9000) + (i < 3 ? ' ' : '');
+    }
+    return res;
+}
     </script>
 </body>
 </html>

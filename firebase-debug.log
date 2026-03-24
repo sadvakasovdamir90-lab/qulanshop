@@ -1,0 +1,105 @@
+[debug] [2026-03-21T11:44:41.271Z] ----------------------------------------------------------------------
+[debug] [2026-03-21T11:44:41.273Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Admin\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy
+[debug] [2026-03-21T11:44:41.273Z] CLI Version:   15.11.0
+[debug] [2026-03-21T11:44:41.273Z] Platform:      win32
+[debug] [2026-03-21T11:44:41.273Z] Node Version:  v24.13.0
+[debug] [2026-03-21T11:44:41.273Z] Time:          Sat Mar 21 2026 16:44:41 GMT+0500 (Қазақстан уақыты)
+[debug] [2026-03-21T11:44:41.274Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-03-21T11:44:42.314Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-03-21T11:44:42.314Z] > authorizing via signed-in user (sadvakasovdamir04@gmail.com)
+[debug] [2026-03-21T11:44:42.314Z] [iam] checking project qulanshop-f0981 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-03-21T11:44:42.315Z] Checked if tokens are valid: true, expires at: 1774096418018
+[debug] [2026-03-21T11:44:42.315Z] Checked if tokens are valid: true, expires at: 1774096418018
+[debug] [2026-03-21T11:44:42.315Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/qulanshop-f0981:testIamPermissions [none]
+[debug] [2026-03-21T11:44:42.315Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/qulanshop-f0981:testIamPermissions  x-goog-user-project=qulanshop-f0981
+[debug] [2026-03-21T11:44:42.315Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/qulanshop-f0981:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-03-21T11:44:46.440Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/qulanshop-f0981:testIamPermissions 200
+[debug] [2026-03-21T11:44:46.440Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/qulanshop-f0981:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-03-21T11:44:46.440Z] Checked if tokens are valid: true, expires at: 1774096418018
+[debug] [2026-03-21T11:44:46.440Z] Checked if tokens are valid: true, expires at: 1774096418018
+[debug] [2026-03-21T11:44:46.440Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/qulanshop-f0981 [none]
+[debug] [2026-03-21T11:44:53.803Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/qulanshop-f0981 200
+[debug] [2026-03-21T11:44:53.803Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/qulanshop-f0981 {"projectId":"qulanshop-f0981","projectNumber":"587700548208","displayName":"qulanshop","name":"projects/qulanshop-f0981","resources":{"hostingSite":"qulanshop-f0981"},"state":"ACTIVE","etag":"1_71574ee9-128f-4cc1-bf4f-d19936896cda"}
+[info] 
+[info] === Deploying to 'qulanshop-f0981'...
+[info] 
+[info] i  deploying hosting 
+[debug] [2026-03-21T11:44:53.806Z] Checked if tokens are valid: true, expires at: 1774096418018
+[debug] [2026-03-21T11:44:53.806Z] Checked if tokens are valid: true, expires at: 1774096418018
+[debug] [2026-03-21T11:44:53.806Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/qulanshop-f0981/versions [none]
+[debug] [2026-03-21T11:44:53.806Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/qulanshop-f0981/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2026-03-21T11:45:02.921Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/qulanshop-f0981/versions 200
+[debug] [2026-03-21T11:45:02.921Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/qulanshop-f0981/versions {"name":"projects/587700548208/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc","status":"CREATED","config":{},"labels":{"deployment-tool":"cli-firebase"}}
+[info] i  hosting[qulanshop-f0981]: beginning deploy... 
+[info] i  hosting[qulanshop-f0981]: found 2 files in n 
+[debug] [2026-03-21T11:45:02.929Z] [hosting] uploading with 200 concurrency
+[debug] [2026-03-21T11:45:02.929Z] [hosting] hash cache [bg] not populated
+[debug] [2026-03-21T11:45:02.933Z] Checked if tokens are valid: true, expires at: 1774096418018
+[debug] [2026-03-21T11:45:02.933Z] Checked if tokens are valid: true, expires at: 1774096418018
+[debug] [2026-03-21T11:45:02.934Z] [hosting] hash cache [bg] stored for 2 files
+[debug] [2026-03-21T11:45:02.934Z] [hosting][hash queue][FINAL] {"max":3,"min":2,"avg":2.5,"active":0,"complete":2,"success":2,"errored":0,"retried":0,"total":2,"elapsed":4}
+[debug] [2026-03-21T11:45:02.935Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/587700548208/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc:populateFiles [none]
+[debug] [2026-03-21T11:45:02.935Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/587700548208/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc:populateFiles {"files":{"/index.html":"dde85a680f9c7c64d7cd7b3c2fec497986465ebeaba84f0f99e675da11bb96f2","/404.html":"762bf484ba67404bd1a3b181546ea28d60dfddf18e9dd4795d8d25bcf3c1a890"}}
+[debug] [2026-03-21T11:45:06.277Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/587700548208/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc:populateFiles 200
+[debug] [2026-03-21T11:45:06.277Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/587700548208/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc:populateFiles {"uploadRequiredHashes":["dde85a680f9c7c64d7cd7b3c2fec497986465ebeaba84f0f99e675da11bb96f2","762bf484ba67404bd1a3b181546ea28d60dfddf18e9dd4795d8d25bcf3c1a890"],"uploadUrl":"https://upload-firebasehosting.googleapis.com/upload/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc/files"}
+[debug] [2026-03-21T11:45:06.277Z] Checked if tokens are valid: true, expires at: 1774096418018
+[debug] [2026-03-21T11:45:06.277Z] Checked if tokens are valid: true, expires at: 1774096418018
+[debug] [2026-03-21T11:45:06.277Z] Checked if tokens are valid: true, expires at: 1774096418018
+[debug] [2026-03-21T11:45:06.277Z] Checked if tokens are valid: true, expires at: 1774096418018
+[debug] [2026-03-21T11:45:06.278Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc/files/dde85a680f9c7c64d7cd7b3c2fec497986465ebeaba84f0f99e675da11bb96f2 [none]
+[debug] [2026-03-21T11:45:06.278Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc/files/dde85a680f9c7c64d7cd7b3c2fec497986465ebeaba84f0f99e675da11bb96f2 [stream]
+[debug] [2026-03-21T11:45:06.278Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc/files/762bf484ba67404bd1a3b181546ea28d60dfddf18e9dd4795d8d25bcf3c1a890 [none]
+[debug] [2026-03-21T11:45:06.278Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc/files/762bf484ba67404bd1a3b181546ea28d60dfddf18e9dd4795d8d25bcf3c1a890 [stream]
+[debug] [2026-03-21T11:45:06.279Z] [hosting][populate queue][FINAL] {"max":3345,"min":3345,"avg":3345,"active":0,"complete":1,"success":1,"errored":0,"retried":0,"total":1,"elapsed":3346}
+[debug] [2026-03-21T11:45:06.279Z] [hosting] uploads queued: 2
+[debug] [2026-03-21T11:45:14.200Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc/files/dde85a680f9c7c64d7cd7b3c2fec497986465ebeaba84f0f99e675da11bb96f2 200
+[debug] [2026-03-21T11:45:14.200Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc/files/dde85a680f9c7c64d7cd7b3c2fec497986465ebeaba84f0f99e675da11bb96f2 [stream]
+[debug] [2026-03-21T11:45:15.384Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc/files/762bf484ba67404bd1a3b181546ea28d60dfddf18e9dd4795d8d25bcf3c1a890 200
+[debug] [2026-03-21T11:45:15.384Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc/files/762bf484ba67404bd1a3b181546ea28d60dfddf18e9dd4795d8d25bcf3c1a890 [stream]
+[debug] [2026-03-21T11:45:15.384Z] [hosting][upload queue][FINAL] {"max":9107,"min":7923,"avg":8515,"active":0,"complete":2,"success":2,"errored":0,"retried":0,"total":2,"elapsed":9107}
+[info] +  hosting[qulanshop-f0981]: file upload complete 
+[debug] [2026-03-21T11:45:15.385Z] [hosting] deploy completed after 12462ms
+[debug] [2026-03-21T11:45:15.385Z] [
+  {
+    "config": {
+      "public": "n",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "site": "qulanshop-f0981"
+    },
+    "version": "projects/587700548208/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc"
+  }
+]
+[info] i  hosting[qulanshop-f0981]: finalizing version... 
+[debug] [2026-03-21T11:45:15.386Z] Checked if tokens are valid: true, expires at: 1774096418018
+[debug] [2026-03-21T11:45:15.386Z] Checked if tokens are valid: true, expires at: 1774096418018
+[debug] [2026-03-21T11:45:15.386Z] >>> [apiv2][query] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc updateMask=status%2Cconfig
+[debug] [2026-03-21T11:45:15.386Z] >>> [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc {"status":"FINALIZED","config":{}}
+[debug] [2026-03-21T11:45:23.957Z] <<< [apiv2][status] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc 200
+[debug] [2026-03-21T11:45:23.957Z] <<< [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc {"name":"projects/587700548208/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc","status":"FINALIZED","config":{},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2026-03-21T11:44:59.636359Z","createUser":{"email":"sadvakasovdamir04@gmail.com"},"finalizeTime":"2026-03-21T11:45:22.382782Z","finalizeUser":{"email":"sadvakasovdamir04@gmail.com"}}
+[debug] [2026-03-21T11:45:23.957Z] [hosting] finalized version for qulanshop-f0981:[object Object]
+[info] +  hosting[qulanshop-f0981]: version finalized 
+[info] i  hosting[qulanshop-f0981]: releasing new version... 
+[debug] [2026-03-21T11:45:23.958Z] Checked if tokens are valid: true, expires at: 1774096418018
+[debug] [2026-03-21T11:45:23.958Z] Checked if tokens are valid: true, expires at: 1774096418018
+[debug] [2026-03-21T11:45:23.958Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/qulanshop-f0981/channels/live/releases versionName=projects%2F587700548208%2Fsites%2Fqulanshop-f0981%2Fversions%2Ff65a4fe2d99a44bc
+[debug] [2026-03-21T11:45:23.958Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/qulanshop-f0981/channels/live/releases {}
+[debug] [2026-03-21T11:45:27.475Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/qulanshop-f0981/channels/live/releases 200
+[debug] [2026-03-21T11:45:27.475Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/qulanshop-f0981/channels/live/releases {"name":"projects/587700548208/sites/qulanshop-f0981/channels/live/releases/1774093524854000","version":{"name":"projects/587700548208/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc","status":"FINALIZED","config":{},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2026-03-21T11:44:59.636359Z","createUser":{"email":"sadvakasovdamir04@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocLOl76eTLy_Xwj9Hmr5XkFJGoVDHHkLDFdAeBlxqFymYPtZGw=mo"},"finalizeTime":"2026-03-21T11:45:22.382782Z","finalizeUser":{"email":"sadvakasovdamir04@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocLOl76eTLy_Xwj9Hmr5XkFJGoVDHHkLDFdAeBlxqFymYPtZGw=mo"}},"type":"DEPLOY","releaseTime":"2026-03-21T11:45:24.854Z","releaseUser":{"email":"sadvakasovdamir04@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocLOl76eTLy_Xwj9Hmr5XkFJGoVDHHkLDFdAeBlxqFymYPtZGw=mo"}}
+[debug] [2026-03-21T11:45:27.475Z] [hosting] release: {"name":"projects/587700548208/sites/qulanshop-f0981/channels/live/releases/1774093524854000","version":{"name":"projects/587700548208/sites/qulanshop-f0981/versions/f65a4fe2d99a44bc","status":"FINALIZED","config":{},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2026-03-21T11:44:59.636359Z","createUser":{"email":"sadvakasovdamir04@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocLOl76eTLy_Xwj9Hmr5XkFJGoVDHHkLDFdAeBlxqFymYPtZGw=mo"},"finalizeTime":"2026-03-21T11:45:22.382782Z","finalizeUser":{"email":"sadvakasovdamir04@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocLOl76eTLy_Xwj9Hmr5XkFJGoVDHHkLDFdAeBlxqFymYPtZGw=mo"}},"type":"DEPLOY","releaseTime":"2026-03-21T11:45:24.854Z","releaseUser":{"email":"sadvakasovdamir04@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocLOl76eTLy_Xwj9Hmr5XkFJGoVDHHkLDFdAeBlxqFymYPtZGw=mo"}}
+[info] +  hosting[qulanshop-f0981]: release complete 
+[info] 
+[info] +  Deploy complete! 
+[info] 
+[info] Project Console: https://console.firebase.google.com/project/qulanshop-f0981/overview
+[info] Hosting URL: https://qulanshop-f0981.web.app
+[debug] [2026-03-21T11:45:37.484Z] Error: Timed out.
+    at Timeout._onTimeout (C:\Users\Admin\AppData\Roaming\npm\node_modules\firebase-tools\lib\utils.js:308:49)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+[error] 
+[error] Error: An unexpected error has occurred.

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель управления | QulanShop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-50 font-sans pb-20">
+
+    <header class="bg-white shadow-sm py-4 mb-6 border-b-4 border-orange-500">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <h1 class="text-xl font-black text-orange-600 italic uppercase">Qulan Admin</h1>
+            <a href="index.html" class="text-gray-400 hover:text-orange-600 font-bold text-sm italic underline">На сайт</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4">
+        <div class="bg-white rounded-[2rem] shadow-xl p-6 md:p-8 mb-8 border border-orange-100 max-w-2xl mx-auto">
+            <h2 class="text-2xl font-black italic text-gray-800 mb-6 uppercase tracking-tight">Добавить товар</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase ml-2 mb-1">Название товара</label>
+                    <input type="text" id="prod-name" placeholder="Например: Смартфон Samsung" 
+                           class="w-full p-4 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-orange-500 outline-none font-bold transition">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase ml-2 mb-1">Цена (₸)</label>
+                    <input type="number" id="prod-price" placeholder="50000" 
+                           class="w-full p-4 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-orange-500 outline-none font-black text-orange-600 transition">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase ml-2 mb-1">Ссылка на фото (URL)</label>
+                    <input type="text" id="prod-image" placeholder="https://example.com/photo.jpg" 
+                           class="w-full p-4 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-orange-500 outline-none text-sm transition">
+                </div>
+
+                <button onclick="addProduct()" 
+                        class="w-full bg-orange-600 text-white py-5 rounded-[1.5rem] font-black uppercase italic shadow-lg shadow-orange-200 active:scale-95 transition-all mt-4">
+                    Добавить в магазин
+                </button>
+            </div>
+        </div>
+
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-xl font-bold italic text-gray-400 mb-4 uppercase ml-4">Управление товарами</h2>
+            <div id="admin-product-list" class="grid grid-cols-1 gap-3">
+                </div>
+        </div>
+    </main>
+
+    <script>
+        // Тауарларды жүктеу
+        function loadProducts() {
+            const products = JSON.parse(localStorage.getItem('qulanProducts')) || [];
+            const list = document.getElementById('admin-product-list');
+            
+            if (products.length === 0) {
+                list.innerHTML = '<p class="text-center text-gray-400 italic py-10">Товаров пока нет...</p>';
+                return;
+            }
+
+            list.innerHTML = products.map((p, index) => `
+                <div class="flex items-center justify-between p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <img src="${p.image}" class="w-14 h-14 rounded-xl object-cover border" onerror="this.src='https://via.placeholder.com/150'">
+                        <div>
+                            <h4 class="font-bold text-gray-800">${p.name}</h4>
+                            <p class="text-orange-600 font-black italic">${p.price.toLocaleString()} ₸</p>
+                        </div>
+                    </div>
+                    <button onclick="deleteProduct(${index})" class="bg-red-50 text-red-500 w-10 h-10 rounded-xl hover:bg-red-500 hover:text-white transition flex items-center justify-center">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Тауар қосу
+        function addProduct() {
+            const name = document.getElementById('prod-name').value;
+            const price = document.getElementById('prod-price').value;
+            const image = document.getElementById('prod-image').value;
+
+            if (!name || !price || !image) {
+                Swal.fire('Ошибка', 'Заполните все поля!', 'warning');
+                return;
+            }
+
+            let products = JSON.parse(localStorage.getItem('qulanProducts')) || [];
+            products.unshift({ name, price: parseInt(price), image });
+            localStorage.setItem('qulanProducts', JSON.stringify(products));
+
+            // Тазалау
+            document.getElementById('prod-name').value = '';
+            document.getElementById('prod-price').value = '';
+            document.getElementById('prod-image').value = '';
+
+            Swal.fire('Успешно!', 'Товар добавлен в магазин ✅', 'success');
+            loadProducts();
+        }
+
+        // Тауар өшіру
+        function deleteProduct(index) {
+            Swal.fire({
+                title: 'Вы уверены?',
+                text: "Товар будет удален навсегда!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ea580c',
+                cancelButtonColor: '#d1d5db',
+                confirmButtonText: 'Да, удалить!',
+                cancelButtonText: 'Отмена'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let products = JSON.parse(localStorage.getItem('qulanProducts')) || [];
+                    products.splice(index, 1);
+                    localStorage.setItem('qulanProducts', JSON.stringify(products));
+                    loadProducts();
+                }
+            });
+        }
+
+        // Бет жүктелгенде іске қосу
+        document.addEventListener('DOMContentLoaded', loadProducts);
+    </script>
+</body>
+</html>

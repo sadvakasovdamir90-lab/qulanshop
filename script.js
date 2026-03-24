@@ -257,3 +257,27 @@ function changePassword() {
         alert("Пароль сәтті өзгертілді!");
     }
 }
+
+
+// Google арқылы тіркелу/кіру функциясы
+async function signInWithGoogle() {
+    // Firebase Google провайдерін қосу
+    const provider = new firebase.auth.GoogleAuthProvider();
+    
+    try {
+        // Google терезесін ашу
+        const result = await firebase.auth().signInWithPopup(provider);
+        const user = result.user;
+        
+        console.log("Успешный вход:", user.displayName);
+        
+        // Тіркелгеннен кейін профильге жіберу
+        location.href = 'profile.html';
+        
+    } catch (error) {
+        console.error("Ошибка при входе:", error.message);
+        alert("Ошибка входа через Google: " + error.message);
+    }
+}
+
+

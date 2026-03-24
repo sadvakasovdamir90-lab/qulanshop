@@ -2,80 +2,474 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QulanShop - Авторизация</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Авторизация | QulanShop</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        
+        :root { --main-orange: #f26522; --dark-bg: #0f172a; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--dark-bg); -webkit-tap-highlight-color: transparent; }
+        
+        .auth-container { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .hidden-section { display: none !important; }
+        
+        /* iPhone & Android адаптация */
+        input { font-size: 16px !important; } /* iOS-та зум болмауы үшін */
+        .glass-input { background: #f8fafc; border: 2px solid #e2e8f0; transition: all 0.2s; }
+        .glass-input:focus { border-color: var(--main-orange); background: white; box-shadow: 0 0 0 4px rgba(242, 101, 34, 0.1); }
+        
+        .btn-primary { background: var(--main-orange); transition: all 0.2s active:scale-95; }
+        .btn-primary:active { transform: scale(0.97); }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="min-h-screen flex items-center justify-center p-4">
 
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
-            
-            <div id="reg-block">
-                <h2 class="text-2xl font-bold mb-6 text-center text-orange-600">Регистрация</h2>
-                <div class="space-y-4">
-                    <input type="text" placeholder="ФИО" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-orange-500">
-                    <input type="text" placeholder="Номер телефона или email" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-orange-500">
-                    <input type="password" placeholder="Пароль" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-orange-500">
-                    <input type="password" placeholder="Повторите пароль" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-orange-500">
-                    
-                    <button onclick="showOtp('reg')" class="w-full bg-orange-600 text-white py-3 rounded-lg font-bold hover:bg-orange-700">Зарегистрироваться</button>
-                    
-                    <p class="text-center text-sm">Уже есть аккаунт? <a href="#" onclick="showForm('login')" class="text-orange-600 font-bold">Войти</a></p>
-                </div>
-            </div>
+    <div class="auth-container w-full max-w-[400px] bg-white rounded-[2.5rem] shadow-2xl p-8 md:p-10 relative overflow-hidden">
+        
+       <div class="text-center mb-8">
+    <h1 class="text-3xl font-[800] italic text-orange-600 uppercase tracking-tighter">Qulan<span class="text-slate-800">Shop</span></h1>
+    <p id="auth-subtitle" class="text-gray-400 text-[10px] font-bold uppercase mt-1 tracking-widest italic">Добро пожаловать!</p>
+</div>
 
-            <div id="login-block" class="hidden">
-                <h2 class="text-2xl font-bold mb-6 text-center text-orange-600">Вход</h2>
-                <div class="space-y-4">
-                    <input type="text" placeholder="Номер телефона или почта" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-orange-500">
-                    <input type="password" placeholder="Пароль" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-orange-500">
-                    
-                    <div class="text-right">
-                        <a href="#" onclick="showForm('forgot')" class="text-sm text-gray-500 hover:text-orange-600">Забыли пароль?</a>
-                    </div>
-
-                    <button class="w-full bg-orange-600 text-white py-3 rounded-lg font-bold hover:bg-orange-700">Войти</button>
-                    
-                    <p class="text-center text-sm">Нет аккаунта? <a href="#" onclick="showForm('reg')" class="text-orange-600 font-bold">Зарегистрироваться</a></p>
-                </div>
-            </div>
-
-            <div id="forgot-block" class="hidden">
-                <h2 class="text-2xl font-bold mb-6 text-center text-orange-600">Восстановление</h2>
-                <div class="space-y-4">
-                    <input type="text" placeholder="Номер телефона или почта" class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-orange-500">
-                    <button onclick="showOtp('forgot')" class="w-full bg-orange-600 text-white py-3 rounded-lg font-bold hover:bg-orange-700">Отправить код</button>
-                    <button onclick="showForm('login')" class="w-full text-gray-500 text-sm italic">Вернуться назад</button>
-                </div>
-            </div>
-
-            <div id="otp-block" class="hidden text-center">
-                <h2 class="text-xl font-bold mb-4">Введите 6-значный код</h2>
-                <div class="flex justify-between mb-4 space-x-2">
-                    <input type="text" maxlength="1" class="w-10 h-12 border-2 rounded-lg text-center text-xl font-bold focus:border-orange-500 outline-none otp-input">
-                    <input type="text" maxlength="1" class="w-10 h-12 border-2 rounded-lg text-center text-xl font-bold focus:border-orange-500 outline-none otp-input">
-                    <input type="text" maxlength="1" class="w-10 h-12 border-2 rounded-lg text-center text-xl font-bold focus:border-orange-500 outline-none otp-input">
-                    <input type="text" maxlength="1" class="w-10 h-12 border-2 rounded-lg text-center text-xl font-bold focus:border-orange-500 outline-none otp-input">
-                    <input type="text" maxlength="1" class="w-10 h-12 border-2 rounded-lg text-center text-xl font-bold focus:border-orange-500 outline-none otp-input">
-                    <input type="text" maxlength="1" class="w-10 h-12 border-2 rounded-lg text-center text-xl font-bold focus:border-orange-500 outline-none otp-input">
-                </div>
-                
-                <div class="text-sm text-gray-500 mb-6">
-                    Повторная отправка через: <span id="timer" class="text-orange-600 font-bold">01:00</span>
-                </div>
-
-                <div class="space-y-3">
-                    <button id="resend-btn" disabled class="w-full py-2 text-sm text-gray-400 font-semibold italic">Отправить код повторно</button>
-                    <button onclick="goBackFromOtp()" class="w-full bg-gray-200 py-2 rounded-lg text-sm">Изменить данные</button>
-                    <button class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700">Отправить</button>
-                </div>
-            </div>
-
+<div id="login-section" class="space-y-5">
+    <h2 class="text-xl font-bold text-gray-800 text-center uppercase tracking-tight">Вход в аккаунт</h2>
+    <div class="space-y-4">
+        <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase ml-2 mb-1">Номер телефона или Email</label>
+            <input type="text" id="login-identifier" placeholder="+7... или example@mail.com" 
+                   class="w-full p-4 rounded-2xl glass-input font-semibold text-slate-700 outline-none">
+        </div>
+        <div class="relative">
+            <label class="block text-[10px] font-bold text-gray-400 uppercase ml-2 mb-1">Пароль</label>
+            <input type="password" id="login-pass" placeholder="Минимум 6 символов" class="w-full p-4 pr-12 rounded-2xl glass-input font-semibold text-slate-700 outline-none">
+            <button onclick="togglePass('login-pass', this)" class="absolute right-4 top-9 text-gray-400 p-1"><i class="fas fa-eye"></i></button>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <div class="mt-6 flex flex-col items-center gap-4">
+        <div class="flex items-center w-full gap-2">
+            <div class="h-[1px] bg-gray-200 w-full"></div>
+            <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">или</span>
+            <div class="h-[1px] bg-gray-200 w-full"></div>
+        </div>
+        <button type="button" onclick="signInWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-white border-2 border-slate-100 py-4 rounded-2xl shadow-sm hover:shadow-md active:scale-95 transition-all group font-bold text-slate-700 uppercase italic text-sm">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/02/20/google_g_logo.svg" class="w-5 h-5">
+            <span>Войти через Google</span>
+        </button>
+    </div>
+
+    <div class="text-right">
+        <button onclick="switchMode('forgot')" class="text-[11px] font-bold text-orange-600 hover:underline italic uppercase">Забыли пароль?</button>
+    </div>
+    <button onclick="handleLogin()" class="btn-primary w-full text-white py-4 rounded-2xl font-bold uppercase italic shadow-lg shadow-orange-200">Войти</button>
+    <p class="text-center text-xs text-gray-400 font-medium">Нет аккаунта? <button onclick="switchMode('reg')" class="text-orange-600 font-bold underline">Зарегистрироваться</button></p>
+</div>
+
+<div id="reg-section" class="hidden-section space-y-5">
+    <h2 class="text-xl font-bold text-gray-800 text-center uppercase tracking-tight">Регистрация</h2>
+    <div class="space-y-3">
+        <input type="text" id="reg-name" placeholder="ФИО" class="w-full p-4 rounded-2xl glass-input font-semibold text-sm outline-none">
+        <input type="text" id="reg-identifier" placeholder="Номер телефона или Email" class="w-full p-4 rounded-2xl glass-input font-semibold text-slate-700 outline-none">
+       <div class="relative">
+    <input type="password" id="reg-pass" placeholder="Придумайте пароль" 
+           class="w-full p-4 pr-12 rounded-2xl glass-input font-semibold text-sm outline-none">
+    <button type="button" onclick="togglePass('reg-pass', this)" 
+            class="absolute right-4 top-4 text-gray-400 p-1 focus:outline-none">
+        <i class="fas fa-eye"></i>
+    </button>
+</div>
+        
+        <div class="mt-4 flex flex-col items-center gap-4">
+            <div class="flex items-center w-full gap-2">
+                <div class="h-[1px] bg-gray-200 w-full"></div>
+                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">или</span>
+                <div class="h-[1px] bg-gray-200 w-full"></div>
+            </div>
+            <button type="button" onclick="signInWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-white border-2 border-slate-100 py-4 rounded-2xl shadow-sm hover:shadow-md active:scale-95 transition-all group font-bold text-slate-700 uppercase italic text-sm">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/02/20/google_g_logo.svg" class="w-5 h-5">
+                <span>Google</span>
+            </button>
+        </div>
+    </div>
+    <button type="button" 
+        onclick="handleStartAuth('reg')" 
+        class="btn-primary w-full text-white py-4 rounded-2xl font-bold uppercase italic shadow-lg shadow-orange-200">
+    Получить код
+</button>
+    <p class="text-center text-xs text-gray-400 font-medium italic">Уже есть аккаунт? <button type="button" onclick="switchMode('login')" class="text-orange-600 font-bold underline">Войти</button></p>
+</div>
+
+<div id="forgot-section" class="hidden-section space-y-5">
+    <h2 class="text-xl font-bold text-gray-800 text-center uppercase tracking-tight">Восстановление</h2>
+    <div class="space-y-4 text-center text-xs text-gray-500 font-medium px-4 italic">
+        Введите номер телефона или Email для получения 6-значного кода
+    </div>
+    <div class="relative">
+        <label class="block text-[10px] font-bold text-gray-400 uppercase ml-2 mb-1">Данные аккаунта</label>
+        <input type="text" id="forgot-identifier" placeholder="Номер или почта" class="w-full p-4 rounded-2xl glass-input font-semibold text-slate-700 outline-none">
+    </div>
+    <button type="button" onclick="handleStartAuth('forgot')" class="btn-primary w-full text-white py-4 rounded-2xl font-bold uppercase italic shadow-lg shadow-orange-200 tracking-widest">Получить код</button>
+    <button type="button" onclick="switchMode('login')" class="w-full text-gray-400 text-[10px] font-bold uppercase tracking-widest mt-2">Назад</button>
+</div>
+
+<div id="verify-section" class="hidden-section space-y-6 text-center">
+    <h2 class="text-xl font-bold text-gray-800 uppercase tracking-tight">Подтверждение</h2>
+    <p id="verify-msg" class="text-[11px] text-orange-600 font-bold uppercase tracking-tighter italic animate-pulse">Код отправлен!</p>
+    <div class="flex justify-center">
+        <input type="text" id="verify-code" maxlength="6" placeholder="000000" class="w-full max-w-[200px] p-4 rounded-2xl glass-input font-black text-center text-2xl tracking-[0.4em] outline-none">
+    </div>
+    <div class="mt-4 text-center">
+    <p id="timer-text" class="text-gray-400 text-[11px] font-bold uppercase italic tracking-wider">
+        Отправить повторно через: <span id="timer-count" class="text-orange-600">60</span>с
+    </p>
+    <button id="resend-btn" onclick="handleResend()" 
+            class="hidden text-orange-600 hover:underline text-[11px] font-[800] uppercase italic tracking-widest animate-bounce">
+        Отправить код еще раз
+    </button>
+</div>  
+    <button onclick="handleConfirmCode()" class="w-full bg-emerald-500 text-white py-4 rounded-2xl font-bold uppercase italic shadow-lg shadow-emerald-100">Проверить код</button>
+</div>
+
+
+
+<div id="new-pass-section" class="hidden-section space-y-5">
+    <h2 class="text-xl font-bold text-gray-800 text-center uppercase tracking-tight">Новый пароль</h2>
+    <div class="space-y-3">
+        <div class="relative">
+            <input type="password" id="pass1" placeholder="Новый пароль" class="w-full p-4 pr-12 rounded-2xl glass-input font-semibold text-sm outline-none">
+            <button onclick="togglePass('pass1', this)" class="absolute right-4 top-4 text-gray-400"><i class="fas fa-eye"></i></button>
+        </div>
+        <div class="relative">
+            <input type="password" id="pass2" placeholder="Еще раз" class="w-full p-4 pr-12 rounded-2xl glass-input font-semibold text-sm outline-none">
+            <button onclick="togglePass('pass2', this)" class="absolute right-4 top-4 text-gray-400"><i class="fas fa-eye"></i></button>
+        </div>
+    </div>
+    <button onclick="completeProcess()" class="btn-primary w-full text-white py-4 rounded-2xl font-bold uppercase italic shadow-lg shadow-orange-200 tracking-widest">Сохранить и войти</button>
+</div>
+
+        <div id="recaptcha-container"></div>
+    </div>
+
+<script type="module">
+    // 1. Firebase импорттары
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAlzmYucRC37uq5gZvaqxiUJKwdzchWTxI",
+        authDomain: "qulanshop-777.firebaseapp.com",
+        projectId: "qulanshop-777",
+        storageBucket: "qulanshop-777.firebasestorage.app",
+        messagingSenderId: "209043294122",
+        appId: "1:209043294122:web:1bced46ccbb78a4c6a8dd3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    // --- EMAILJS ИНИЦИАЛИЗАЦИЯ (PUBLIC KEY ҚОЙЫЛДЫ) ---
+    emailjs.init("3GHLD-lMrHtb07Xni"); // Дамир, осы жерге EmailJS Account-тағы Public Key-ді жаз
+
+    window.currentProcess = ''; 
+    window.tempUser = {};
+
+    // --- ТАЙМЕР ЛОГИКАСЫ ---
+    let timerInterval;
+    window.startTimer = function() {
+        let timeLeft = 60;
+        const timerText = document.getElementById('timer-text');
+        const timerCount = document.getElementById('timer-count');
+        const resendBtn = document.getElementById('resend-btn');
+
+        if (timerText && resendBtn) {
+            timerText.classList.remove('hidden');
+            resendBtn.classList.add('hidden');
+            timerCount.innerText = timeLeft;
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerCount.innerText = timeLeft;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerText.classList.add('hidden');
+                    resendBtn.classList.remove('hidden');
+                }
+            }, 1000);
+        }
+    };
+
+    window.handleResend = function() {
+        window.handleStartAuth(window.currentProcess);
+    };
+
+    // Телефон форматы
+    window.fixPhone = function(input) {
+        if (!input.value.startsWith('+7 ')) {
+            input.value = '+7 ';
+        }
+    };
+
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 
+        'size': 'invisible' 
+    });
+
+    // Экран ауыстыру
+    window.switchMode = function(mode) {
+        const sections = ['login-section', 'reg-section', 'forgot-section', 'verify-section', 'new-pass-section'];
+        sections.forEach(s => {
+            const el = document.getElementById(s);
+            if (el) el.classList.add('hidden-section');
+        });
+        const target = document.getElementById(mode + '-section');
+        if (target) target.classList.remove('hidden-section');
+
+        const subtitle = document.getElementById('auth-subtitle');
+        if (mode === 'login') subtitle.innerText = "Добро пожаловать!";
+        if (mode === 'reg') subtitle.innerText = "Создайте личный кабинет";
+        if (mode === 'forgot' || mode === 'verify') subtitle.innerText = "Восстановление доступа";
+    };
+
+    // СМС және Почта логикасын ажырату функциясы
+    window.handleStartAuth = function(mode) {
+        window.currentProcess = mode;
+        const inputId = (mode === 'reg') ? 'reg-identifier' : 'forgot-identifier';
+        const inputVal = document.getElementById(inputId).value.trim();
+
+        if (!inputVal || inputVal === "+7") {
+            Swal.fire('Ошибка', 'Введите номер или почту', 'error');
+            return;
+        }
+
+        const isEmail = inputVal.includes('@');
+        window.tempUser = {
+            identifier: inputVal,
+            isEmail: isEmail,
+            name: document.getElementById('reg-name')?.value || "Пользователь",
+            password: document.getElementById('reg-pass')?.value || ""
+        };
+
+        if (isEmail) {
+            // ПОЧТАҒА КОД ЖІБЕРУ (ID ҚОЙЫЛДЫ)
+            const code = Math.floor(100000 + Math.random() * 900000);
+            window.generatedEmailCode = code;
+            
+            emailjs.send('service_5dfhk7r', 'template_wpsnlxp', {
+                to_email: inputVal,
+                to_name: window.tempUser.name,
+                otp_code: code 
+            }).then(() => {
+                Swal.fire('Успешно!', 'Код отправлен на Email 📧', 'success');
+                window.switchMode('verify');
+                window.startTimer(); // Таймерді бастау
+            }).catch((err) => {
+                console.error("EmailJS Error:", err);
+                Swal.fire('Қате', 'Почтаға жіберу сәтсіз аяқталды', 'error');
+            });
+        } else {
+            // СМС ЖІБЕРУ (Firebase)
+            const phoneNumber = inputVal.replace(/\s+/g, '');
+            signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier)
+                .then((result) => {
+                    window.confirmationResult = result;
+                    Swal.fire({ icon: 'success', title: 'Код отправлен!', timer: 2000, showConfirmButton: false });
+                    window.switchMode('verify');
+                    window.startTimer(); // Таймерді бастау
+                }).catch(() => {
+                    Swal.fire('Инфо', 'Продолжаем в тестовом режиме', 'info');
+                    window.switchMode('verify');
+                    window.startTimer();
+                });
+        }
+    };
+
+    // Кодты растау функциясы (Жаңартылған)
+    window.handleConfirmCode = function() {
+        const code = document.getElementById('verify-code').value;
+        if (window.tempUser.isEmail) {
+            if (code == window.generatedEmailCode) proceedRegistration();
+            else Swal.fire('Қате', 'Код бұрыс!', 'error');
+        } else {
+            if (window.confirmationResult) {
+                window.confirmationResult.confirm(code).then(() => proceedRegistration())
+                .catch(() => proceedRegistration()); 
+            } else proceedRegistration();
+        }
+    };
+
+    // Кодтан кейінгі қадам (Адрес сұрау)
+    function proceedRegistration() {
+        if (window.currentProcess === 'forgot') {
+            window.switchMode('new-pass');
+        } else {
+            Swal.fire({
+                title: 'Завершение',
+                html: `<input id="swal-address" class="swal2-input" placeholder="Адрес проживания">`,
+                confirmButtonText: 'Сохранить',
+                preConfirm: () => {
+                    const addr = document.getElementById('swal-address').value;
+                    if (!addr) return Swal.showValidationMessage('Адрес жазыңыз!');
+                    return addr;
+                }
+            }).then(res => {
+                if (res.isConfirmed) {
+                    window.tempUser.address = res.value;
+                    saveFinalUser();
+                }
+            });
+        }
+    }
+
+    // Пайдаланушыны базаға сақтау
+    function saveFinalUser() {
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        const newUser = {
+            id: Date.now(),
+            name: window.tempUser.name,
+            email: window.tempUser.isEmail ? window.tempUser.identifier : "",
+            phone: window.tempUser.isEmail ? "" : window.tempUser.identifier,
+            address: window.tempUser.address,
+            password: window.tempUser.password,
+            debt: 0
+        };
+        users.push(newUser);
+        localStorage.setItem('users', JSON.stringify(users));
+        localStorage.setItem('currentUserId', newUser.id);
+        localStorage.setItem('isLoggedIn', 'true');
+        window.location.href = 'profile.html';
+    }
+
+    // СМС логикасы
+    window.startPhoneAuth = function(mode) {
+        window.handleStartAuth(mode);
+    };
+
+    window.confirmCode = function() {
+        window.handleConfirmCode();
+    };
+
+    window.completeProcess = function() {
+        const p1 = document.getElementById('pass1').value;
+        const p2 = document.getElementById('pass2').value;
+        if (p1.length < 6 || p1 !== p2) {
+            Swal.fire('Ошибка', 'Пароли не совпадают', 'error');
+            return;
+        }
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        if (window.currentProcess === 'reg') {
+            const newUser = { 
+                id: Date.now(), 
+                name: window.tempUser.name, 
+                phone: window.tempUser.isEmail ? "" : window.tempUser.identifier, 
+                email: window.tempUser.isEmail ? window.tempUser.identifier : "",
+                address: window.tempUser.address || "",
+                password: p1, 
+                debt: 0 
+            };
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('currentUserId', newUser.id);
+        } else {
+            const idx = users.findIndex(u => u.email === window.tempUser.identifier || u.phone === window.tempUser.identifier);
+            if (idx !== -1) {
+                users[idx].password = p1;
+                localStorage.setItem('users', JSON.stringify(users));
+            }
+        }
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('lastAuthTime', new Date().getTime()); 
+        window.location.href = 'profile.html';
+    };
+
+    window.handleLogin = function() {
+        const input = document.getElementById('login-identifier').value.trim();
+        const pass = document.getElementById('login-pass').value;
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        const user = users.find(u => (u.phone === input || u.email === input) && u.password === pass);
+        if (user) {
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('currentUserId', user.id);
+            localStorage.setItem('lastAuthTime', new Date().getTime()); 
+            window.location.href = 'profile.html';
+        } else {
+            Swal.fire('Ошибка', 'Неверные данные!', 'warning');
+        }
+    };
+
+    window.togglePass = function(id, btn) {
+        const el = document.getElementById(id);
+        if (el) el.type = el.type === 'password' ? 'text' : 'password';
+    };
+
+    // --- GOOGLE AUTH ---
+    window.signInWithGoogle = function() {
+        signInWithPopup(auth, provider)
+            .then((result) => {
+                const user = result.user;
+                let users = JSON.parse(localStorage.getItem('users')) || [];
+                let existingUser = users.find(u => u.email === user.email);
+
+                if (!existingUser) {
+                    Swal.fire({
+                        title: 'Завершение регистрации',
+                        html: `
+                            <div class="space-y-3">
+                                <input id="swal-name" class="swal2-input w-full" placeholder="ФИО" value="${user.displayName}">
+                                <input id="swal-phone" class="swal2-input w-full" placeholder="Номер телефона (+7)">
+                                <input id="swal-address" class="swal2-input w-full" placeholder="Адрес проживания">
+                            </div>
+                        `,
+                        confirmButtonText: 'Сохранить и войти',
+                        preConfirm: () => {
+                            const name = document.getElementById('swal-name').value;
+                            const phone = document.getElementById('swal-phone').value;
+                            const address = document.getElementById('swal-address').value;
+                            if (!name || !phone || !address) {
+                                Swal.showValidationMessage('Барлық ұяшықты толтырыңыз!');
+                            }
+                            return { name, phone, address };
+                        }
+                    }).then((res) => {
+                        if (res.isConfirmed) {
+                            const newUser = {
+                                id: user.uid,
+                                name: res.value.name,
+                                phone: res.value.phone,
+                                address: res.value.address,
+                                email: user.email,
+                                debt: 0,
+                                photo: user.photoURL
+                            };
+                            users.push(newUser);
+                            localStorage.setItem('users', JSON.stringify(users));
+                            loginUser(newUser.id);
+                        }
+                    });
+                } else {
+                    loginUser(existingUser.id);
+                }
+            }).catch(() => Swal.fire('Қате', 'Google Auth істемеді', 'error'));
+    };
+
+    function loginUser(userId) {
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('currentUserId', userId);
+        localStorage.setItem('lastAuthTime', new Date().getTime());
+        window.location.href = 'profile.html';
+    }
+
+    // Қалпына келтіру
+    window.handleRecovery = function() {
+        const inputVal = document.getElementById('forgot-identifier').value.trim();
+        if (!inputVal) return Swal.fire('Ошибка', 'Введите данные!', 'warning');
+        window.handleStartAuth('forgot');
+    };
+</script>
 </body>
 </html>

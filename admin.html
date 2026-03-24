@@ -37,8 +37,11 @@
                 <button onclick="openTab(event, 'tab-support')" class="sidebar-link w-full flex items-center p-3 rounded-xl hover:bg-slate-800 transition font-bold text-sm relative">
                     <i class="fas fa-headset mr-3 w-5 text-center"></i> Поддержка
                     <span id="support-alert" class="hidden absolute right-3 top-4 w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
-                </button>
+           <button onclick="openTab(event, 'tab-people')" class="sidebar-link w-full flex items-center p-3 rounded-xl hover:bg-slate-800 transition font-bold text-sm">
+    <i class="fas fa-user-edit mr-3 w-5 text-center"></i> Редактор имен
+</button>
             </nav>
+
 
             <div class="pt-6 border-t border-slate-800">
                 <a href="index.html" class="flex items-center p-3 text-slate-400 hover:text-white transition text-sm font-bold italic"><i class="fas fa-arrow-left mr-3"></i> На главный сайт</a>
@@ -52,6 +55,32 @@
                     <h2 class="text-3xl font-black italic uppercase">Управление Товарами</h2>
                     <button onclick="showModal('product-modal')" class="bg-orange-600 px-6 py-3 rounded-xl font-bold hover:bg-orange-500 transition shadow-lg shadow-orange-900/20"><i class="fas fa-plus mr-2"></i> Добавить товар</button>
                 </div>
+
+
+<div class="flex flex-col md:flex-row items-end gap-4 mb-8">
+    
+    <div class="relative flex-1 w-full">
+        <label class="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest italic mb-1 block">Поиск товара</label>
+        <div class="relative">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-orange-500"></i>
+            <input type="text" id="admin-search-input" oninput="runAdvancedFilter()" 
+                placeholder="Артикул или название..." 
+                class="w-full pl-12 pr-4 py-4 rounded-2xl bg-[#1e293b] border border-slate-800 outline-none focus:border-orange-500 transition-all text-sm font-bold text-white">
+        </div>
+    </div>
+
+    <div class="w-full md:w-72">
+        <label class="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest italic mb-1 block">Категория</label>
+        <select id="p-category" onchange="runAdvancedFilter()" class="w-full p-4 rounded-2xl bg-[#1e293b] border border-slate-800 outline-none font-bold text-white focus:border-orange-500 transition-all text-sm appearance-none cursor-pointer">
+    <option value="all">Все категории</option>
+    <option value="Техника">Техника</option>
+    <option value="Овощи">Овощи</option>
+    <option value="Продукты">Продукты</option>
+</select>
+    </div>
+
+</div>
+
                 <div class="bg-[#1e293b] rounded-[2.5rem] border border-slate-800 overflow-hidden shadow-2xl">
                     <table class="w-full text-left">
                         <thead class="bg-slate-800/50 text-[10px] font-black uppercase tracking-widest text-slate-500">
@@ -62,6 +91,11 @@
                     </table>
                     
                 </div>
+
+
+
+
+
             </div>
 
             <div id="tab-orders" class="tab-content">
@@ -71,17 +105,41 @@
                 </div>
             </div>
 
-            <div id="tab-users" class="tab-content space-y-6">
-                <h2 class="text-3xl font-black italic uppercase">Клиенты & Статусы</h2>
-                <div class="bg-[#1e293b] rounded-[2.5rem] border border-slate-800 overflow-hidden shadow-2xl">
-                    <table class="w-full text-left">
-                        <thead class="bg-slate-800/50 text-[10px] font-black uppercase tracking-widest text-slate-500">
-                            <tr><th class="p-6">ФИО</th><th class="p-6">Долг</th><th class="p-6">Просрочка</th><th class="p-6">Статус</th><th class="p-6 text-right">Действие</th></tr>
-                        </thead>
-                        <tbody id="admin-user-list" class="divide-y divide-slate-800"></tbody>
-                    </table>
-                </div>
-            </div>
+           <div id="tab-users" class="tab-content scroll-anim">
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-black italic uppercase tracking-tighter">База Клиентов & Долги</h2>
+        <button onclick="showModal('user-modal')" class="bg-orange-600 hover:bg-orange-700 px-6 py-3 rounded-2xl font-black italic uppercase text-xs transition-all shadow-lg shadow-orange-900/20">
+            <i class="fas fa-user-plus mr-2"></i>Добавить клиента
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="bg-slate-800/50 p-6 rounded-[2rem] border border-slate-700">
+            <p class="text-[10px] font-black uppercase text-slate-500 italic mb-1">Общий долг магазину:</p>
+            <p id="total-debt-amount" class="text-3xl font-black text-red-500 italic">0 ₸</p>
+        </div>
+        <div class="bg-slate-800/50 p-6 rounded-[2rem] border border-slate-700">
+            <p class="text-[10px] font-black uppercase text-slate-500 italic mb-1">Клиентов с долгами:</p>
+            <p id="debtors-count" class="text-3xl font-black text-orange-500 italic">0</p>
+        </div>
+    </div>
+
+    <div class="bg-slate-900/50 rounded-[2.5rem] border border-slate-800 overflow-hidden shadow-2xl">
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-800/50 text-[10px] font-black uppercase italic text-slate-500">
+                <tr>
+                    <th class="p-6">Клиент</th>
+                    <th class="p-6 text-center">Статус</th>
+                    <th class="p-6">Сумма долга</th>
+                    <th class="p-6">Дедлайн</th>
+                    <th class="p-6 text-right">Действия</th>
+                </tr>
+            </thead>
+            <tbody id="admin-user-list">
+                </tbody>
+        </table>
+    </div>
+</div>
 
             <div id="tab-promos" class="tab-content space-y-6">
                 <div class="flex justify-between items-center">
@@ -92,15 +150,48 @@
             </div>
 
             <div id="tab-banners" class="tab-content space-y-6">
-                <h2 class="text-3xl font-black italic uppercase">Настройка баннеров</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-[#1e293b] p-6 rounded-3xl border border-slate-800">
-                        <label class="block text-xs font-bold text-slate-500 mb-2 uppercase">Основной Баннер 1</label>
-                        <input type="text" id="banner-1-url" class="w-full p-4 rounded-2xl mb-4" placeholder="URL картинки">
-                        <button onclick="saveBanners()" class="w-full bg-orange-600 py-3 rounded-xl font-bold">Обновить</button>
-                    </div>
+    <h2 class="text-3xl font-black italic uppercase mb-6">Настройка баннеров</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-[#1e293b] p-8 rounded-[2rem] border border-slate-800 space-y-4 shadow-xl">
+            <h3 class="text-orange-500 font-black italic uppercase text-sm mb-4">Основные баннеры (Слайдер)</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-2">Баннер 1 (Главный)</label>
+                    <input type="text" id="main-banner-1" class="w-full p-4 rounded-2xl mt-1" placeholder="URL картинки 1">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-2">Баннер 2</label>
+                    <input type="text" id="main-banner-2" class="w-full p-4 rounded-2xl mt-1" placeholder="URL картинки 2">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-2">Баннер 3</label>
+                    <input type="text" id="main-banner-3" class="w-full p-4 rounded-2xl mt-1" placeholder="URL картинки 3">
                 </div>
             </div>
+        </div>
+
+        <div class="bg-[#1e293b] p-8 rounded-[2rem] border border-slate-800 space-y-4 shadow-xl flex flex-col justify-between">
+            <div>
+                <h3 class="text-blue-500 font-black italic uppercase text-sm mb-4">Дополнительный баннер</h3>
+                <label class="text-[10px] font-bold text-slate-500 uppercase ml-2">Маленький баннер (Промо)</label>
+                <input type="text" id="small-banner" class="w-full p-4 rounded-2xl mt-1" placeholder="URL маленькой картинки">
+            </div>
+            
+            <button onclick="saveAllBanners()" class="w-full bg-orange-600 py-5 rounded-2xl font-black uppercase italic tracking-widest shadow-lg shadow-orange-900/40 hover:bg-orange-500 transition-all mt-6">
+                <i class="fas fa-save mr-2"></i> Сохранить все изменения
+            </button>
+        </div>
+    </div>
+
+<div class="mt-6 p-4 bg-orange-900/20 rounded-2xl border border-orange-500/30">
+    <label class="text-[10px] font-black text-orange-500 uppercase ml-2 tracking-widest">Окончание Акции (Таймер)</label>
+    <input type="datetime-local" id="promo-deadline" 
+        class="w-full bg-[#0f172a] border border-slate-700 p-4 rounded-xl mt-2 font-bold text-white outline-none focus:border-orange-500">
+</div>
+
+</div>
 
             <div id="tab-support" class="tab-content space-y-6">
                 <h2 class="text-3xl font-black italic uppercase">Чат с маман (Тех.Поддержка)</h2>
@@ -109,8 +200,25 @@
                 </div>
             </div>
 
+               <div id="tab-people" class="tab-content space-y-6">
+    <h2 class="text-3xl font-black italic uppercase text-orange-500 mb-6">Редактирование имен</h2>
+    <div class="bg-[#1e293b] rounded-[2.5rem] border border-slate-800 overflow-hidden shadow-2xl">
+        <table class="w-full text-left">
+            <thead class="bg-slate-800/50 text-[10px] font-black uppercase tracking-widest text-slate-500 italic">
+                <tr>
+                    <th class="p-6">Текущее имя</th>
+                    <th class="p-6 text-right">Действие</th>
+                </tr>
+            </thead>
+            <tbody id="people-edit-list" class="divide-y divide-slate-800">
+                </tbody>
+        </table>
+    </div>
+</div>
+
         </main>
     </div>
+
 
     <div id="product-modal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[1000] flex items-center justify-center p-4">
         <div class="bg-[#1e293b] w-full max-w-lg rounded-[2.5rem] p-8 border border-slate-700 shadow-2xl">
@@ -123,6 +231,16 @@
                 </div>
                 <input type="text" id="p-img" placeholder="Ссылка на фото (URL)" class="w-full p-4 rounded-2xl outline-none font-bold">
                 <div class="space-y-2 mt-4">
+
+                 <div class="space-y-1">
+    <label class="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest italic">Категория товара</label>
+    <select id="p-category-modal" class="w-full p-4 rounded-2xl bg-[#0f172a] border border-slate-700 outline-none font-bold text-white focus:border-orange-500 transition-all text-sm appearance-none cursor-pointer">
+        <option value="Техника">Техника</option>
+        <option value="Овощи">Овощи</option>
+        <option value="Продукты">Продукты</option>
+    </select>
+</div>
+
     <label class="text-[10px] font-bold text-slate-500 uppercase italic">Характеристики товара</label>
     <div id="specs-container" class="space-y-2">
         </div>
@@ -130,6 +248,8 @@
         + Добавить параметр
     </button>
 </div>
+
+
                 <div class="flex gap-4 pt-4">
                     <button onclick="saveProduct()" class="flex-1 bg-orange-600 py-4 rounded-2xl font-black uppercase italic tracking-widest shadow-lg shadow-orange-900/40">Сохранить</button>
                     <button onclick="hideModal('product-modal')" class="flex-1 bg-slate-700 py-4 rounded-2xl font-black uppercase italic">Отмена</button>
@@ -151,36 +271,111 @@
         </div>
     </div>
 
+
+    <div id="toast" class="fixed top-[-100px] left-1/2 -translate-x-1/2 z-[2000] transition-all duration-500 ease-in-out">
+    <div class="bg-white/80 backdrop-blur-xl border border-white/50 px-8 py-4 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] flex items-center gap-4">
+        <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-green-200">
+            <i class="fas fa-check"></i>
+        </div>
+        <div>
+            <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 leading-none">Система</p>
+            <p class="text-sm font-bold italic text-slate-800">Данные успешно обновлены!</p>
+        </div>
+    </div>
+    
+</div>
+
     <script>
 
 
+
+
+
+// 1. Тек адамдардың атын тізімге шығару
+function renderPeopleEdit() {
+    const list = document.getElementById('people-edit-list');
+    if (!list) return;
+
+    // LocalStorage-дан адамдарды аламыз
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+
+    if (users.length === 0) {
+        list.innerHTML = `<tr><td colspan="2" class="p-10 text-center text-slate-600 italic">Базада ешкім жоқ...</td></tr>`;
+        return;
+    }
+
+    list.innerHTML = users.map(u => `
+        <tr class="hover:bg-slate-800/40 transition-all">
+            <td class="p-6">
+                <p class="font-bold italic text-white uppercase tracking-tight text-sm">${u.name}</p>
+            </td>
+            <td class="p-6 text-right">
+                <button onclick="renameUser('${u.id}')" class="bg-orange-600 px-6 py-2 rounded-xl text-[10px] font-black uppercase italic hover:bg-orange-500 transition-all shadow-lg shadow-orange-900/20">
+                    <i class="fas fa-edit mr-2"></i> Изменить имя
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// 2. Атын өзгерту (Prompt терезесімен)
+function renameUser(userId) {
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+    const index = users.findIndex(u => String(u.id) === String(userId));
+
+    if (index !== -1) {
+        const oldName = users[index].name;
+        const newName = prompt("Жаңа атын жазыңыз:", oldName);
+
+        if (newName && newName.trim() !== "" && newName !== oldName) {
+            users[index].name = newName.trim();
+            localStorage.setItem('users', JSON.stringify(users)); // Сақтау
+            renderPeopleEdit(); // Тізімді жаңарту
+            showToast(); // "Сәтті" деген хабарлама
+        }
+    }
+}
+
     // 1. ДЕРЕКТЕР БАЗАСЫ (LocalStorage)
-    let db = {
+let db = {
         products: JSON.parse(localStorage.getItem('products')) || [],
         users: JSON.parse(localStorage.getItem('users')) || [
-            { id: 1, name: "Садвакасов Дамир", debt: 15500, days: 45, status: "active" },
-            { id: 2, name: "Ибрагимов Асан", debt: 0, days: 0, status: "blocked" }
+            { id: 1, name: "Садвакасов Дамир", debt: 15500 },
+            { id: 2, name: "Ибрагимов Асан", debt: 0 }
         ],
-        promos: JSON.parse(localStorage.getItem('promos')) || [],
         orders: JSON.parse(localStorage.getItem('orders')) || []
     };
 
     // 2. ТАБТАРДЫ АУЫСТЫРУ
-    function openTab(evt, tabId) {
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
+function openTab(evt, tabId) {
+    // Барлық контентті жасыру
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    // Барлық батырмалардан активті түсті алу
+    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+    
+    const target = document.getElementById(tabId);
+    if (target) {
+        target.classList.add('active');
         evt.currentTarget.classList.add('active');
     }
 
+    // Тізімдерді жаңарту (Дұрыс жақшалармен)
+    if (tabId === 'tab-people') renderPeopleEdit();
+    if (tabId === 'tab-users') renderUsers();
+    if (tabId === 'tab-products') renderProducts();
+}
+
     // 3. МОДАЛКАЛАРДЫ БАСҚАРУ
-    function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
-    function hideModal(id) { 
-        document.getElementById(id).classList.add('hidden');
-        if(id === 'product-modal') {
-            document.getElementById('specs-container').innerHTML = ''; // Тазалау
-        }
-    }
+      function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    // БЕТ АШЫЛҒАНДА БӘРІН ҚОСУ
+ window.onload = () => {
+    renderProducts();
+    renderUsers();
+    renderPeopleEdit(); // ОСЫНЫҢ ЖАЗЫЛЫП ТҰРҒАНЫН ТЕКСЕР
+    if (typeof loadBannersToAdmin === 'function') loadBannersToAdmin();
+};
 
     // 4. ХАРАКТЕРИСТИКА ЖОЛЫН ҚОСУ
     function addSpecRow() {
@@ -195,55 +390,64 @@
         container.appendChild(row);
     }
 
-    // 5. ТАУАРДЫ САҚТАУ (АРТИКУЛ + ХАРАКТЕРИСТИКА)
     function saveProduct() {
-        const name = document.getElementById('p-name').value;
-        const price = document.getElementById('p-price').value;
-        const oldPrice = document.getElementById('p-old-price').value;
-        const img = document.getElementById('p-img').value;
+    const name = document.getElementById('p-name').value;
+    const price = document.getElementById('p-price').value;
+    const oldPrice = document.getElementById('p-old-price').value;
+    const img = document.getElementById('p-img').value;
+    
+    // МҰНДА: Модалкадағы таңдалған категорияны айнымалыға аламыз
+    const category = document.getElementById('p-category-modal').value;
 
-        if (!name || !price) {
-            alert("Заполните название и цену!");
-            return;
-        }
-
-        // Автоматты Артикул жасау (QS-123456)
-        const article = "QS-" + Math.floor(100000 + Math.random() * 900000);
-
-        // Характеристикаларды жинау
-        const keys = document.querySelectorAll('.spec-key');
-        const values = document.querySelectorAll('.spec-value');
-        let specs = [];
-        keys.forEach((key, i) => {
-            if(key.value.trim() !== "" && values[i].value.trim() !== "") {
-                specs.push({ key: key.value, val: values[i].value });
-            }
-        });
-
-        const newProduct = {
-            id: Date.now(),
-            article: article,
-            name: name,
-            price: price,
-            oldPrice: oldPrice,
-            img: img,
-            specs: specs
-        };
-
-        // Базаға қосу
-        db.products.push(newProduct);
-        localStorage.setItem('products', JSON.stringify(db.products));
-
-        // Жаңарту
-        renderProducts();
-        hideModal('product-modal');
-        
-        // Форманы тазалау
-        document.getElementById('p-name').value = '';
-        document.getElementById('p-price').value = '';
-        document.getElementById('p-old-price').value = '';
-        document.getElementById('p-img').value = '';
+    if (!name || !price) {
+        alert("Заполните название и цену!");
+        return;
     }
+
+    // Автоматты Артикул жасау (QS-123456)
+    const article = "QS-" + Math.floor(100000 + Math.random() * 900000);
+
+    // Характеристикаларды жинау
+    const keys = document.querySelectorAll('.spec-key');
+    const values = document.querySelectorAll('.spec-value');
+    let specs = [];
+    keys.forEach((key, i) => {
+        if(key.value.trim() !== "" && values[i].value.trim() !== "") {
+            specs.push({ key: key.value, val: values[i].value });
+        }
+    });
+
+    const newProduct = {
+        id: Date.now(),
+        article: article,
+        name: name,
+        price: price,
+        oldPrice: oldPrice,
+        img: img,
+        category: category, // БАЗАҒА КАТЕГОРИЯ САҚТАЛАДЫ
+        specs: specs
+    };
+
+    // unshift арқылы жаңа тауарды тізімнің басына қосамыз
+    db.products.unshift(newProduct); 
+    localStorage.setItem('products', JSON.stringify(db.products));
+
+    // Жаңарту (Егер фильтр болса, соны қолданамыз)
+    if (typeof runAdvancedFilter === 'function') {
+        runAdvancedFilter(); 
+    } else {
+        renderProducts();
+    }
+
+    hideModal('product-modal');
+    
+    // Форманы тазалау
+    document.getElementById('p-name').value = '';
+    document.getElementById('p-price').value = '';
+    document.getElementById('p-old-price').value = '';
+    document.getElementById('p-img').value = '';
+    document.getElementById('specs-container').innerHTML = ''; // Спецификацияларды тазалау
+}
 
     // 6. ТАУАРЛАРДЫ ШЫҒАРУ
     function renderProducts() {
@@ -269,31 +473,58 @@
     }
 
     // 7. ПАЙДАЛАНУШЫЛАР ЖӘНЕ БЛОК
-    function renderUsers() {
+   // КЛИЕНТТЕР МЕН ҚАРЫЗДАРДЫ ШЫҒАРУ
+function renderUsers() {
         const list = document.getElementById('admin-user-list');
-        list.innerHTML = db.users.map(u => `
-            <tr class="hover:bg-slate-800/30 transition border-b border-slate-800">
-                <td class="p-6 font-bold italic text-white">${u.name}</td>
-                <td class="p-6 font-black ${u.debt > 0 ? 'text-red-500' : 'text-green-500'} italic">${u.debt.toLocaleString()} ₸</td>
-                <td class="p-6"><span class="bg-red-500/10 text-red-500 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter">${u.days} дней</span></td>
-                <td class="p-6">
-                    <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase ${u.status === 'active' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/20 text-red-600'}">
-                        ${u.status === 'active' ? 'Активен' : 'В БАНЕ'}
-                    </span>
-                </td>
-                <td class="p-6 text-right">
-                    <button onclick="toggleUserStatus(${u.id})" class="bg-slate-800 px-4 py-2 rounded-xl text-[10px] font-bold uppercase hover:bg-slate-700 transition border border-slate-700 text-white">Блок/Разблок</button>
-                </td>
-            </tr>
-        `).join('');
+        const totalElem = document.getElementById('total-debt-amount');
+        let users = JSON.parse(localStorage.getItem('users')) || db.users;
+        let total = 0;
+
+        if (!list) return;
+        list.innerHTML = users.map(u => {
+            total += Number(u.debt || 0);
+            return `
+                <tr class="border-b border-slate-800 hover:bg-slate-800/20 transition">
+                    <td class="p-6 text-white font-bold uppercase text-xs">${u.name}</td>
+                    <td class="p-6 font-black text-red-500">${Number(u.debt || 0).toLocaleString()} ₸</td>
+                    <td class="p-6 text-right">
+                        ${u.debt > 0 ? `<button onclick="payDebt('${u.id}')" class="text-green-500 text-[10px] uppercase font-bold">Жабу</button>` : '—'}
+                    </td>
+                </tr>`;
+        }).join('');
+        if (totalElem) totalElem.innerText = total.toLocaleString() + " ₸";
     }
 
-    function toggleUserStatus(id) {
-        const user = db.users.find(u => u.id === id);
-        user.status = user.status === 'active' ? 'blocked' : 'active';
-        localStorage.setItem('users', JSON.stringify(db.users));
-        renderUsers();
+    function payDebt(id) {
+        let users = JSON.parse(localStorage.getItem('users')) || db.users;
+        const i = users.findIndex(u => String(u.id) === String(id));
+        if (i !== -1) {
+            users[i].debt = 0;
+            localStorage.setItem('users', JSON.stringify(users));
+            renderUsers();
+        }
     }
+
+    // Статистиканы жаңарту
+    if(totalDebtElem) totalDebtElem.innerText = totalDebt.toLocaleString() + " ₸";
+    if(debtorsCountElem) debtorsCountElem.innerText = debtorsCount;
+
+
+// ҚАРЫЗДЫ ЖАБУ (Оплата долга)
+function payDebt(userId) {
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+    const user = users.find(u => (u.id || u.email) === userId);
+    
+    if (user && user.debt > 0) {
+        if (confirm(`${user.name} қарызын толық өтеді ме?`)) {
+            user.debt = 0;
+            user.deadline = "";
+            localStorage.setItem('users', JSON.stringify(users));
+            renderUsers();
+            showToast("Қарыз жабылды! ✅");
+        }
+    }
+}
 
     // 8. ПРОМОКОДТАР
     function savePromo() {
@@ -346,6 +577,317 @@
     };
 
 
+// 1. Тауарды категориямен сақтау
+function saveProduct() {
+    const name = document.getElementById('p-name').value;
+    const price = document.getElementById('p-price').value;
+    const category = document.getElementById('p-category').value; // Жаңа
+    const img = document.getElementById('p-img').value;
+    
+    // Артикул жасау (QS-12345)
+    const article = "QS-" + Math.floor(10000 + Math.random() * 90000);
+
+    const newProduct = {
+        id: Date.now(),
+        article: article,
+        name: name,
+        price: price,
+        category: category, // Жаңа
+        img: img
+    };
+
+    db.products.push(newProduct);
+    localStorage.setItem('products', JSON.stringify(db.products));
+    renderProducts();
+    hideModal('product-modal');
+}
+
+// 2. Артикул мен Категория бойынша бірден іздеу
+function runAdvancedFilter() {
+    const search = document.getElementById('admin-search-input').value.toLowerCase();
+    const cat = document.getElementById('admin-category-filter').value;
+    
+    const filtered = db.products.filter(p => {
+    // 1. Категорияны тексеру (p.category жоқ болса, бос мәтін деп аламыз)
+    const productCat = (p.category || "").trim().toLowerCase();
+    const filterCat = (cat || "all").trim().toLowerCase();
+
+    const categoryMatch = (filterCat === 'all' || productCat === filterCat);
+
+    // 2. Мәтінді тексеру (Аты немесе Артикулы)
+    const productName = (p.name || "").toLowerCase();
+    const productArticle = (p.article || "").toLowerCase();
+    const searchText = search.toLowerCase().trim();
+
+    const textMatch = productName.includes(searchText) || 
+                      productArticle.includes(searchText);
+    
+    return categoryMatch && textMatch;
+});
+
+// Тізімді қайта шығару
+displayProducts(filtered);
+}
+
+// 3. Кестені жаңарту
+function displayProducts(productsList) {
+    const list = document.getElementById('admin-product-list');
+    list.innerHTML = productsList.map(p => `
+        <tr class="hover:bg-slate-800/30 border-b border-slate-800">
+            <td class="p-6">
+                <div class="flex items-center gap-4">
+                    <img src="${p.img}" class="w-10 h-10 rounded-lg">
+                    <div>
+                        <p class="font-bold text-white">${p.name}</p>
+                        <p class="text-[9px] text-orange-500 font-black uppercase tracking-widest">${p.article}</p>
+                    </div>
+                </div>
+            </td>
+            <td class="p-6 font-bold text-xs text-slate-400">${p.category || 'Общая'}</td>
+            <td class="p-6 font-black text-white">${Number(p.price).toLocaleString()} ₸</td>
+            <td class="p-6 text-right">
+                <button onclick="deleteItem('products', ${p.id}, renderProducts)" class="text-red-500 hover:text-red-400">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    `).reverse().join('');
+}
+
+
+
+// 1. Базаға баннерлер бөлімін қосу (window.onload ішіне немесе басына)
+if (!localStorage.getItem('site_banners')) {
+    const defaultBanners = {
+        main: ['', '', ''],
+        small: ''
+    };
+    localStorage.setItem('site_banners', JSON.stringify(defaultBanners));
+}
+
+function saveAllBanners() {
+    const banners = {
+        main: [
+            document.getElementById('main-banner-1').value,
+            document.getElementById('main-banner-2').value,
+            document.getElementById('main-banner-3').value
+        ],
+        small: document.getElementById('small-banner').value,
+        deadline: document.getElementById('promo-deadline').value
+    };
+
+    localStorage.setItem('site_banners', JSON.stringify(banners));
+    
+    // Alert-тың орнына жаңа Toast шақырамыз
+    showToast();
+}
+
+
+
+function showToast() {
+    const toast = document.getElementById('toast');
+    
+    // Хабарламаны төмен түсіру
+    toast.style.top = "30px";
+    
+    // Дыбыстық эффект (опционально)
+    // new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3').play();
+
+    // 3 секундтан кейін қайтадан жасыру
+    setTimeout(() => {
+        toast.style.top = "-100px";
+    }, 3000);
+}
+
+// 3. Админ панельді ашқанда қазіргі сілтемелерді инпуттарға толтыру
+function loadBannersToAdmin() {
+    const banners = JSON.parse(localStorage.getItem('site_banners'));
+    if (banners) {
+        document.getElementById('main-banner-1').value = banners.main[0] || '';
+        document.getElementById('main-banner-2').value = banners.main[1] || '';
+        document.getElementById('main-banner-3').value = banners.main[2] || '';
+        document.getElementById('small-banner').value = banners.small || '';
+    }
+}
+
+// window.onload функциясын жаңарту
+const oldLoad = window.onload;
+window.onload = () => {
+    if (oldLoad) oldLoad();
+    loadBannersToAdmin(); // Баннерлерді жүктеу
+};
+
+
+function runAdvancedFilter() {
+    // 1. Іздеу жолағы мен Категория таңдауын аламыз
+    const searchInput = document.getElementById('admin-search-input');
+    const categorySelect = document.getElementById('p-category');
+
+    if (!searchInput || !categorySelect) return;
+
+    const searchValue = searchInput.value.toLowerCase().trim();
+    const selectedCategory = categorySelect.value;
+
+    // 2. Базадағы тауарларды (db.products) сүзгіден өткіземіз
+    const filtered = db.products.filter(product => {
+        // Категория сәйкестігі (егер 'all' болса, бәрін өткізеді)
+        const matchesCategory = (selectedCategory === 'all' || product.category === selectedCategory);
+        
+        // Артикул немесе Аты бойынша іздеу
+        const productName = product.name ? product.name.toLowerCase() : "";
+        const productArticle = product.article ? product.article.toLowerCase() : "";
+        
+        const matchesText = productName.includes(searchValue) || productArticle.includes(searchValue);
+        
+        return matchesCategory && matchesText;
+    });
+
+    // 3. Нәтижені кестеге шығару
+    renderFilteredTable(filtered);
+}
+
+// Сүзілген тауарларды экранға шығаратын көмекші функция
+function renderFilteredTable(list) {
+    const listContainer = document.getElementById('admin-product-list');
+    if (!listContainer) return;
+
+    if (list.length === 0) {
+        listContainer.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-500 italic">Товары не найдены...</td></tr>`;
+        return;
+    }
+
+    listContainer.innerHTML = list.map(p => `
+        <tr class="hover:bg-slate-800/30 transition border-b border-slate-800">
+            <td class="p-6 flex items-center gap-4">
+                <img src="${p.img || 'https://via.placeholder.com/50'}" class="w-12 h-12 rounded-xl object-cover border border-slate-700">
+                <div>
+                    <p class="font-bold italic text-white">${p.name}</p>
+                    <p class="text-[10px] text-orange-500 font-black uppercase tracking-widest">${p.article || 'Нет артикула'}</p>
+                </div>
+            </td>
+            <td class="p-6 font-bold text-xs text-slate-400">${p.category || 'Прочее'}</td>
+            <td class="p-6 font-black text-orange-500 italic">${Number(p.price).toLocaleString()} ₸</td>
+            <td class="p-6 text-right">
+                <button onclick="deleteItem('products', ${p.id}, renderProducts)" class="text-red-500 p-2 hover:bg-red-500/10 rounded-xl transition">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+
+function renderOrders() {
+    const container = document.getElementById('orders-list');
+    const orders = JSON.parse(localStorage.getItem('orders')) || [];
+
+    if (orders.length === 0) {
+        container.innerHTML = `<p class="text-slate-500 italic p-6">Заказов пока нет...</p>`;
+        return;
+    }
+
+    container.innerHTML = orders.map(ord => `
+        <div class="bg-[#1e293b] p-6 rounded-[2rem] border ${ord.status === 'new' ? 'border-orange-500 animate-pulse' : 'border-slate-800'} shadow-xl mb-4 transition-all">
+            <div class="flex flex-col md:flex-row justify-between gap-4">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-3">
+                        <span class="bg-orange-600 text-[10px] font-black px-3 py-1 rounded-full uppercase italic">${ord.id}</span>
+                        <span class="text-slate-400 text-xs font-bold">${ord.date}</span>
+                    </div>
+                    <h4 class="text-xl font-black italic text-white uppercase mt-2">${ord.product}</h4>
+                    <p class="text-sm text-slate-400 font-bold italic"><i class="fas fa-user mr-2"></i>${ord.customer} (${ord.phone})</p>
+                    <p class="text-sm text-slate-400 font-bold italic"><i class="fas fa-map-marker-alt mr-2 text-red-500"></i>${ord.address}</p>
+                </div>
+                
+                <div class="text-right flex flex-col justify-between items-end">
+                    <p class="text-2xl font-black text-orange-500 italic">${ord.total}</p>
+                    <div class="flex gap-2 mt-4">
+                        <button onclick="changeOrderStatus('${ord.id}', 'completed')" class="bg-green-600/20 text-green-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-green-600 hover:text-white transition">Принять</button>
+                        <button onclick="deleteOrder('${ord.id}')" class="bg-red-500/10 text-red-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-red-500 hover:text-white transition">Отмена</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Статусты өзгерту
+function changeOrderStatus(orderId, newStatus) {
+    let orders = JSON.parse(localStorage.getItem('orders')) || [];
+    const order = orders.find(o => o.id === orderId);
+    if(order) {
+        order.status = newStatus;
+        localStorage.setItem('orders', JSON.stringify(orders));
+        renderOrders();
+        showToast("Статус заказа обновлен! ✅");
+    }
+}
+
+// Тапсырысты өшіру
+function deleteOrder(orderId) {
+    if(confirm("Вы действительно хотите удалить заказ?")) {
+        let orders = JSON.parse(localStorage.getItem('orders')) || [];
+        orders = orders.filter(o => o.id !== orderId);
+        localStorage.setItem('orders', JSON.stringify(orders));
+        renderOrders();
+    }
+}
+
+
+function checkNewOrders() {
+    const signal = localStorage.getItem('new_order_signal');
+    if (signal === 'true') {
+        // 1. Дыбыс шығару
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
+        audio.play().catch(e => console.log("Дыбысқа рұқсат жоқ"));
+        
+        // 2. Тізімді жаңарту
+        renderOrders();
+        
+        // 3. Сигналды өшіру
+        localStorage.setItem('new_order_signal', 'false');
+        
+        // 4. Төбеден Toast шығару
+        showToast("ПОЛУЧЕН НОВЫЙ ЗАКАЗ! 🔥");
+    }
+}
+
+// Бұл функцияны window.onload ішіне қос
+setInterval(checkNewOrders, 3000);
+
+
+function changeOrderStatus(orderId, newStatus) {
+    let orders = JSON.parse(localStorage.getItem('orders')) || [];
+    const order = orders.find(o => o.id === orderId);
+
+    if (order && newStatus === 'completed') {
+        order.status = newStatus;
+
+        // Егер төлем әдісі "Наличные" болса, қарызға жазу
+        if (order.payment === "Наличные") {
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+            // Қолданушыны аты немесе телефоны арқылы табамыз
+            let user = users.find(u => u.name === order.customer || u.phone === order.phone);
+
+            if (user) {
+                // Бағадан тек санды алып, қарызға қосамыз
+                const priceNum = parseInt(order.total.replace(/[^0-9]/g, ''));
+                user.debt += priceNum;
+                // Қарыз қайтару мерзімін автоматты түрде бүгіннен бастап 1 айға қою
+                const deadline = new Date();
+                deadline.setMonth(deadline.getMonth() + 1);
+                user.deadline = deadline.toISOString().split('T')[0];
+                
+                localStorage.setItem('users', JSON.stringify(users));
+                if (typeof renderUsers === 'function') renderUsers();
+            }
+        }
+
+        localStorage.setItem('orders', JSON.stringify(orders));
+        renderOrders();
+        showToast("Заказ принят и задолженность обновлена! ✅");
+    }
+}
 
 
 

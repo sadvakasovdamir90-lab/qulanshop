@@ -41,10 +41,10 @@
                     </div>
                 </div>
 
-                <a href="profile.html" class="flex flex-col items-center hover:text-orange-600 transition shrink-0">
-                    <i class="far fa-user text-lg md:text-xl"></i>
-                    <span class="text-[9px] md:text-[10px] mt-1 font-medium italic">Кабинет</span>
-                </a>
+            <button onclick="checkAuth('profile.html')" class="flex flex-col items-center hover:text-orange-600 transition shrink-0">
+    <i class="far fa-user text-lg md:text-xl"></i>
+    <span class="text-[9px] md:text-[10px] mt-1 font-medium italic">Кабинет</span>
+</button>
 
                 <a href="#" class="flex flex-col items-center hover:text-orange-600 transition shrink-0">
                     <i class="far fa-heart text-lg md:text-xl"></i>
@@ -338,358 +338,179 @@
 
 </style>
 
-    <script>
-        // --- 1. ТІЛ ЖҮЙЕСІ ЖӘНЕ СЛАЙДЕР ---
-        const slider = document.getElementById('slider');
-        let slideIndex = 0;
-        setInterval(() => { slideIndex = (slideIndex + 1) % 3; slider.style.transform = `translateX(-${slideIndex * 100}%)`; }, 4000);
+  <script>
+    // --- 1. АВТОРИЗАЦИЯ ЖӘНЕ 24 САҒАТТЫҚ ТЕКСЕРІС ---
+    function checkAuth(pageUrl) {
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        const lastAuthTime = localStorage.getItem('lastAuthTime'); 
+        const now = new Date().getTime();
+        const oneDay = 24 * 60 * 60 * 1000; 
 
-        function toggleLangMenu() { document.getElementById('lang-menu').classList.toggle('active'); }
-        function setLanguage(lang) { localStorage.setItem('qulan_lang', lang); applyLanguage(lang); document.getElementById('lang-menu').classList.remove('active'); }
-
-        function applyLanguage(lang) {
-            const isKz = lang === 'kz';
-            document.getElementById('current-lang-text').innerText = isKz ? "Қазақша" : "Русский";
-            document.getElementById('txt-cabinet').innerText = isKz ? "Кабинет" : "Кабинет";
-            document.getElementById('txt-fav').innerText = isKz ? "Таңдаулы" : "Избранное";
-            document.getElementById('txt-cart').innerText = isKz ? "Себет" : "Корзина";
-            document.getElementById('txt-cat-btn').innerText = isKz ? "Тауарлар категориясы" : "Категории товаров";
-            document.getElementById('txt-hits').innerText = isKz ? "Хит тауарлар" : "Хиты продаж";
-            document.querySelectorAll('.btn-add-cart').forEach(btn => btn.innerText = isKz ? "Себетке салу" : "В корзину");
-        }
-
-        // --- 2. КАТЕГОРИЯЛАР ---
-        const catMenu = document.getElementById('category-menu');
-        function toggleCategories() { catMenu.classList.toggle('active'); }
-        function showCategoriesDesktop() { if(window.innerWidth > 768) catMenu.classList.add('active'); }
-        function hideCategoriesDesktop() { if(window.innerWidth > 768) catMenu.classList.remove('active'); }
-
-        // --- 3. GEMINI AI CHAT ENGINE ---
-        const GEMINI_API_KEY = "AIzaSyBU1eWfKxsuIJshtMzUlR4YKucfuRTvWog";
-        const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-
-        function toggleAIChat() { document.getElementById('ai-chat-window').classList.toggle('hidden'); }
-
-        async function queryGemini(userMessage) {
-            const isRussian = /[а-яА-Я]/.test(userMessage);
-            const systemInstruction = `Ты Qulan AI, помощник магазина QulanShop. Отвечай кратко, дружелюбно, с эмодзи. Язык: ${isRussian ? 'русский' : 'казахский'}. Если не знаешь ответа, верни: SPECIALIST_REQUIRED. Текст: ${userMessage}`;
-            try {
-                const response = await fetch(GEMINI_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: systemInstruction }] }] })
-                });
-                const data = await response.json();
-                return data.candidates[0].content.parts[0].text.trim();
-            } catch (e) { return null; }
-        }
-
-        async function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const container = document.getElementById('chat-messages');
-            if (!input.value.trim()) return;
-            const text = input.value.trim();
-            
-            container.innerHTML += `<div class="flex justify-end mb-3"><div class="bg-orange-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] shadow-md text-sm italic">${text}</div></div>`;
-            input.value = '';
-            container.scrollTop = container.scrollHeight;
-
-            const aiReply = await queryGemini(text);
-            if (aiReply === "SPECIALIST_REQUIRED" || !aiReply) {
-                handleHumanChoice(true);
-            } else {
-                container.innerHTML += `<div class="flex justify-start mb-3"><div class="bg-white border p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-md text-sm italic text-gray-700">${aiReply}</div></div>`;
-            }
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function handleHumanChoice(choice) {
-            const container = document.getElementById('chat-messages');
-            if (choice) {
-                const chatData = { id: "#" + Math.floor(Math.random()*9000), message: "Көмек қажет", time: new Date().toLocaleTimeString().slice(0,5) };
-                localStorage.setItem('qulan_new_chat', JSON.stringify(chatData));
-                localStorage.setItem('new_chat_request', 'true');
-                container.innerHTML += `<div class="bg-orange-50 p-3 rounded-xl text-xs border border-orange-200 italic">Маманға хабарлама жіберілді. Админ-чатты тексеріңіз.</div>`;
-            }
-        }
-
-        window.onload = () => { applyLanguage(localStorage.getItem('qulan_lang') || 'ru'); };
-        document.getElementById('chat-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
-
-        function toggleCategories() {
-    const catMenu = document.getElementById('category-menu');
-    const chevron = document.getElementById('cat-chevron');
-    
-    // Мәзірді ашу/жабу
-    catMenu.classList.toggle('active');
-    
-    // Стрелканы анимациямен айналдыру
-    if (catMenu.classList.contains('active')) {
-        chevron.style.transform = 'rotate(180deg)';
-    } else {
-        chevron.style.transform = 'rotate(0deg)';
-    }
-}
-
-// Hover функцияларын (mouseEnter/mouseLeave) өшіріп таста, олар кедергі жасайды
-function showCategoriesDesktop() { return; }
-function hideCategoriesDesktop() { return; }
-
-// Тауарды себетке қосу функциясы
-function addToCart(id, name, price, icon) {
-    let cart = JSON.parse(localStorage.getItem('qulanCart')) || [];
-    
-    // Тауардың себетте бар-жоғын тексеру
-    let existingItem = cart.find(item => item.id === id);
-    
-    if (existingItem) {
-        existingItem.quantity += 1;
-    } else {
-        cart.push({ id, name, price, icon, quantity: 1 });
-    }
-    
-    localStorage.setItem('qulanCart', JSON.stringify(cart));
-    alert('Тауар себетке қосылды! ✅');
-}
-
-function searchProducts(query) {
-    // Жазылған мәтінді кіші әріпке айналдыру және бос орындарды алу
-    const searchTerm = query.toLowerCase().trim();
-    // Барлық тауар карточкаларын тауып алу
-    const products = document.querySelectorAll('.product-card');
-    const container = document.getElementById('products-container');
-    let foundAny = false;
-
-    products.forEach(product => {
-        // Тауардың атын тауып алу (product-name класы арқылы)
-        const productName = product.querySelector('.product-name').innerText.toLowerCase();
-        
-        if (productName.includes(searchTerm)) {
-            // Егер ат сәйкес келсе - көрсету
-            product.style.display = "block";
-            foundAny = true;
+        if (isLoggedIn !== 'true' || !lastAuthTime || (now - lastAuthTime > oneDay)) {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('lastAuthTime');
+            localStorage.setItem('redirectTarget', pageUrl); 
+            window.location.href = 'auth.html';
         } else {
-            // Сәйкес келмесе - жасыру
-            product.style.display = "none";
+            window.location.href = pageUrl;
         }
-    });
-
-    // Нәтиже табылмаған жағдайдағы хабарламаны басқару
-    let noResultsMsg = document.getElementById('no-results-message');
-    
-    if (!foundAny) {
-        if (!noResultsMsg) {
-            noResultsMsg = document.createElement('div');
-            noResultsMsg.id = 'no-results-message';
-            noResultsMsg.className = 'col-span-full text-center py-10 italic text-gray-400';
-            noResultsMsg.innerHTML = `
-                <i class="fas fa-search-minus text-4xl mb-2"></i>
-                <p>Товар не найден...</p>
-            `;
-            container.appendChild(noResultsMsg);
-        }
-    } else {
-        if (noResultsMsg) noResultsMsg.remove();
     }
-}
-        
 
-function addToCart(productName, productPrice, productImage) {
-    // 1. Себетті жадыдан (LocalStorage) оқу
-    let cart = JSON.parse(localStorage.getItem('qulanCart')) || [];
-    
-    // 2. Жаңа тауарды тізімге қосу
-    cart.push({ 
-        name: productName, 
-        price: productPrice, 
-        image: productImage 
-    });
-    
-    // 3. Жаңартылған себетті қайта сақтау
-    localStorage.setItem('qulanCart', JSON.stringify(cart));
-    
-    // 4. Пайдаланушыға хабарлама көрсету
-    alert("Товар добавлен в корзину!");
-    
-    // (Қосымша) Егер басты бетте себет иконкасы болса, санын жаңарту функциясын осында шақыруға болады
-    if (typeof updateCartCounter === "function") updateCartCounter();
-}
+    // --- 2. ЖАСЫРЫН БӨЛІМДЕРДІ БАСҚАРУ (Подарочные карты) ---
+    function updatePrivateUI() {
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        const lastAuthTime = localStorage.getItem('lastAuthTime');
+        const now = new Date().getTime();
+        const isValid = isLoggedIn === 'true' && (lastAuthTime && (now - lastAuthTime < 24 * 60 * 60 * 1000));
 
-
-
-// 1. Тауарларды базадан (localStorage) жүктеу функциясы
-function loadProductsFromAdmin() {
-    const container = document.getElementById('products-container');
-    if (!container) return;
-
-    // Админ панель сақтайтын 'products' кілтінен деректерді аламыз
-    let products = JSON.parse(localStorage.getItem('products')) || [];
-
-    // Егер тауар болса, ішін тазалап, жаңаларын саламыз
-    if (products.length > 0) {
-        container.innerHTML = ''; // Ескі статикалық тауарларды өшіру
-
-        products.forEach(p => {
-            // Жеңілдік (скидка) бар-жоғын тексеру
-            const hasDiscount = p.oldPrice && parseInt(p.oldPrice) > parseInt(p.price);
-            const discountPercent = hasDiscount ? Math.round((1 - p.price / p.oldPrice) * 100) : 0;
-
-            container.innerHTML += `
-                <div class="product-card bg-white rounded-[2rem] p-3 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 relative group cursor-pointer" 
-                     onclick="location.href='product.html?id=${p.id}'">
-                    
-                    ${hasDiscount ? `
-                        <div class="absolute top-4 left-4 bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded-lg z-10 animate-pulse">
-                            -${discountPercent}%
-                        </div>
-                    ` : ''}
-
-                    <div class="w-full h-32 md:h-40 bg-slate-100 rounded-2xl mb-4 flex items-center justify-center overflow-hidden">
-                        <img src="${p.img || 'images/no-photo.jpg'}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                             onerror="this.src='https://via.placeholder.com/150?text=No+Photo'">
-                    </div>
-
-                    <div class="flex items-baseline gap-2 mb-1">
-                        <p class="text-orange-600 font-black text-xl italic">${Number(p.price).toLocaleString()} ₸</p>
-                        ${hasDiscount ? `<p class="text-gray-400 text-xs line-through italic">${Number(p.oldPrice).toLocaleString()} ₸</p>` : ''}
-                    </div>
-                    
-                    <h3 class="product-name text-sm font-bold h-10 overflow-hidden italic leading-tight mb-3 text-gray-800">
-                        ${p.name}
-                    </h3>
-
-                    <button onclick="event.stopPropagation(); addToCart('${p.name}', ${p.price}, '${p.img}')" 
-                            class="w-full bg-orange-600 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-orange-700 active:scale-95 transition-all">
-                        В корзину
-                    </button>
-                </div>
-            `;
+        const giftCardLinks = document.querySelectorAll('a[href="gift-cards.html"]');
+        giftCardLinks.forEach(link => {
+            // Тек тіркелген адамға ғана көрсетеміз, әйтпесе жасырамыз
+            link.parentElement.style.display = isValid ? 'block' : 'none';
         });
     }
-}
 
-// Бет жүктелгенде функцияны іске қосу
-document.addEventListener('DOMContentLoaded', loadProductsFromAdmin);
+    // --- 3. ТІЛ ЖҮЙЕСІ ЖӘНЕ СЛАЙДЕР ---
+    const slider = document.getElementById('slider');
+    let slideIndex = 0;
+    setInterval(() => { slideIndex = (slideIndex + 1) % 3; if(slider) slider.style.transform = `translateX(-${slideIndex * 100}%)`; }, 4000);
 
+    function toggleLangMenu() { document.getElementById('lang-menu').classList.toggle('active'); }
+    function setLanguage(lang) { localStorage.setItem('qulan_lang', lang); applyLanguage(lang); document.getElementById('lang-menu').classList.remove('active'); }
 
-function renderProducts() {
-    const container = document.getElementById('products-container');
-    if (!container) return;
-
-    // 1. Админ панельдің базасын оқимыз
-    const products = JSON.parse(localStorage.getItem('products')) || [];
-
-    // 2. Егер база бос болса, экранды тазалаймыз
-    if (products.length === 0) {
-        container.innerHTML = `
-            <div class="col-span-full text-center py-20">
-                <i class="fas fa-box-open text-6xl text-gray-200 mb-4"></i>
-                <p class="text-gray-400 italic">Товары временно отсутствуют...</p>
-            </div>
-        `;
-        return;
+    function applyLanguage(lang) {
+        const isKz = lang === 'kz';
+        const els = {
+            'current-lang-text': isKz ? "Қазақша" : "Русский",
+            'txt-cabinet': isKz ? "Профиль" : "Профиль",
+            'txt-fav': isKz ? "Таңдаулы" : "Избранное",
+            'txt-cart': isKz ? "Себет" : "Корзина",
+            'txt-cat-btn': isKz ? "Тауарлар категориясы" : "Категории товаров",
+            'txt-hits': isKz ? "Хит тауарлар" : "Хиты продаж"
+        };
+        for (let id in els) { const el = document.getElementById(id); if(el) el.innerText = els[id]; }
+        document.querySelectorAll('.btn-add-cart').forEach(btn => btn.innerText = isKz ? "Себетке салу" : "В корзину");
     }
 
-    // 3. Егер тауарлар болса, оларды экранға шығарамыз
-    container.innerHTML = products.map(p => {
-        const hasDiscount = p.oldPrice && parseInt(p.oldPrice) > parseInt(p.price);
-        
-        return `
-            <div class="product-card bg-white rounded-[2rem] p-3 shadow-sm hover:shadow-xl transition-all border border-gray-100 relative group cursor-pointer" 
-                 onclick="location.href='product.html?id=${p.id}'">
-                
-                ${hasDiscount ? `<div class="absolute top-4 left-4 bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded-lg z-10">SALE</div>` : ''}
+    // --- 4. КАТЕГОРИЯЛАР ---
+    function toggleCategories() {
+        const catMenu = document.getElementById('category-menu');
+        const chevron = document.getElementById('cat-chevron');
+        if(catMenu) catMenu.classList.toggle('active');
+        if(chevron) chevron.style.transform = catMenu.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
 
-                <div class="w-full h-32 md:h-40 bg-gray-50 rounded-2xl mb-4 flex items-center justify-center overflow-hidden">
+    // --- 5. GEMINI AI CHAT ---
+    const GEMINI_API_KEY = "AIzaSyBU1eWfKxsuIJshtMzUlR4YKucfuRTvWog";
+    const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    function toggleAIChat() { document.getElementById('ai-chat-window').classList.toggle('hidden'); }
+    async function queryGemini(userMessage) {
+        const isRussian = /[а-яА-Я]/.test(userMessage);
+        const systemInstruction = `Ты Qulan AI, помощник магазина QulanShop. Отвечай кратко, дружелюбно. Язык: ${isRussian ? 'russian' : 'kazakh'}.`;
+        try {
+            const response = await fetch(GEMINI_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ contents: [{ parts: [{ text: systemInstruction + " Текст: " + userMessage }] }] })
+            });
+            const data = await response.json();
+            return data.candidates[0].content.parts[0].text.trim();
+        } catch (e) { return null; }
+    }
+    async function sendMessage() {
+        const input = document.getElementById('chat-input');
+        const container = document.getElementById('chat-messages');
+        if (!input || !input.value.trim()) return;
+        const text = input.value.trim();
+        container.innerHTML += `<div class="flex justify-end mb-3"><div class="bg-orange-600 text-white p-3 rounded-2xl max-w-[85%] text-sm italic">${text}</div></div>`;
+        input.value = '';
+        const aiReply = await queryGemini(text);
+        if (aiReply) container.innerHTML += `<div class="flex justify-start mb-3"><div class="bg-white border p-3 rounded-2xl max-w-[85%] text-sm italic">${aiReply}</div></div>`;
+        container.scrollTop = container.scrollHeight;
+    }
+
+    // --- 6. ТАУАРЛАР ЖҮЙЕСІ ---
+    function renderProducts() {
+        const container = document.getElementById('products-container');
+        if (!container) return;
+        const products = JSON.parse(localStorage.getItem('products')) || [];
+        if (products.length === 0) {
+            container.innerHTML = `<div class="col-span-full text-center py-20 italic text-gray-400">Товары временно отсутствуют...</div>`;
+            return;
+        }
+        container.innerHTML = products.map(p => `
+            <div class="product-card bg-white rounded-[2rem] p-3 shadow-sm hover:shadow-xl border border-gray-100 relative group cursor-pointer" onclick="location.href='product.html?id=${p.id}'">
+                <div class="w-full h-32 md:h-40 bg-gray-50 rounded-2xl mb-4 overflow-hidden flex items-center justify-center">
                     <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/150'">
                 </div>
-
-                <div class="flex items-baseline gap-2 mb-1">
-                    <p class="text-orange-600 font-black text-xl italic">${Number(p.price).toLocaleString()} ₸</p>
-                    ${hasDiscount ? `<p class="text-gray-400 text-[10px] line-through italic">${Number(p.oldPrice).toLocaleString()} ₸</p>` : ''}
-                </div>
-                
-                <h3 class="product-name text-[11px] font-bold h-8 overflow-hidden italic leading-tight mb-3 text-gray-800">${p.name}</h3>
-
-                <button onclick="event.stopPropagation(); addToCart('${p.name}', ${p.price}, '${p.img}')" 
+                <p class="text-orange-600 font-black text-xl italic">${Number(p.price).toLocaleString()} ₸</p>
+                <h3 class="product-name text-[11px] font-bold h-8 overflow-hidden mb-3 text-gray-800">${p.name}</h3>
+                <button onclick="event.stopPropagation(); checkAuth('cart.html')" 
                         class="w-full bg-orange-600 text-white py-2 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-orange-700 transition-all">
                     В корзину
                 </button>
             </div>
-        `;
-    }).reverse().join(''); // Жаңа қосылған тауар бірінші тұрады
-}
+        `).reverse().join('');
+    }
 
-// Бет жүктелгенде және басқа беттен қайтып келгенде жаңарту
-document.addEventListener('DOMContentLoaded', renderProducts);
-window.addEventListener('focus', renderProducts);
+    // --- 7. БАННЕРЛЕР МЕН ТАЙМЕР (ТҮЗЕТІЛДІ) ---
+    function loadSiteBanners() {
+        const savedBanners = JSON.parse(localStorage.getItem('site_banners'));
+        if (savedBanners) {
+            if (savedBanners.main && savedBanners.main[0]) document.getElementById('slider-img-1').src = savedBanners.main[0];
+            if (savedBanners.main && savedBanners.main[1]) document.getElementById('slider-img-2').src = savedBanners.main[1];
+            if (savedBanners.main && savedBanners.main[2]) document.getElementById('slider-img-3').src = savedBanners.main[2];
+            if (savedBanners.small) { 
+                const el = document.getElementById('small-banner-img');
+                if(el) el.src = savedBanners.small;
+            }
+        }
+    }
 
-
-
-function loadSiteBanners() {
-    // Админ панельден сақталған деректерді аламыз
-    const savedBanners = JSON.parse(localStorage.getItem('site_banners'));
-    
-    if (savedBanners) {
-        // Үлкен слайдер суреттерін ауыстыру
-        if (savedBanners.main[0]) document.getElementById('slider-img-1').src = savedBanners.main[0];
-        if (savedBanners.main[1]) document.getElementById('slider-img-2').src = savedBanners.main[1];
-        if (savedBanners.main[2]) document.getElementById('slider-img-3').src = savedBanners.main[2];
+    function startGlobalTimer() {
+        const banners = JSON.parse(localStorage.getItem('site_banners'));
+        const promoSection = document.getElementById('promo-section');
         
-        // Кішкентай баннерді ауыстыру
-        if (savedBanners.small) document.getElementById('small-banner-img').src = savedBanners.small;
-    }
-}
-
-// Бет жүктелгенде іске қосамыз
-document.addEventListener('DOMContentLoaded', () => {
-    loadSiteBanners();
-    // Сенің ескі слайдер анимацияң осы жерде қала береді
-});
-
-
-
-function startGlobalTimer() {
-    const banners = JSON.parse(localStorage.getItem('site_banners'));
-    const promoSection = document.getElementById('promo-section');
-
-    // Егер деректер жоқ болса немесе уақыт орнатылмаса — блокты бірден жасырамыз
-    if (!banners || !banners.deadline || !promoSection) {
-        if(promoSection) promoSection.style.display = 'none';
-        return;
-    }
-
-    const targetDate = new Date(banners.deadline).getTime();
-
-    const interval = setInterval(() => {
-        const now = new Date().getTime();
-        const diff = targetDate - now;
-
-        // ЕГЕР УАҚЫТ БІТСЕ:
-        if (diff <= 0) {
-            clearInterval(interval);
-            promoSection.style.display = 'none'; // БҮКІЛ БЛОК ЖОҒАЛАДЫ
-            return;
+        // АКЦИЯ ЖОҚ БОЛСА - БЛОКТЫ ӨШІРУ
+        if (!banners || !banners.deadline) { 
+            if(promoSection) promoSection.style.display = 'none'; 
+            return; 
         }
 
-        // Таймерді есептеу
-        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const s = Math.floor((diff % (1000 * 60)) / 1000);
+        const targetDate = new Date(banners.deadline).getTime();
+        const interval = setInterval(() => {
+            const now = new Date().getTime();
+            const diff = targetDate - now;
+            
+            if (diff <= 0) { 
+                clearInterval(interval); 
+                if(promoSection) promoSection.style.display = 'none'; 
+                return; 
+            }
 
-        // Сандарды шығару
-        document.getElementById('days').innerText = d < 10 ? '0' + d : d;
-        document.getElementById('hours').innerText = h < 10 ? '0' + h : h;
-        document.getElementById('minutes').innerText = m < 10 ? '0' + m : m;
-        document.getElementById('seconds').innerText = s < 10 ? '0' + s : s;
-    }, 1000);
-}
+            if(promoSection) promoSection.style.display = 'block';
+            
+            const d = Math.floor(diff / (1000*60*60*24));
+            const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+            const m = Math.floor((diff % (1000*60*60)) / (1000*60));
+            const s = Math.floor((diff % (1000*60)) / 1000);
 
-// Бет жүктелгенде тексеру
-document.addEventListener('DOMContentLoaded', startGlobalTimer);
+            if(document.getElementById('days')) document.getElementById('days').innerText = d < 10 ? '0'+d : d;
+            if(document.getElementById('hours')) document.getElementById('hours').innerText = h < 10 ? '0'+h : h;
+            if(document.getElementById('minutes')) document.getElementById('minutes').innerText = m < 10 ? '0'+m : m;
+            if(document.getElementById('seconds')) document.getElementById('seconds').innerText = s < 10 ? '0'+s : s;
+        }, 1000);
+    }
 
-    </script>
+    // БЕТ ЖҮКТЕЛГЕНДЕ БӘРІН ІСКЕ ҚОСУ
+    window.onload = () => {
+        applyLanguage(localStorage.getItem('qulan_lang') || 'ru');
+        renderProducts();
+        loadSiteBanners();
+        startGlobalTimer();
+        updatePrivateUI();
+    };
+</script>
 </body>
 
 </html>

@@ -586,7 +586,37 @@ function closePaymentModal() {
 
 
 
+function completeOrder() {
+    const method = document.getElementById('display-method').innerText;
+    const addr = document.getElementById('user-address').value;
+    const phone = document.getElementById('user-phone').value;
+    const price = document.getElementById('display-total').innerText;
+    const productName = document.getElementById('prod-title').innerText;
 
+    // 1. Тапсырыс нысанын (объект) жасау
+    const newOrder = {
+        id: "ORD-" + Math.floor(1000 + Math.random() * 9000),
+        date: new Date().toLocaleString(),
+        customer: "Дамир Садвакасов", // Мұнда авторизациядан келген есімді қоюға болады
+        phone: phone,
+        address: addr,
+        product: productName,
+        total: price,
+        payment: method,
+        status: "new" // Статус: жаңа
+    };
+
+    // 2. Базаға (LocalStorage) сақтау
+    let orders = JSON.parse(localStorage.getItem('orders')) || [];
+    orders.unshift(newOrder); // Жаңа тапсырысты ең басына қою
+    localStorage.setItem('orders', JSON.stringify(orders));
+
+    // 3. Админге сигнал жіберу
+    localStorage.setItem('new_order_signal', 'true');
+
+    alert("Тапсырыс қабылданды! Менеджер хабарласады. ✅");
+    window.location.href = 'index.html';
+}
 
 
 

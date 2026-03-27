@@ -101,6 +101,33 @@
         © 2026 QulanShop. Все права защищены.
     </footer>
 
+    <!-- Барлық беттің астына қосатын HTML -->
+<div id="offline-overlay" class="fixed inset-0 bg-white/90 backdrop-blur-xl z-[9999] flex-col items-center justify-center hidden">
+    <div class="text-center p-8 animate-modal">
+        <i class="fas fa-wifi-slash text-5xl text-orange-600 mb-4"></i>
+        <h2 class="text-xl font-black italic uppercase">Интернет <span class="text-orange-600">үзілді</span></h2>
+        <p class="text-[10px] font-bold text-gray-400 uppercase mt-2 mb-6 italic">Байланысты тексеріп, қайта көріңіз</p>
+        <button onclick="location.reload()" class="bg-slate-900 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase">Жаңарту</button>
+    </div>
+</div>
+
+<!-- Скрипт бөлімі -->
+<script>
+function updateOnlineStatus() {
+    const overlay = document.getElementById('offline-overlay');
+    if (!navigator.onLine) {
+        overlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    } else {
+        overlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+window.addEventListener('DOMContentLoaded', updateOnlineStatus);
+</script>
+
 
     <script>
 

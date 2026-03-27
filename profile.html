@@ -54,7 +54,7 @@
     <main class="container mx-auto px-2 md:px-4 pb-20">
         <div class="flex flex-col md:flex-row gap-4 md:gap-6">
             
-     <aside class="w-full md:w-1/4 space-y-2">
+    <aside class="w-full md:w-1/4 space-y-2">
     <div class="bg-white rounded-xl shadow-sm p-3 md:p-4 border border-gray-100">
         <h3 class="text-gray-400 text-[9px] md:text-[10px] font-bold uppercase mb-3 px-3 italic tracking-wider">Личные данные</h3>
         
@@ -516,6 +516,7 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
 
         // --- 1. ТАБТАР ЖҮЙЕСІ ---
         function showTab(event, tabId) {
+            const currentId = localStorage.getItem('currentUserId');
             document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
             document.querySelectorAll('.nav-btn').forEach(b => {
                 b.classList.remove('bg-orange-50', 'text-orange-600', 'font-medium');
@@ -526,8 +527,12 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
             event.currentTarget.classList.add('bg-orange-50', 'text-orange-600', 'font-medium');
             event.currentTarget.classList.remove('hover:bg-gray-100');
 
-            // Сертификаттар табы ашылғанда деректерді жаңарту
-            if (tabId === 'tab-certificates') renderCertificates();
+            // --- Сертификаттар табы ашылғанда "NEW" белгісін жоғалту ---
+            if (tabId === 'tab-certificates') {
+                localStorage.setItem('certs_read_' + currentId, 'true');
+                renderCertificates();
+                updateMenuBadges(); 
+            }
         }
 
         // --- 2. GEMINI AI CHAT ENGINE ---
@@ -603,7 +608,7 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
             container.scrollTop = container.scrollHeight;
         }
 
-        // --- 3. ҚАРЫЗ СТАТУСЫН ЖАҢАРТУ (UPDATED: AUTO HIDE DETAILS) ---
+        // --- 3. ҚАРЫЗ СТАТУСЫН ЖАҢАРТУ ---
         function updateDebtStatus() {
             const currentId = localStorage.getItem('currentUserId');
             let users = JSON.parse(localStorage.getItem('users')) || [];
@@ -951,8 +956,8 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
 
             if(emptyMsg) emptyMsg.classList.add('hidden');
             
-            list.innerHTML = user.certificates.map(cert => `
-                <div class="cert-card ${cert.style} p-5 md:p-6 rounded-[1.8rem] md:rounded-[2rem] text-white relative overflow-hidden h-44 md:h-48 flex flex-col justify-between shadow-lg animate-modal">
+            list.innerHTML = user.certificates.map((cert, index) => `
+                <div onclick="openCertModal(${index})" class="cert-card ${cert.style} p-5 md:p-6 rounded-[1.8rem] md:rounded-[2rem] text-white relative overflow-hidden h-44 md:h-48 flex flex-col justify-between shadow-lg animate-modal">
                     <div class="relative z-10 flex justify-between items-start">
                         <span class="font-black italic text-[10px] md:text-xs uppercase opacity-80">QulanShop Gift</span>
                         <i class="fas fa-crown opacity-40 text-xs md:text-base"></i>
@@ -977,7 +982,6 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
             const user = users.find(u => u.id == currentId);
             let cart = JSON.parse(localStorage.getItem('qulanCart')) || [];
 
-            // 1. Корзина
             const badgeCart = document.getElementById('badge-cart');
             if (badgeCart) {
                 if (cart.length > 0) {
@@ -989,17 +993,16 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
             }
 
             if (user) {
-                // 2. Қарыз белгісі
                 const badgeDebt = document.getElementById('badge-debt');
                 if (badgeDebt) {
                     if (user.debt > 0) badgeDebt.classList.remove('hidden');
                     else badgeDebt.classList.add('hidden');
                 }
 
-                // 3. Сертификаттар саны
                 const badgeCert = document.getElementById('badge-cert');
+                const isRead = localStorage.getItem('certs_read_' + currentId);
                 if (badgeCert) {
-                    if (user.certificates && user.certificates.length > 0) {
+                    if (user.certificates && user.certificates.length > 0 && !isRead) {
                         badgeCert.innerText = user.certificates.length;
                         badgeCert.classList.remove('hidden');
                     } else {
@@ -1023,6 +1026,73 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
         }
         window.addEventListener('online', updateOnlineStatus);
         window.addEventListener('offline', updateOnlineStatus);
+
+        // --- 12. МОДАЛЬДІ ТЕРЕЗЕНІ БАСҚАРУ ЖӘНЕ PDF ЖҮКТЕУ ---
+        function openCertModal(index) {
+            const currentId = localStorage.getItem('currentUserId');
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const user = users.find(u => u.id == currentId);
+            const cert = user.certificates[index];
+
+            const modal = document.getElementById('cert-modal');
+            const content = document.getElementById('cert-modal-content');
+            
+            content.innerHTML = `
+                <div id="pdf-target" class="cert-card ${cert.style} p-8 rounded-[2.5rem] text-white relative overflow-hidden h-56 flex flex-col justify-between shadow-2xl">
+                    <div class="relative z-10 flex justify-between items-start">
+                        <span class="font-black italic text-sm uppercase">QulanShop Premium Gift</span>
+                        <i class="fas fa-gem opacity-50 text-xl"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <p class="text-xs font-bold uppercase opacity-70 tracking-[0.3em]">Подарочный сертификат</p>
+                        <h3 class="text-5xl font-black italic tracking-tighter">${Number(cert.amount).toLocaleString()} ₸</h3>
+                    </div>
+                    <div class="relative z-10 flex justify-between items-end">
+                        <div>
+                            <p class="text-[10px] font-mono opacity-60 mb-1">${cert.code}</p>
+                            <p class="text-[10px] font-black uppercase italic">Для: ${user.name}</p>
+                        </div>
+                        <span class="text-xs font-bold bg-white/20 px-3 py-1 rounded-xl uppercase">${cert.date}</span>
+                    </div>
+                    <i class="fas fa-gift absolute -right-6 -bottom-6 text-white/10 text-[10rem] rotate-12"></i>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            document.getElementById('download-pdf-btn').onclick = () => downloadCertReceipt(cert);
+        }
+
+        function closeCertModal() {
+            document.getElementById('cert-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        async function downloadCertReceipt(cert) {
+            const element = document.getElementById('pdf-target');
+            const btn = document.getElementById('download-pdf-btn');
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Создание...';
+            btn.disabled = true;
+
+            const opt = {
+                margin: 10,
+                filename: `Receipt_${cert.code}.pdf`,
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { scale: 3, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            try {
+                await html2pdf().set(opt).from(element).save();
+            } catch (e) {
+                alert("Ошибка при загрузке");
+            } finally {
+                btn.innerHTML = '<i class="fas fa-file-pdf"></i> Скачать PDF чек';
+                btn.disabled = false;
+            }
+        }
 
         // Event listeners
         document.getElementById('chat-input')?.addEventListener('keypress', function (e) {

@@ -6,6 +6,7 @@
     <title>QulanShop — Интернет-магазин</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .slider-container { display: flex; transition: transform 0.5s ease-in-out; }
         .slide { min-width: 100%; }
@@ -16,6 +17,89 @@
         .product-card { transition: opacity 0.3s ease, transform 0.3s ease; }
         .footer-link:hover { color: #ea580c; padding-left: 4px; }
         .footer-link { transition: all 0.3s; }
+
+/* Скролл жолағын жасыру (iPhone және Android үшін) */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;  /* IE/Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* Басылған батырманың стилі */
+.sort-btn.active {
+    background-color: #ea580c !important; /* Orange-600 */
+    color: white !important;
+    border-color: #ea580c !important;
+}
+
+.sort-btn.active i {
+    color: white !important;
+}
+
+
+/* Toast хабарлама стилі */
+.toast-success {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e293b;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: bold;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from { bottom: -50px; opacity: 0; }
+    to { bottom: 20px; opacity: 1; }
+}
+
+/* Прогресс бар стилі */
+.stock-bar {
+    width: 100%;
+    height: 4px;
+    background: #f1f5f9;
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+.stock-bar-fill {
+    height: 100%;
+    background: #ef4444;
+    transition: width 0.5s ease-in-out;
+}
+
+.floating-cart {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    background: #ea580c;
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 25px rgba(234, 88, 12, 0.4);
+    z-index: 40;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.floating-cart:hover { transform: scale(1.1); }
+
+
+
     </style>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800">
@@ -171,6 +255,30 @@
     </div>
 </section>
 
+<!-- Сұрыптау және Фильтр (Адаптивті нұсқа) -->
+<div class="container mx-auto px-4 mt-6 flex gap-2 overflow-x-auto pb-3 no-scrollbar shrink-0">
+    <button id="btn-sort-cheap" onclick="sortProducts('cheap')" 
+        class="sort-btn bg-white border border-gray-200 px-5 py-2.5 rounded-full text-[11px] md:text-xs font-bold whitespace-nowrap shadow-sm transition-all active:scale-95">
+        <i class="fas fa-sort-amount-down-alt mr-1 text-gray-400"></i> Сначала дешевые
+    </button>
+    
+    <button id="btn-sort-expensive" onclick="sortProducts('expensive')" 
+        class="sort-btn bg-white border border-gray-200 px-5 py-2.5 rounded-full text-[11px] md:text-xs font-bold whitespace-nowrap shadow-sm transition-all active:scale-95">
+        <i class="fas fa-sort-amount-up mr-1 text-gray-400"></i> Сначала дорогие
+    </button>
+    
+    <button id="btn-filter-discount" onclick="filterDiscount()" 
+        class="sort-btn bg-red-50 border border-red-100 text-red-600 px-5 py-2.5 rounded-full text-[11px] md:text-xs font-bold whitespace-nowrap shadow-sm transition-all active:scale-95">
+        🔥 Со скидкой
+    </button>
+
+    <!-- Барлығын қайтару батырмасы (UX үшін керек) -->
+    <button onclick="renderProducts()" 
+        class="bg-gray-100 text-gray-500 px-5 py-2.5 rounded-full text-[11px] md:text-xs font-bold whitespace-nowrap transition-all active:scale-95">
+        Сброс
+    </button>
+</div>
+
    <section class="container mx-auto px-4 mt-12 mb-20">
     <h2 class="text-xl md:text-2xl font-bold mb-6 italic" id="txt-hits">Хиты продаж</h2>
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="products-container"></div>
@@ -181,6 +289,57 @@
     </div>
 </section>
 
+<section class="container mx-auto px-4 mt-16 mb-10">
+    <h2 class="text-2xl font-black italic uppercase text-center mb-8">Вопросы и <span class="text-orange-600">ответы</span></h2>
+    
+    <div class="max-w-3xl mx-auto space-y-4">
+        <!-- Вопрос 1 -->
+        <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+            <button onclick="toggleFAQ(1)" class="w-full flex justify-between items-center p-6 text-left hover:bg-gray-50 transition-all">
+                <span class="font-bold text-gray-800">Как работает доставка в село Кулан?</span>
+                <i id="faq-icon-1" class="fas fa-plus text-orange-500 transition-transform"></i>
+            </button>
+            <div id="faq-ans-1" class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out bg-gray-50/50">
+                <p class="p-6 text-sm text-gray-600 leading-relaxed italic">
+                    Мы доставляем заказы ежедневно с 09:00 до 20:00. По самому селу Кулан доставка осуществляется в течение 1 часа. Также есть доставка в ближайшие аулы по договоренности.
+                </p>
+            </div>
+        </div>
+
+        <!-- Вопрос 2 -->
+        <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+            <button onclick="toggleFAQ(2)" class="w-full flex justify-between items-center p-6 text-left hover:bg-gray-50 transition-all">
+                <span class="font-bold text-gray-800">Можно ли оплатить при получении?</span>
+                <i id="faq-icon-2" class="fas fa-plus text-orange-500 transition-transform"></i>
+            </button>
+            <div id="faq-ans-2" class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out bg-gray-50/50">
+                <p class="p-6 text-sm text-gray-600 leading-relaxed italic">
+                    Да, вы можете оплатить наличными курьеру или сделать Kaspi перевод при получении товара. Мы доверяем нашим клиентам!
+                </p>
+            </div>
+        </div>
+
+        <!-- Вопрос 3 -->
+        <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+            <button onclick="toggleFAQ(3)" class="w-full flex justify-between items-center p-6 text-left hover:bg-gray-50 transition-all">
+                <span class="font-bold text-gray-800">Как работают бонусы Q-Coins?</span>
+                <i id="faq-icon-3" class="fas fa-plus text-orange-500 transition-transform"></i>
+            </button>
+            <div id="faq-ans-3" class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out bg-gray-50/50">
+                <p class="p-6 text-sm text-gray-600 leading-relaxed italic">
+                    За каждую покупку вам начисляется 3% кэшбэка в виде Q-Coins. 1 Q-Coin = 1 тенге. Вы можете оплатить ими до 50% стоимости вашего следующего заказа в личном кабинете.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="recent-viewed-section" class="container mx-auto px-4 mt-12 mb-10 hidden">
+    <h2 class="text-xl font-bold mb-6 italic text-gray-500">Вы недавно смотрели</h2>
+    <div class="grid grid-cols-2 md:grid-cols-6 gap-4" id="recent-container"></div>
+</section>
+
+
 <script>
     // Тауар бетіне өту функциясы
     function goToProduct(url) {
@@ -188,16 +347,37 @@
     }
 
     // Себетке қосу функциясы (бұрынғы логика)
-    function addToCart(id, name, price, icon) {
-        let cart = JSON.parse(localStorage.getItem('qulanCart')) || [];
-        let item = cart.find(i => i.id === id);
-        if (item) { item.quantity += 1; } 
-        else { cart.push({ id, name, price, icon, quantity: 1 }); }
-        localStorage.setItem('qulanCart', JSON.stringify(cart));
-        
-        // Әдемі хабарлама (Toast) шығаруға болады
-        alert(name + " қосылды! ✨");
+  function addToCart(id, name, price, img) {
+    let cart = JSON.parse(localStorage.getItem('qulanCart')) || [];
+    let item = cart.find(i => i.id === id);
+    
+    if (item) { 
+        item.quantity += 1; 
+    } else { 
+        cart.push({ id, name, price, image: img, quantity: 1 }); 
     }
+    
+    localStorage.setItem('qulanCart', JSON.stringify(cart));
+    
+    // Создание профессионального уведомления (Toast)
+    const toast = document.createElement('div');
+    toast.className = "toast-success";
+    // Текст изменен на русский: "добавлен в корзину!"
+    toast.innerHTML = `<i class="fas fa-check-circle text-orange-500 text-lg"></i> <span>${name} добавлен в корзину!</span>`;
+    document.body.appendChild(toast);
+
+    // Плавное исчезновение через 2 секунды
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease'; // Добавил для плавности
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
+
+    // Обновление счетчика корзины (если функция существует)
+    if (typeof updateCartBadge === 'function') {
+        updateCartBadge();
+    }
+}
 </script>
 
    <footer class="bg-white border-t border-gray-200 pt-16 pb-8 mt-20">
@@ -365,7 +545,7 @@ window.addEventListener('offline', updateOnlineStatus);
 window.addEventListener('DOMContentLoaded', updateOnlineStatus);
 </script>
 
- <script>
+<script>
     // --- 1. АВТОРИЗАЦИЯ ЖӘНЕ 24 САҒАТТЫҚ ТЕКСЕРІС ---
     function checkAuth(pageUrl) {
         const isLoggedIn = localStorage.getItem('isLoggedIn');
@@ -428,7 +608,6 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
 
     // --- 5. GEMINI AI CHAT (КӘСІБИ ЖӘНЕ МЫҚТЫ НҰСҚА) ---
     const GEMINI_API_KEY = "AIzaSyBU1eWfKxsuIJshtMzUlR4YKucfuRTvWog";
-    const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
     
     function toggleAIChat() { 
         const win = document.getElementById('ai-chat-window');
@@ -438,46 +617,27 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
         }
     }
 
-   async function queryGemini(userMessage) {
-    // Скриншоттағы нақты кілтің (пробелсіз)
-    const GEMINI_API_KEY = "AIzaSyC20EAvnYus71g7nShOgvwcokNnO0jGps"; 
-    
-    // Ең тұрақты және жұмыс істейтін сілтеме (v1 нұсқасы)
-    const URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    async function queryGemini(userMessage) {
+        const API_KEY = "AIzaSyC20EAvnYus71g7nShOgvwcokNnO0jGps"; 
+        const URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
-    try {
-        const response = await fetch(URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{ text: userMessage }]
-                }]
-            })
-        });
-
-        const data = await response.json();
-
-        // Егер Google қате қайтарса (мысалы, тағы модель табылмаса)
-        if (data.error) {
-            console.error("API Error:", data.error.message);
-            // Егер gemini-1.5-flash табылмаса, ең сенімді "gemini-pro"-ға ауыстырып көруге болады
-            return "Қате: " + data.error.message;
+        try {
+            const response = await fetch(URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ contents: [{ parts: [{ text: userMessage }] }] })
+            });
+            const data = await response.json();
+            if (data.error) return "Қате: " + data.error.message;
+            if (data.candidates && data.candidates[0].content) {
+                return data.candidates[0].content.parts[0].text.trim();
+            } else {
+                return "Google жауап бермеді. Кейінірек көріңіз.";
+            }
+        } catch (e) {
+            return "Байланыс үзілді. Интернетті немесе Live Server-ді тексеріңіз.";
         }
-
-        if (data.candidates && data.candidates[0].content) {
-            return data.candidates[0].content.parts[0].text.trim();
-        } else {
-            return "Google жауап бермеді. Кейінірек көріңіз.";
-        }
-
-    } catch (e) {
-        console.error("Fetch Error:", e);
-        return "Байланыс үзілді. Интернетті немесе Live Server-ді тексеріңіз.";
     }
-}
 
     async function sendMessage() {
         const input = document.getElementById('chat-input');
@@ -485,67 +645,122 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
         if (!input || !input.value.trim()) return;
 
         const text = input.value.trim();
-        
-        // Пайдаланушы хабарламасы
-        container.innerHTML += `
-            <div class="flex justify-end mb-3">
-                <div class="bg-orange-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] text-sm italic shadow-md">
-                    ${text}
-                </div>
-            </div>`;
-        
+        container.innerHTML += `<div class="flex justify-end mb-3"><div class="bg-orange-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] text-sm italic shadow-md">${text}</div></div>`;
         input.value = '';
         container.scrollTop = container.scrollHeight;
 
-        // Жазу индикаторы
         const typingId = "typing-" + Date.now();
-        container.innerHTML += `
-            <div id="${typingId}" class="flex justify-start mb-3 animate-pulse">
-                <div class="bg-gray-200 text-gray-500 p-2 px-4 rounded-2xl text-[11px] italic">
-                    Qulan AI жауап жазуда...
-                </div>
-            </div>`;
+        container.innerHTML += `<div id="${typingId}" class="flex justify-start mb-3 animate-pulse"><div class="bg-gray-200 text-gray-500 p-2 px-4 rounded-2xl text-[11px] italic">Qulan AI жауап жазуда...</div></div>`;
         container.scrollTop = container.scrollHeight;
 
         const aiReply = await queryGemini(text);
-        
-        // Индикаторды өшіру және жауапты шығару
         const loader = document.getElementById(typingId);
         if (loader) loader.remove();
 
-        container.innerHTML += `
-            <div class="flex justify-start mb-3">
-                <div class="bg-white border border-gray-100 p-4 rounded-2xl rounded-tl-none shadow-lg max-w-[85%] text-sm text-gray-700 leading-relaxed italic">
-                    ${aiReply}
-                </div>
-            </div>`;
-        
+        container.innerHTML += `<div class="flex justify-start mb-3"><div class="bg-white border border-gray-100 p-4 rounded-2xl rounded-tl-none shadow-lg max-w-[85%] text-sm text-gray-700 leading-relaxed italic">${aiReply}</div></div>`;
         container.scrollTop = container.scrollHeight;
     }
 
-    // --- 6. ТАУАРЛАР ЖҮЙЕСІ ---
-    function renderProducts() {
-        const container = document.getElementById('products-container');
-        if (!container) return;
-        const products = JSON.parse(localStorage.getItem('products')) || [];
-        if (products.length === 0) {
-            container.innerHTML = `<div class="col-span-full text-center py-20 italic text-gray-400">Товары временно отсутствуют...</div>`;
-            return;
-        }
-        container.innerHTML = products.map(p => `
-            <div class="product-card bg-white rounded-[2rem] p-3 shadow-sm hover:shadow-xl border border-gray-100 relative group cursor-pointer" onclick="location.href='product.html?id=${p.id}'">
-                <div class="w-full h-32 md:h-40 bg-gray-50 rounded-2xl mb-4 overflow-hidden flex items-center justify-center">
-                    <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/150'">
-                </div>
-                <p class="text-orange-600 font-black text-xl italic">${Number(p.price).toLocaleString()} ₸</p>
-                <h3 class="product-name text-[11px] font-bold h-8 overflow-hidden mb-3 text-gray-800">${p.name}</h3>
-                <button onclick="event.stopPropagation(); checkAuth('cart.html')" 
-                        class="w-full bg-orange-600 text-white py-2 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-orange-700 transition-all">
-                    В корзину
-                </button>
-            </div>
-        `).reverse().join('');
+    // Қауіпсіздік үшін escapeHTML (Іздеу мен рендер үшін керек)
+    function escapeHTML(str) {
+        if (!str) return "";
+        return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
+
+    // --- 6. ТАУАРЛАР ЖҮЙЕСІ (РЕНДЕР) ---
+function renderProducts() {
+    const container = document.getElementById('products-container');
+    if (!container) return;
+    const products = JSON.parse(localStorage.getItem('products')) || [];
+    displayProductList(products); 
+}
+
+function displayProductList(list) {
+    const container = document.getElementById('products-container');
+    if (!container) return;
+
+    if (list.length === 0) {
+        container.innerHTML = `<div class="col-span-full text-center py-20 italic text-gray-400">Товары временно отсутствуют...</div>`;
+        return;
+    }
+
+    const wishlist = JSON.parse(localStorage.getItem('qulanWishlist')) || [];
+
+    // Тізімді кері ретпен шығару (жаңа тауар бірінші)
+    container.innerHTML = [...list].reverse().map(p => {
+        const isFavorite = wishlist.includes(String(p.id));
+        const heartClass = isFavorite ? 'fas fa-heart text-red-500' : 'far fa-heart text-gray-400';
+
+        let discountBadge = "";
+        if (p.oldPrice && Number(p.oldPrice) > Number(p.price)) {
+            const discountPercent = Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100);
+            discountBadge = `
+                <div class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-lg z-20 shadow-md">
+                    -${discountPercent}%
+                </div>`;
+        }
+
+        return `
+            <div class="product-card bg-white rounded-[2rem] p-4 shadow-sm hover:shadow-xl border border-gray-100 relative group cursor-pointer transition-all duration-300 flex flex-col justify-between" 
+                 onclick="saveToHistory('${p.id}'); location.href='product.html?id=${p.id}'">
+                
+                ${discountBadge}
+
+                <!-- ЖҮРЕКШЕ (ИЗБРАННОЕ) -->
+                <div onclick="event.stopPropagation(); toggleWishlist('${p.id}')" 
+                        class="absolute top-2 right-2 z-30 w-9 h-9 bg-white/90 backdrop-blur-sm shadow-sm rounded-full flex items-center justify-center border border-gray-100 active:scale-90 transition-all">
+                    <i id="wish-icon-${p.id}" class="${heartClass} text-lg"></i>
+                </div>
+
+                <!-- Тауар суреті -->
+                <div class="w-full h-36 md:h-44 bg-gray-50 rounded-2xl mb-3 overflow-hidden flex items-center justify-center border border-gray-50">
+                    <img src="${p.img || 'images/no-photo.jpg'}" 
+                         class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" 
+                         onerror="this.src='https://via.placeholder.com/150'">
+                </div>
+
+                <!-- Ақпарат бөлімі -->
+                <div class="flex flex-col flex-grow">
+                    <!-- Ескі баға -->
+                    <div class="h-4">
+                        ${p.oldPrice ? `<span class="text-[10px] text-gray-400 line-through font-bold">${Number(p.oldPrice).toLocaleString()} ₸</span>` : ''}
+                    </div>
+                    
+                    <!-- Жаңа баға -->
+                    <p class="text-orange-600 font-black text-xl leading-none mb-1">${Number(p.price).toLocaleString()} ₸</p>
+                    
+                    <!-- Тауар аты (Аты бағаның астында анық көрінуі үшін) -->
+                    <h3 class="product-name text-xs font-bold text-gray-700 leading-tight h-8 overflow-hidden mb-3">
+                        ${escapeHTML(p.name)}
+                    </h3>
+                </div>
+
+                <!-- Себетке салу батырмасы -->
+                <button onclick="event.stopPropagation(); checkAuth('cart.html')" 
+                        class="w-full bg-orange-600 text-white py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-orange-700 active:scale-95 transition-all shadow-md shadow-orange-100 mt-auto">
+                    <i class="fas fa-shopping-basket mr-1"></i> В корзину
+                </button>
+            </div>`;
+    }).join('');
+}
+// --- 8. ІЗДЕУ ЖҮЙЕСІ (АТЫ ЖӘНЕ АРТИКУЛ БОЙЫНША) ---
+function searchProducts(query) {
+    const products = JSON.parse(localStorage.getItem('products')) || [];
+    const searchTerm = query.toLowerCase().trim();
+
+    if (!searchTerm) {
+        renderProducts();
+        return;
+    }
+
+    const filtered = products.filter(p => {
+        const nameMatch = p.name ? p.name.toLowerCase().includes(searchTerm) : false;
+        const articleMatch = p.article ? p.article.toLowerCase().includes(searchTerm) : false;
+        return nameMatch || articleMatch;
+    });
+
+    displayProductList(filtered);
+}
 
     // --- 7. БАННЕРЛЕР МЕН ТАЙМЕР ---
     function loadSiteBanners() {
@@ -564,30 +779,24 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
     function startGlobalTimer() {
         const banners = JSON.parse(localStorage.getItem('site_banners'));
         const promoSection = document.getElementById('promo-section');
-        
         if (!banners || !banners.deadline) { 
             if(promoSection) promoSection.style.display = 'none'; 
             return; 
         }
-
         const targetDate = new Date(banners.deadline).getTime();
         const interval = setInterval(() => {
             const now = new Date().getTime();
             const diff = targetDate - now;
-            
             if (diff <= 0) { 
                 clearInterval(interval); 
                 if(promoSection) promoSection.style.display = 'none'; 
                 return; 
             }
-
             if(promoSection) promoSection.style.display = 'block';
-            
             const d = Math.floor(diff / (1000*60*60*24));
             const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
             const m = Math.floor((diff % (1000*60*60)) / (1000*60));
             const s = Math.floor((diff % (1000*60)) / 1000);
-
             if(document.getElementById('days')) document.getElementById('days').innerText = d < 10 ? '0'+d : d;
             if(document.getElementById('hours')) document.getElementById('hours').innerText = h < 10 ? '0'+h : h;
             if(document.getElementById('minutes')) document.getElementById('minutes').innerText = m < 10 ? '0'+m : m;
@@ -595,12 +804,33 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
         }, 1000);
     }
 
-    // Enter пернесін тыңдау
     document.getElementById('chat-input')?.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
     });
 
-    // БЕТ ЖҮКТЕЛГЕНДЕ БӘРІН ІСКЕ ҚОСУ
+    function renderRecentHistory() {
+    const historyIds = JSON.parse(localStorage.getItem('qulanHistory')) || [];
+    const allProducts = JSON.parse(localStorage.getItem('products')) || [];
+    const container = document.getElementById('recent-container');
+    const section = document.getElementById('recent-viewed-section');
+
+    if (historyIds.length === 0) return;
+
+    // Идентификаторлар бойынша тауарларды жинау
+    const recentProducts = historyIds.map(id => allProducts.find(p => String(p.id) === String(id))).filter(p => p);
+
+    if (recentProducts.length > 0) {
+        section.classList.remove('hidden');
+        container.innerHTML = recentProducts.map(p => `
+            <div class="bg-white p-2 rounded-2xl shadow-sm border opacity-70 hover:opacity-100 transition" onclick="location.href='product.html?id=${p.id}'">
+                <img src="${p.img}" class="w-full h-20 object-cover rounded-xl mb-2">
+                <p class="text-[10px] font-bold truncate">${p.name}</p>
+                <p class="text-orange-600 text-[10px] font-black">${Number(p.price).toLocaleString()} ₸</p>
+            </div>
+        `).join('');
+    }
+}
+
     window.onload = () => {
         applyLanguage(localStorage.getItem('qulan_lang') || 'ru');
         renderProducts();
@@ -608,12 +838,169 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
         startGlobalTimer();
         updatePrivateUI();
     };
+
+    // Батырмалардың активті күйін басқару
+function setActiveBtn(id) {
+    document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+    if (id) document.getElementById(id).classList.add('active');
+}
+
+// 1. Баға бойынша сұрыптау
+function sortProducts(type) {
+    let products = JSON.parse(localStorage.getItem('products')) || [];
+    
+    if (type === 'cheap') {
+        products.sort((a, b) => Number(a.price) - Number(b.price));
+        setActiveBtn('btn-sort-cheap');
+    } else if (type === 'expensive') {
+        products.sort((a, b) => Number(b.price) - Number(a.price));
+        setActiveBtn('btn-sort-expensive');
+    }
+    
+    displayProductList(products);
+}
+
+// 2. Тек жеңілдігі барларды фильтрлеу
+function filterDiscount() {
+    let products = JSON.parse(localStorage.getItem('products')) || [];
+    let discounted = products.filter(p => p.oldPrice && Number(p.oldPrice) > Number(p.price));
+    
+    setActiveBtn('btn-filter-discount');
+    displayProductList(discounted);
+}
+
+function displayProductList(list) {
+    const container = document.getElementById('products-container');
+    if (!container) return;
+
+    // 1. Егер тізім бос болса, хабарлама шығару
+    if (!list || list.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full text-center py-20 italic text-gray-400 animate-pulse">
+                Товары по вашему запросу не найдены...
+            </div>`;
+        return;
+    }
+
+    function saveToHistory(id) {
+    let history = JSON.parse(localStorage.getItem('qulanHistory')) || [];
+    if (!history.includes(id)) {
+        history.unshift(id); 
+        if (history.length > 6) history.pop(); 
+        localStorage.setItem('qulanHistory', JSON.stringify(history));
+    }
+}
+
+    // 2. Рендеринг (Тауарларды карта түрінде шығару)
+    container.innerHTML = list.map(p => {
+        // Жеңілдік (Скидка) есептеу
+        let discountBadge = "";
+        if (p.oldPrice && Number(p.oldPrice) > Number(p.price)) {
+            const discountPercent = Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100);
+            discountBadge = `
+                <div class="absolute top-3 left-3 bg-red-500 text-white text-[9px] font-black px-2 py-1 rounded-lg uppercase shadow-lg z-10 animate-bounce">
+                    -${discountPercent}%
+                </div>`;
+        }
+
+        return `
+            <div class="product-card bg-white rounded-[2rem] p-3 shadow-sm hover:shadow-xl border border-gray-100 relative group cursor-pointer transition-all duration-300" 
+                 onclick="location.href='product.html?id=${p.id}'">
+                
+                ${discountBadge}
+
+                <!-- Тауар суреті -->
+                <div class="w-full h-32 md:h-40 bg-gray-50 rounded-2xl mb-4 overflow-hidden flex items-center justify-center border border-gray-50">
+                    <img src="${p.img || 'images/no-photo.jpg'}" 
+                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                         onerror="this.src='https://via.placeholder.com/150?text=QulanShop'">
+                </div>
+
+                <!-- Бағалар бөлімі -->
+                <div class="flex flex-col mb-1">
+                    ${p.oldPrice ? `<span class="text-[10px] text-gray-400 line-through font-bold italic">${Number(p.oldPrice).toLocaleString()} ₸</span>` : '<span class="text-[10px] opacity-0">0</span>'}
+                    <p class="text-orange-600 font-black text-xl italic leading-none">${Number(p.price).toLocaleString()} ₸</p>
+                </div>
+
+                <!-- Тауар аты -->
+                <h3 class="product-name text-[11px] font-bold h-8 overflow-hidden mb-3 text-gray-800 leading-tight">
+                    ${escapeHTML(p.name)}
+                </h3>
+
+                <!-- Себетке салу батырмасы -->
+                <button onclick="event.stopPropagation(); addToCart('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${p.price}, '${p.img}')" 
+                        class="w-full bg-orange-600 text-white py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-orange-700 active:scale-95 transition-all shadow-md shadow-orange-100">
+                    <i class="fas fa-shopping-basket mr-1"></i> В корзину
+                </button>
+            </div>`;
+    }).join('');
+}
+
+function toggleFAQ(id) {
+    const ans = document.getElementById(`faq-ans-${id}`);
+    const icon = document.getElementById(`faq-icon-${id}`);
+    
+    // Закрываем другие, если нужно (опционально)
+    // document.querySelectorAll('[id^="faq-ans-"]').forEach(el => {
+    //     if(el.id !== `faq-ans-${id}`) el.style.maxHeight = '0';
+    // });
+
+    if (ans.style.maxHeight === '0px' || !ans.style.maxHeight) {
+        ans.style.maxHeight = '200px'; // Достаточная высота для текста
+        icon.style.transform = 'rotate(45deg)';
+        icon.classList.replace('fa-plus', 'fa-times');
+    } else {
+        ans.style.maxHeight = '0px';
+        icon.style.transform = 'rotate(0deg)';
+        icon.classList.replace('fa-times', 'fa-plus');
+    }
+}
+
+function saveToHistory(id) {
+    let history = JSON.parse(localStorage.getItem('qulanHistory')) || [];
+    if (!history.includes(id)) {
+        history.unshift(id); // Басына қосу
+        if (history.length > 6) history.pop(); // Тек соңғы 6-ауын сақтау
+        localStorage.setItem('qulanHistory', JSON.stringify(history));
+    }
+}
+
+// displayProductList ішіндегі тауар картасының HTML-іне мынаны қосамыз:
+// onclick="saveToHistory('${p.id}'); location.href='product.html?id=${p.id}'"
+
+
+// 1. Избранное-ға қосу/алу
+function toggleWishlist(productId) {
+    let wishlist = JSON.parse(localStorage.getItem('qulanWishlist')) || [];
+    const icon = document.getElementById(`wish-icon-${productId}`);
+
+    if (wishlist.includes(String(productId))) {
+        wishlist = wishlist.filter(id => id !== String(productId));
+        if (icon) {
+            icon.classList.replace('fas', 'far');
+            icon.classList.replace('text-red-500', 'text-gray-400');
+        }
+    } else {
+        wishlist.push(String(productId));
+        if (icon) {
+            icon.classList.replace('far', 'fas');
+            icon.classList.replace('text-gray-400', 'text-red-500');
+        }
+    }
+    localStorage.setItem('qulanWishlist', JSON.stringify(wishlist));
+}
+
+// 2. Қарау тарихына сақтау
+function saveToHistory(id) {
+    let history = JSON.parse(localStorage.getItem('qulanHistory')) || [];
+    if (!history.includes(id)) {
+        history.unshift(id); 
+        if (history.length > 6) history.pop(); 
+        localStorage.setItem('qulanHistory', JSON.stringify(history));
+    }
+}
+
 </script>
 </body>
 
 </html>
-
-
-
-
-

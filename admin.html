@@ -156,6 +156,16 @@
                 <button onclick="openTab(event, 'tab-people')" class="sidebar-link w-full flex items-center p-3 rounded-xl hover:bg-slate-800 transition font-bold text-sm">
                     <i class="fas fa-user-edit mr-3 w-5 text-center"></i> Редактор имен
                 </button>
+                <!-- BACKUP БАТЫРМАСЫ (ОСЫ ЖЕРГЕ ҚОЙ) -->
+<div class="pt-4 mt-4 border-t border-slate-800 space-y-2">
+    <button onclick="downloadBackup()" class="w-full text-left p-3 text-[10px] font-black uppercase text-blue-400 hover:bg-blue-500/10 rounded-xl transition">
+        <i class="fas fa-save mr-2"></i> Создать Бекап (JSON)
+    </button>
+    <label class="block w-full text-left p-3 text-[10px] font-black uppercase text-orange-400 hover:bg-orange-500/10 rounded-xl transition cursor-pointer">
+        <i class="fas fa-upload mr-2"></i> Восстановить базу
+        <input type="file" id="restore-file" class="hidden" onchange="restoreBackup(this)">
+    </label>
+</div>
             </nav>
 
             <div class="pt-6 border-t border-slate-800">
@@ -192,10 +202,43 @@
                     </div>
                 </div>
 
+                <!-- Сұрыптау блогы енді таза -->
+<div class="w-full md:w-64">
+    <label class="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest italic mb-1 block">Сортировка</label>
+    <select id="p-sort" onchange="runAdvancedFilter()" class="w-full p-4 rounded-2xl bg-[#1e293b] border border-slate-800 outline-none font-bold text-white focus:border-orange-500 transition-all text-sm appearance-none cursor-pointer">
+    <option value="new">Сначала новые</option>
+    <option value="price-low">Цена: Низкая</option>
+    <option value="price-high">Цена: Высокая</option>
+    <option value="stock-low">Мало на складе</option>
+</select>
+</div>
+
+
+                <!-- ОСЫНЫ <main> ТЕГІНІҢ ІШІНЕ, ЕҢ БАСЫНА ҚОЙ -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 animate-in fade-in duration-500">
+    <div class="bg-gradient-to-br from-orange-500 to-orange-700 p-6 rounded-[2rem] shadow-xl shadow-orange-900/20">
+        <p class="text-[10px] font-black uppercase text-white/70 italic mb-1">Продажи за сегодня</p>
+        <p id="today-revenue" class="text-2xl font-black text-white italic">0 ₸</p>
+    </div>
+    <div class="bg-slate-800 border border-slate-700 p-6 rounded-[2rem]">
+        <p class="text-[10px] font-black uppercase text-slate-500 italic mb-1">Новых заказов</p>
+        <p id="new-orders-count" class="text-2xl font-black text-orange-500 italic">0</p>
+    </div>
+    <div class="bg-slate-800 border border-slate-700 p-6 rounded-[2rem]">
+        <p class="text-[10px] font-black uppercase text-slate-500 italic mb-1">Всего товаров</p>
+        <p id="total-products-count" class="text-2xl font-black text-blue-500 italic">0</p>
+    </div>
+    <div class="bg-slate-800 border border-slate-700 p-6 rounded-[2rem] flex flex-col justify-center">
+        <button onclick="exportToExcel()" class="w-full h-full bg-green-600/20 text-green-500 border border-green-600/30 rounded-2xl font-black uppercase italic text-[10px] hover:bg-green-600 hover:text-white transition-all">
+            <i class="fas fa-file-excel mr-2"></i> Скачать базу (Excel)
+        </button>
+    </div>
+</div>
+
                 <div class="bg-[#1e293b] rounded-[2.5rem] border border-slate-800 overflow-hidden shadow-2xl table-responsive">
                     <table class="w-full text-left">
                         <thead class="bg-slate-800/50 text-[10px] font-black uppercase tracking-widest text-slate-500">
-                            <tr><th class="p-6">Товар</th><th class="p-6">Цена</th><th class="p-6">Скидка</th><th class="p-6 text-right">Действие</th></tr>
+                            <tr><th class="p-6">Товар</th><th class="p-6">Цена</th><th class="p-6 text-center">Наличие</th><th class="p-6">Скидка</th><th class="p-6 text-right">Действие</th></tr>
                         </thead>
                         <tbody id="admin-product-list" class="divide-y divide-slate-800"></tbody>
                     </table>
@@ -243,6 +286,7 @@
                     </table>
                 </div>
             </div>
+            
 
             <div id="tab-promos" class="tab-content space-y-6">
                 <div class="flex justify-between items-center">
@@ -314,6 +358,7 @@
             </div>
         </main>
     </div>
+    
 
     <!-- Модалкалар -->
     <div id="product-modal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[1000] flex items-center justify-center p-4">
@@ -325,7 +370,18 @@
                     <input type="number" id="p-price" placeholder="Цена (₸)" class="p-4 rounded-2xl outline-none font-bold">
                     <input type="number" id="p-old-price" placeholder="Старая цена (скидка)" class="p-4 rounded-2xl outline-none font-bold text-red-400">
                 </div>
+                <!-- ЖАҢА: Количество өрісі -->
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest italic">Количество на складе</label>
+                    <input type="number" id="p-stock" placeholder="Кол-во (шт/кг)" class="w-full p-4 rounded-2xl outline-none font-bold bg-[#0f172a] border border-slate-700">
+                </div>
                 <input type="text" id="p-img" placeholder="Ссылка на фото (URL)" class="w-full p-4 rounded-2xl outline-none font-bold">
+                <div class="space-y-1">
+    <label class="text-[10px] font-black text-slate-500 uppercase ml-2 italic">Превью фото</label>
+    <div id="img-preview-container" class="w-full h-32 bg-[#0f172a] rounded-2xl border border-slate-700 overflow-hidden flex items-center justify-center">
+        <img id="p-img-preview" src="https://via.placeholder.com/150" class="h-full w-full object-contain opacity-50">
+    </div>
+</div>
                 <div class="space-y-2 mt-4">
                     <div class="space-y-1">
                         <label class="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest italic">Категория товара</label>
@@ -348,6 +404,7 @@
             </div>
         </div>
     </div>
+    
 
     <div id="promo-modal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[1000] flex items-center justify-center p-4">
         <div class="bg-[#1e293b] w-full max-w-md rounded-[2.5rem] p-8 border border-slate-700 shadow-2xl">
@@ -384,24 +441,32 @@
     </div>
 </div>
 
+<div id="order-detail-modal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[2000] flex items-center justify-center p-4">
+    <div class="bg-[#1e293b] w-full max-w-lg rounded-[2.5rem] p-8 border border-slate-700 shadow-2xl relative">
+        <button onclick="hideModal('order-detail-modal')" class="absolute top-6 right-6 text-slate-400 hover:text-white text-2xl">×</button>
+        <h3 class="text-xl font-black italic uppercase text-orange-500 mb-6">Детали заказа</h3>
+        <div id="order-detail-content" class="space-y-4">
+            <!-- Мұнда мәліметтер JS арқылы түседі -->
+        </div>
+    </div>
+</div>
+
+
+
+
 <!-- Скрипт бөлімі -->
 <script>
-function updateOnlineStatus() {
-    const overlay = document.getElementById('offline-overlay');
-    if (!navigator.onLine) {
-        overlay.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    } else {
-        overlay.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-}
-window.addEventListener('online', updateOnlineStatus);
-window.addEventListener('offline', updateOnlineStatus);
-window.addEventListener('DOMContentLoaded', updateOnlineStatus);
-</script>
+        // Редакциялау режимін бақылау үшін айнымалы
+        let editingProductId = null;
 
-    <script>
+        // ҚАУІПСІЗДІК: XSS-тен қорғау (Мәтінді тазарту)
+        function escapeHTML(str) {
+            if (!str) return "";
+            return String(str).replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+            });
+        }
+
         // 1. Тек адамдардың атын тізімге шығару
         function renderPeopleEdit() {
             const list = document.getElementById('people-edit-list');
@@ -414,7 +479,7 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
             list.innerHTML = users.map(u => `
                 <tr class="hover:bg-slate-800/40 transition-all">
                     <td class="p-6">
-                        <p class="font-bold italic text-white uppercase tracking-tight text-sm">${u.name}</p>
+                        <p class="font-bold italic text-white uppercase tracking-tight text-sm">${escapeHTML(u.name)}</p>
                     </td>
                     <td class="p-6 text-right">
                         <button onclick="renameUser('${u.id}')" class="bg-orange-600 px-6 py-2 rounded-xl text-[10px] font-black uppercase italic hover:bg-orange-500 transition-all shadow-lg shadow-orange-900/20">
@@ -436,12 +501,37 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
                     users[index].name = newName.trim();
                     localStorage.setItem('users', JSON.stringify(users));
                     renderPeopleEdit();
+                    renderUsers(); // Базадағы тізімді де жаңарту
                     showToast();
                 }
             }
         }
 
-        // Мәзірді ашып-жабу
+        // ТАУАРДЫ ӨЗГЕРТУ РЕЖИМІН АШУ
+        function editProduct(id) {
+            const product = db.products.find(p => p.id === id);
+            if (!product) return;
+            editingProductId = id; 
+            document.getElementById('p-name').value = product.name;
+            document.getElementById('p-price').value = product.price;
+            document.getElementById('p-old-price').value = product.oldPrice || "";
+            document.getElementById('p-stock').value = product.stock || ""; 
+            document.getElementById('p-img').value = product.img;
+            document.getElementById('p-category-modal').value = product.category;
+            const container = document.getElementById('specs-container');
+            container.innerHTML = "";
+            if (product.specs) {
+                product.specs.forEach(s => {
+                    const row = document.createElement('div');
+                    row.className = "flex gap-2 animate-in fade-in slide-in-from-left-2";
+                    row.innerHTML = `<input type="text" placeholder="Параметр" class="spec-key w-1/2 p-2 text-xs rounded-lg bg-slate-700 border border-slate-600 outline-none text-white" value="${escapeHTML(s.key)}"><input type="text" placeholder="Значение" class="spec-value w-1/2 p-2 text-xs rounded-lg bg-slate-700 border border-slate-600 outline-none text-white" value="${escapeHTML(s.val)}"><button onclick="this.parentElement.remove()" class="text-red-500 px-2 font-bold">×</button>`;
+                    container.appendChild(row);
+                });
+            }
+            document.querySelector('#product-modal h3').innerText = "Изменить товар";
+            showModal('product-modal');
+        }
+
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
@@ -449,42 +539,78 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
             overlay.classList.toggle('active');
         }
 
-        // Табтарды ауыстыру
-        function openTab(evt, tabId) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-            const target = document.getElementById(tabId);
-            if (target) {
-                target.classList.add('active');
-                evt.currentTarget.classList.add('active');
-            }
-            if (window.innerWidth < 1024) {
-                toggleSidebar();
-            }
-            if (tabId === 'tab-people') renderPeopleEdit();
-            if (tabId === 'tab-users') renderUsers();
-            if (tabId === 'tab-products') renderProducts();
-            if (tabId === 'tab-orders') renderOrders();
-            if (tabId === 'tab-promos') renderPromos();
+       function openTab(evt, tabId) {
+    // 1. Барлық табтардың контентін жасыру
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    
+    // 2. Барлық бүйірлік батырмалардан "active" стилін алып тастау
+    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+    
+    // 3. Таңдалған табты көрсету
+    const target = document.getElementById(tabId);
+    if (target) {
+        target.classList.add('active');
+        // Батырманың өзіне "active" стилін қосу
+        if (evt && evt.currentTarget) {
+            evt.currentTarget.classList.add('active');
         }
+    }
 
-        // Деректер базасы
+    // 4. Мобильді нұсқада бүйірлік мәзірді жабу
+    if (window.innerWidth < 1024) {
+        if (typeof toggleSidebar === "function") toggleSidebar();
+    }
+
+    // 5. Әр таб ашылғанда тиісті функцияларды шақыру (Мәліметтер жаңартылуы үшін)
+    if (tabId === 'tab-people') renderPeopleEdit();
+    if (tabId === 'tab-users') renderUsers();
+    if (tabId === 'tab-products') renderProducts();
+    if (tabId === 'tab-orders') renderOrders();
+    if (tabId === 'tab-promos') renderPromos();
+}
+
         let db = {
             products: JSON.parse(localStorage.getItem('products')) || [],
-            users: JSON.parse(localStorage.getItem('users')) || [
-                { id: 1, name: "Садвакасов Дамир", debt: 15500 },
-                { id: 2, name: "Ибрагимов Асан", debt: 0 }
-            ],
+            users: JSON.parse(localStorage.getItem('users')) || [],
             orders: JSON.parse(localStorage.getItem('orders')) || [],
             promos: JSON.parse(localStorage.getItem('promos')) || []
         };
 
         function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function hideModal(id) { 
+            document.getElementById(id).classList.add('hidden'); 
+            if (id === 'product-modal') {
+                editingProductId = null;
+                document.querySelector('#product-modal h3').innerText = "Новый товар";
+                document.getElementById('p-name').value = '';
+                document.getElementById('p-price').value = '';
+                document.getElementById('p-old-price').value = '';
+                document.getElementById('p-stock').value = '';
+                document.getElementById('p-img').value = '';
+                document.getElementById('specs-container').innerHTML = '';
+            }
+        }
 
         window.onload = () => {
             renderProducts(); renderUsers(); renderPeopleEdit(); renderOrders(); renderPromos(); loadBannersToAdmin();
-            setInterval(checkSupport, 3000); setInterval(checkNewOrders, 3000);
+            updateAnalytics();
+            setInterval(updateAnalytics, 5000);
+            setInterval(checkSupport, 3000); 
+            setInterval(checkNewOrders, 3000);
+
+    // Инпутқа жазғанда суретті бірден көрсету
+document.getElementById('p-img').addEventListener('input', function() {
+    const preview = document.getElementById('p-img-preview');
+    const url = this.value.trim();
+    
+    if (url) {
+        preview.src = url;
+        preview.style.opacity = "1"; // Сурет бар болса анық көрсетеміз
+    } else {
+        preview.src = 'https://via.placeholder.com/150';
+        preview.style.opacity = "0.5"; // Бос болса күңгірт қыламыз
+    }
+});
         };
 
         function addSpecRow() {
@@ -499,27 +625,28 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
             const name = document.getElementById('p-name').value;
             const price = document.getElementById('p-price').value;
             const oldPrice = document.getElementById('p-old-price').value;
+            const stock = document.getElementById('p-stock').value;
             const img = document.getElementById('p-img').value;
             const category = document.getElementById('p-category-modal').value;
             if (!name || !price) { alert("Заполните название и цену!"); return; }
-            const article = "QS-" + Math.floor(100000 + Math.random() * 900000);
             const keys = document.querySelectorAll('.spec-key');
             const values = document.querySelectorAll('.spec-value');
             let specs = [];
             keys.forEach((key, i) => { if(key.value.trim() !== "" && values[i].value.trim() !== "") specs.push({ key: key.value, val: values[i].value }); });
-            const newProduct = { id: Date.now(), article, name, price, oldPrice, img, category, specs };
-            db.products.unshift(newProduct);
+            if (editingProductId) {
+                const index = db.products.findIndex(p => p.id === editingProductId);
+                if (index !== -1) db.products[index] = { ...db.products[index], name, price, oldPrice, stock: Number(stock), img, category, specs };
+            } else {
+                const article = "QS-" + Math.floor(100000 + Math.random() * 900000);
+                db.products.unshift({ id: Date.now(), article, name, price, oldPrice, stock: Number(stock) || 0, img, category, specs });
+            }
             localStorage.setItem('products', JSON.stringify(db.products));
-            runAdvancedFilter(); hideModal('product-modal');
-            document.getElementById('p-name').value = ''; document.getElementById('p-price').value = ''; document.getElementById('p-old-price').value = ''; document.getElementById('p-img').value = ''; document.getElementById('specs-container').innerHTML = '';
+            runAdvancedFilter(); hideModal('product-modal'); showToast();
         }
 
-        function renderProducts() {
-            const list = document.getElementById('admin-product-list');
-            if (!list) return;
-            list.innerHTML = db.products.map(p => `<tr class="hover:bg-slate-800/30 transition border-b border-slate-800"><td class="p-6 flex items-center gap-4"><img src="${p.img || 'https://via.placeholder.com/50'}" class="w-12 h-12 rounded-xl object-cover border border-slate-700"><div><p class="font-bold italic text-white">${p.name}</p><p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">${p.article || 'Нет артикула'}</p></div></td><td class="p-6 font-black text-orange-500 italic">${Number(p.price).toLocaleString()} ₸</td><td class="p-6 text-slate-500 line-through text-xs">${p.oldPrice ? Number(p.oldPrice).toLocaleString() + ' ₸' : '-'}</td><td class="p-6 text-right"><button onclick="deleteItem('products', ${p.id}, renderProducts)" class="text-red-500 p-2 hover:bg-red-500/10 rounded-xl transition"><i class="fas fa-trash-alt"></i></button></td></tr>`).reverse().join('');
-        }
+        function renderProducts() { runAdvancedFilter(); }
 
+        // --- 1. ЖАҢАРТЫЛҒАН: VIP ЖҮЙЕСІ БАР КЛИЕНТТЕР ТІЗІМІ ---
         function renderUsers() {
             const list = document.getElementById('admin-user-list');
             const totalElem = document.getElementById('total-debt-amount');
@@ -527,9 +654,28 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
             let users = JSON.parse(localStorage.getItem('users')) || db.users;
             let total = 0; let debtorsCount = 0;
             if (!list) return;
+
             list.innerHTML = users.map(u => {
                 const d = Number(u.debt || 0); total += d; if (d > 0) debtorsCount++;
-                return `<tr class="border-b border-slate-800 hover:bg-slate-800/20 transition"><td class="p-6"><p class="text-white font-bold uppercase text-xs">${u.name}</p><p class="text-[9px] text-slate-500">${u.phone || ''}</p></td><td class="p-6 text-center"><span class="${d > 0 ? 'text-red-500' : 'text-green-500'} font-bold text-[10px] uppercase">${d > 0 ? 'Должник' : 'Чист'}</span></td><td class="p-6 font-black text-red-500">${d.toLocaleString()} ₸</td><td class="p-6 text-slate-400 text-xs">${u.deadline || '—'}</td><td class="p-6 text-right">${d > 0 ? `<button onclick="payDebt('${u.id}')" class="text-green-500 text-[10px] uppercase font-bold hover:underline">Жабу</button>` : '—'}</td></tr>`;
+                // VIP Тексеріс: Егер қарызы жоқ және базада бұрыннан болса
+                const isVip = d === 0 && u.id < (Date.now() - 86400000); 
+
+                return `
+                <tr class="border-b border-slate-800 hover:bg-slate-800/20 transition">
+                    <td class="p-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center font-black text-[10px] text-orange-500 uppercase">${u.name.charAt(0)}</div>
+                            <div>
+                                <p class="text-white font-bold uppercase text-xs">${escapeHTML(u.name)} ${isVip ? '<i class="fas fa-crown text-yellow-500 ml-1"></i>' : ''}</p>
+                                <p class="text-[9px] text-slate-500">${u.phone || ''}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-6 text-center"><span class="${d > 0 ? 'text-red-500 bg-red-500/10' : 'text-green-500 bg-green-500/10'} px-2 py-1 rounded text-[9px] font-black uppercase">${d > 0 ? 'Должник' : 'Чист'}</span></td>
+                    <td class="p-6 font-black ${d > 0 ? 'text-red-500' : 'text-slate-500'} italic text-sm">${d.toLocaleString()} ₸</td>
+                    <td class="p-6 text-slate-400 text-xs">${u.deadline || '—'}</td>
+                    <td class="p-6 text-right">${d > 0 ? `<button onclick="payDebt('${u.id}')" class="text-green-500 text-[10px] uppercase font-bold hover:underline">Жабу</button>` : '—'}</td>
+                </tr>`;
             }).join('');
             if (totalElem) totalElem.innerText = total.toLocaleString() + " ₸";
             if (debtorsCountElem) debtorsCountElem.innerText = debtorsCount;
@@ -558,7 +704,7 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
         function renderPromos() {
             const container = document.getElementById('promo-list');
             if (!container) return;
-            container.innerHTML = db.promos.map(p => `<div class="bg-slate-800 p-5 rounded-3xl border border-slate-700 shadow-xl"><p class="font-black text-blue-500 text-lg italic tracking-tight">CODE: ${p.code}</p><div class="flex justify-between mt-3"><span class="text-[10px] text-slate-400 font-bold uppercase italic">Скидка: ${p.percent}%</span><span class="text-[10px] text-slate-500 italic">До: ${p.date}</span></div><button onclick="deleteItem('promos', ${p.id}, renderPromos)" class="mt-4 w-full py-2 bg-red-500/10 text-red-500 text-[10px] font-black uppercase rounded-xl hover:bg-red-500 transition">Удалить</button></div>`).join('');
+            container.innerHTML = db.promos.map(p => `<div class="bg-slate-800 p-5 rounded-3xl border border-slate-700 shadow-xl"><p class="font-black text-blue-500 text-lg italic tracking-tight">CODE: ${escapeHTML(p.code)}</p><div class="flex justify-between mt-3"><span class="text-[10px] text-slate-400 font-bold uppercase italic">Скидка: ${p.percent}%</span><span class="text-[10px] text-slate-500 italic">До: ${p.date}</span></div><button onclick="deleteItem('promos', ${p.id}, renderPromos)" class="mt-4 w-full py-2 bg-red-500/10 text-red-500 text-[10px] font-black uppercase rounded-xl hover:bg-red-500 transition">Удалить</button></div>`).join('');
         }
 
         function deleteItem(key, id, callback) { if(confirm("Вы уверены?")) { db[key] = db[key].filter(i => i.id !== id); localStorage.setItem(key, JSON.stringify(db[key])); callback(); } }
@@ -580,59 +726,458 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
             }
         }
 
-        function runAdvancedFilter() {
-            const searchInput = document.getElementById('admin-search-input');
-            const categorySelect = document.getElementById('p-category');
-            if (!searchInput || !categorySelect) return;
-            const searchValue = searchInput.value.toLowerCase().trim();
-            const selectedCategory = categorySelect.value;
-            const filtered = db.products.filter(product => {
-                const matchesCategory = (selectedCategory === 'all' || product.category === selectedCategory);
-                const productName = product.name ? product.name.toLowerCase() : "";
-                const productArticle = product.article ? product.article.toLowerCase() : "";
-                return matchesCategory && (productName.includes(searchValue) || productArticle.includes(searchValue));
-            });
-            renderFilteredTable(filtered);
-        }
+      // 1. ФИЛЬТРЛЕУ ЖӘНЕ СҰРЫПТАУ (Оңтайландырылған нұсқа)
+function runAdvancedFilter() {
+    // 1. Форма элементтерін тауып аламыз
+    const searchInput = document.getElementById('admin-search-input');
+    const categorySelect = document.getElementById('p-category');
+    const sortSelect = document.getElementById('p-sort');
 
-        function renderFilteredTable(list) {
-            const listContainer = document.getElementById('admin-product-list');
-            if (!listContainer) return;
-            if (list.length === 0) { listContainer.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-500 italic">Товары не найдены...</td></tr>`; return; }
-            listContainer.innerHTML = list.map(p => `<tr class="hover:bg-slate-800/30 transition border-b border-slate-800"><td class="p-6 flex items-center gap-4"><img src="${p.img || 'https://via.placeholder.com/50'}" class="w-12 h-12 rounded-xl object-cover border border-slate-700"><div><p class="font-bold italic text-white">${p.name}</p><p class="text-[10px] text-orange-500 font-black uppercase tracking-widest">${p.article || 'Нет артикула'}</p></div></td><td class="p-6 font-bold text-xs text-slate-400">${p.category || 'Прочее'}</td><td class="p-6 font-black text-orange-500 italic">${Number(p.price).toLocaleString()} ₸</td><td class="p-6 text-right"><button onclick="deleteItem('products', ${p.id}, renderProducts)" class="text-red-500 p-2 hover:bg-red-500/10 rounded-xl transition"><i class="fas fa-trash-alt"></i></button></td></tr>`).join('');
-        }
+    // Тексеріс: Егер элементтер табылса ғана жұмыс істейді
+    if (!searchInput || !categorySelect || !sortSelect) return;
 
-        function renderOrders() {
-            const container = document.getElementById('orders-list');
-            if (!container) return;
-            const orders = JSON.parse(localStorage.getItem('orders')) || [];
-            if (orders.length === 0) { container.innerHTML = `<p class="text-slate-500 italic p-6">Заказов пока нет...</p>`; return; }
-            container.innerHTML = orders.map(ord => `<div class="bg-[#1e293b] p-6 rounded-[2rem] border ${ord.status === 'new' ? 'border-orange-500 animate-pulse' : 'border-slate-800'} shadow-xl mb-4 transition-all"><div class="flex flex-col md:flex-row justify-between gap-4"><div class="space-y-1"><div class="flex items-center gap-3"><span class="bg-orange-600 text-[10px] font-black px-3 py-1 rounded-full uppercase italic">${ord.id}</span><span class="text-slate-400 text-xs font-bold">${ord.date}</span></div><h4 class="text-xl font-black italic text-white uppercase mt-2">${ord.product}</h4><p class="text-sm text-slate-400 font-bold italic"><i class="fas fa-user mr-2"></i>${ord.customer} (${ord.phone})</p><p class="text-sm text-slate-400 font-bold italic"><i class="fas fa-map-marker-alt mr-2 text-red-500"></i>${ord.address}</p></div><div class="text-right flex flex-col justify-between items-end"><p class="text-2xl font-black text-orange-500 italic">${ord.total}</p><div class="flex gap-2 mt-4"><button onclick="changeOrderStatus('${ord.id}', 'completed')" class="bg-green-600/20 text-green-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-green-600 hover:text-white transition">Принять</button><button onclick="deleteOrder('${ord.id}')" class="bg-red-500/10 text-red-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-red-500 hover:text-white transition">Отмена</button></div></div></div></div>`).join('');
-        }
+    // Мәндерді аламыз
+    const searchValue = searchInput.value.toLowerCase().trim();
+    const selectedCategory = categorySelect.value;
+    const sortValue = sortSelect.value;
 
-        function changeOrderStatus(orderId, newStatus) {
+    // 2. ФИЛЬТРЛЕУ (Категория мен Іздеу мәтіні бойынша)
+    let filtered = db.products.filter(product => {
+        const matchesCategory = (selectedCategory === 'all' || product.category === selectedCategory);
+        const productName = (product.name || "").toLowerCase();
+        const productArticle = (product.article || "").toLowerCase();
+        
+        return matchesCategory && (productName.includes(searchValue) || productArticle.includes(searchValue));
+    });
+
+    // 3. СҰРЫПТАУ (Sorting)
+    switch (sortValue) {
+        case 'price-low':
+            // Арзаннан қымбатқа
+            filtered.sort((a, b) => Number(a.price) - Number(b.price));
+            break;
+        case 'price-high':
+            // Қымбаттан арзанға
+            filtered.sort((a, b) => Number(b.price) - Number(a.price));
+            break;
+        case 'stock-low':
+            // Складта аз қалғандар бірінші шығады
+            filtered.sort((a, b) => Number(a.stock || 0) - Number(b.stock || 0));
+            break;
+        default: 
+            // 'new' - Соңғы қосылғандар бірінші (ID бойынша)
+            filtered.sort((a, b) => b.id - a.id);
+    }
+
+    // 4. Нәтижені кестеге қайта шығару
+    renderFilteredTable(filtered);
+}
+
+// 2. ТАУАРЛАР КЕСТЕСІН ШЫҒАРУ
+function renderFilteredTable(list) {
+    const listContainer = document.getElementById('admin-product-list');
+    if (!listContainer) return;
+
+    if (list.length === 0) {
+        listContainer.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-500 italic">Товары не найдены...</td></tr>`;
+        return;
+    }
+
+    listContainer.innerHTML = list.map(p => {
+        let stockLabel = "";
+        const s = Number(p.stock || 0);
+        if (s <= 0) stockLabel = `<span class="text-red-500 bg-red-500/10 px-2 py-1 rounded text-[8px] font-black uppercase tracking-tighter">Нет</span>`;
+        else if (s <= 5) stockLabel = `<span class="text-orange-500 bg-orange-500/10 px-2 py-1 rounded text-[8px] font-black uppercase tracking-tighter">Мало (${s})</span>`;
+        else stockLabel = `<span class="text-green-500 bg-green-500/10 px-2 py-1 rounded text-[8px] font-black uppercase tracking-tighter">Есть (${s})</span>`;
+
+        return `
+            <tr class="hover:bg-slate-800/30 transition border-b border-slate-800">
+                <td class="p-6 flex items-center gap-4">
+                    <img src="${p.img || 'https://via.placeholder.com/50'}" class="w-12 h-12 rounded-xl object-cover border border-slate-700">
+                    <div>
+                        <p class="font-bold italic text-white uppercase text-sm">${escapeHTML(p.name)}</p>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">${escapeHTML(p.article || 'Нет артикула')}</p>
+                    </div>
+                </td>
+                <td class="p-6 font-black text-orange-500 italic">${Number(p.price).toLocaleString()} ₸</td>
+                <td class="p-6 text-center">${stockLabel}</td>
+                <td class="p-6 text-slate-500 line-through text-xs">${p.oldPrice ? Number(p.oldPrice).toLocaleString() + ' ₸' : '-'}</td>
+                <td class="p-6 text-right">
+                    <div class="flex justify-end gap-2">
+                        <button onclick="editProduct(${p.id})" class="text-blue-500 p-2 hover:bg-blue-500/10 rounded-xl transition"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteItem('products', ${p.id}, renderProducts)" class="text-red-500 p-2 hover:bg-red-500/10 rounded-xl transition"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                </td>
+            </tr>`;
+    }).join('');
+}
+
+// 3. ТАПСЫРЫСТАР ТІЗІМІН ШЫҒАРУ
+function renderOrders() {
+    const container = document.getElementById('orders-list');
+    if (!container) return;
+    const orders = JSON.parse(localStorage.getItem('orders')) || [];
+
+    if (orders.length === 0) {
+        container.innerHTML = `<p class="text-slate-500 italic p-6 text-center">Заказов пока нет...</p>`;
+        return;
+    }
+
+    container.innerHTML = orders.map(ord => {
+        let statusBadge = ord.status === 'new' ? 'border-orange-500 animate-pulse' : (ord.status === 'delivering' ? 'border-blue-500 bg-blue-500/5' : 'border-slate-800 opacity-60');
+        return `
+            <div onclick="viewOrderDetails('${ord.id}')" class="bg-[#1e293b] p-6 rounded-[2rem] border ${statusBadge} shadow-xl mb-4 transition-all cursor-pointer hover:scale-[1.01] active:scale-95 group">
+                <div class="flex flex-col md:flex-row justify-between gap-4">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-3">
+                            <span class="bg-orange-600 text-[10px] font-black px-3 py-1 rounded-full uppercase italic">${ord.id}</span>
+                            <span class="text-slate-400 text-xs font-bold italic">${ord.date}</span>
+                            ${ord.status === 'delivering' ? '<span class="text-blue-400 text-[8px] font-black uppercase italic">[ В ПУТИ ]</span>' : ''}
+                        </div>
+                        <h4 class="text-xl font-black italic text-white uppercase mt-2 group-hover:text-orange-500 transition-colors">${escapeHTML(ord.product)}</h4>
+                        <p class="text-sm text-slate-400 font-bold italic"><i class="fas fa-user mr-2 text-orange-500"></i>${escapeHTML(ord.customer)} (${ord.phone})</p>
+                    </div>
+                    <div class="text-right flex flex-col justify-between items-end">
+                        <p class="text-2xl font-black text-orange-500 italic">${ord.total}</p>
+                        <p class="text-[9px] text-slate-500 font-black uppercase italic">Детали <i class="fas fa-arrow-right ml-1"></i></p>
+                    </div>
+                </div>
+            </div>`;
+    }).join('');
+}
+
+        // --- 3. ЖАҢА: ТАПСЫРЫС МӘЛІМЕТТЕРІН МОДАЛКАҒА ШЫҒАРУ ---
+   function viewOrderDetails(orderId) {
+    const orders = JSON.parse(localStorage.getItem('orders')) || [];
+    const products = JSON.parse(localStorage.getItem('products')) || [];
+    // ID-ді қауіпсіз салыстыру
+    const ord = orders.find(o => String(o.id) === String(orderId));
+    
+    if (!ord) return;
+
+    const prodInfo = products.find(p => p.name === ord.product);
+    const imgUrl = prodInfo ? (prodInfo.img || 'https://via.placeholder.com/150') : 'https://via.placeholder.com/150';
+    const content = document.getElementById('order-detail-content');
+
+    // Тырнақшалардан қате кетпеуі үшін таза "Backticks" әдісін қолданамыз
+    content.innerHTML = `
+        <div class="flex gap-4 border-b border-slate-700 pb-6 mb-4 items-center">
+            <img src="${imgUrl}" class="w-24 h-24 rounded-3xl object-cover border border-slate-700 shadow-2xl">
+            <div>
+                <p class="text-[10px] text-slate-500 uppercase font-black italic mb-1">Товар:</p>
+                <h4 class="text-white font-black uppercase italic text-lg leading-tight">${escapeHTML(ord.product)}</h4>
+                <p class="text-orange-500 font-black text-2xl mt-1">${ord.total}</p>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 gap-6 text-sm italic">
+            <div><p class="text-[9px] text-slate-500 font-black mb-1">Клиент:</p><p class="text-white font-bold">${escapeHTML(ord.customer)}</p><p class="text-orange-500 font-bold">${ord.phone}</p></div>
+            <div><p class="text-[9px] text-slate-500 font-black mb-1">Адрес:</p><p class="text-slate-300 text-xs">${escapeHTML(ord.address)}</p></div>
+            <div class="col-span-2 bg-slate-800/40 p-4 rounded-2xl border border-slate-700">
+                <p class="text-[9px] text-slate-500 font-black mb-1">Комментарий:</p>
+                <p class="text-slate-300 text-xs">${ord.comment || 'Нет комментария'}</p>
+            </div>
+        </div>
+       <div class="pt-6 flex flex-wrap gap-2">
+    <!-- Чек батырмасы -->
+    <button onclick="printOrderReceipt('${ord.id}')" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-3 rounded-2xl font-black uppercase italic text-[10px] flex items-center gap-2">
+        <i class="fas fa-print"></i> Чек
+    </button>
+
+    <!-- ЖАҢА: WhatsApp батырмасы -->
+    <button onclick="sendWhatsApp('${ord.id}')" class="bg-green-600 hover:bg-green-500 text-white px-4 py-3 rounded-2xl font-black uppercase italic text-[10px] flex items-center gap-2">
+        <i class="fab fa-whatsapp text-lg"></i> Написать
+    </button>
+    
+    ${ord.status === 'new' ? `<button onclick="updateOrderStatus('${ord.id}', 'delivering'); hideModal('order-detail-modal')" class="flex-1 bg-blue-600 py-3 rounded-2xl font-black uppercase italic text-[10px]">В путь</button>` : ''}
+    <button onclick="changeOrderStatus('${ord.id}', 'completed'); hideModal('order-detail-modal')" class="flex-1 bg-green-600 py-3 rounded-2xl font-black uppercase italic text-[10px]">Принять</button>
+    <button onclick="deleteOrder('${ord.id}'); hideModal('order-detail-modal')" class="bg-red-500/20 text-red-500 px-4 py-3 rounded-2xl font-black uppercase italic text-[10px]">Удалить</button>
+</div>
+    `;
+    showModal('order-detail-modal');
+}
+
+        
+
+        // --- 4. ЖАҢАРТЫЛҒАН: СТАТУС ӨЗГЕРТУ + СКЛАДТЫ АЗАЙТУ ---
+        function updateOrderStatus(id, newStatus) {
             let orders = JSON.parse(localStorage.getItem('orders')) || [];
-            const order = orders.find(o => o.id === orderId);
-            if (order && newStatus === 'completed') {
-                order.status = newStatus;
-                if (order.payment === "Наличные") {
-                    let users = JSON.parse(localStorage.getItem('users')) || [];
-                    let user = users.find(u => u.name === order.customer || u.phone === order.phone);
-                    if (user) {
-                        const priceNum = parseInt(order.total.replace(/[^0-9]/g, ''));
-                        user.debt = (Number(user.debt) || 0) + priceNum;
-                        const deadline = new Date(); deadline.setMonth(deadline.getMonth() + 1);
-                        user.deadline = deadline.toISOString().split('T')[0];
-                        localStorage.setItem('users', JSON.stringify(users)); renderUsers();
-                    }
-                }
-                localStorage.setItem('orders', JSON.stringify(orders)); renderOrders(); showToast();
+            const index = orders.findIndex(o => o.id === id);
+            if(index !== -1) {
+                orders[index].status = newStatus;
+                localStorage.setItem('orders', JSON.stringify(orders));
+                renderOrders(); showToast();
             }
         }
 
+        
+function changeOrderStatus(orderId, newStatus) {
+    let orders = JSON.parse(localStorage.getItem('orders')) || [];
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+    let products = JSON.parse(localStorage.getItem('products')) || [];
+    
+    const orderIndex = orders.findIndex(o => String(o.id) === String(orderId));
+    if (orderIndex === -1) return;
+
+    if (newStatus === 'completed' && orders[orderIndex].status !== 'completed') {
+        const order = orders[orderIndex];
+        order.status = 'completed';
+
+        // КЛИЕНТТІ ТАБУ (Аты мен Телефоны арқылы тексеру)
+        const customerName = order.customer.toLowerCase().trim();
+        const customerPhone = order.phone.replace(/\D/g, ''); 
+
+        let user = users.find(u => 
+            u.name.toLowerCase().trim() === customerName || 
+            (u.phone && u.phone.replace(/\D/g, '') === customerPhone)
+        );
+
+        if (user) {
+            // БОНУС ЕСЕПТЕУ (3% кэшбэк)
+            const cashbackPercent = 3; 
+            const orderSum = parseInt(order.total.replace(/\D/g, '')) || 0;
+            const earnedBonus = Math.floor(orderSum * (cashbackPercent / 100));
+
+            // ПАЙДАЛАНУШЫНЫҢ БОНУСЫН ЖАҢАРТУ (user.bonus немесе user.bonuses екенін тексер)
+            user.bonus = (Number(user.bonus) || 0) + earnedBonus;
+
+            // ҚАРЫЗ ЖҮЙЕСІ (Наличные болса)
+            if (order.payment === "Наличные") {
+                user.debt = (Number(user.debt) || 0) + orderSum;
+                user.debtDate = new Date().toISOString().split('T')[0];
+            }
+
+            // СКЛАДТЫ АЗАЙТУ
+            const productInDb = products.find(p => p.name === order.product);
+            if (productInDb && Number(productInDb.stock) > 0) {
+                productInDb.stock = Number(productInDb.stock) - 1;
+                localStorage.setItem('products', JSON.stringify(products));
+            }
+
+            alert(`✅ Бонус қосылды: +${earnedBonus} ₸. Клиент: ${user.name}`);
+        } else {
+            alert("⚠️ Клиент базадан табылмады! Бонус қосылмады.");
+        }
+
+        localStorage.setItem('users', JSON.stringify(users));
+        localStorage.setItem('orders', JSON.stringify(orders));
+
+        renderOrders();
+        if (typeof renderUsers === "function") renderUsers();
+        showToast(); 
+    }
+}
+        
+
         function deleteOrder(orderId) { if(confirm("Вы действительно хотите удалить заказ?")) { let orders = JSON.parse(localStorage.getItem('orders')) || []; orders = orders.filter(o => o.id !== orderId); localStorage.setItem('orders', JSON.stringify(orders)); renderOrders(); } }
-        function checkNewOrders() { if (localStorage.getItem('new_order_signal') === 'true') { new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3').play().catch(() => {}); renderOrders(); localStorage.setItem('new_order_signal', 'false'); showToast(); } }
+        function checkNewOrders() { if (localStorage.getItem('new_order_signal') === 'true') { new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3').play().catch(() => {}); db.orders = JSON.parse(localStorage.getItem('orders')); renderOrders(); updateAnalytics(); localStorage.setItem('new_order_signal', 'false'); showToast(); } }
         function checkSupport() { const req = localStorage.getItem('new_chat_request'); const el = document.getElementById('support-alert'); if(req === 'true' && el) el.classList.remove('hidden'); }
+        
+        function updateAnalytics() {
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            const today = new Date().toLocaleDateString();
+            let revenue = 0; let newCount = 0;
+            orders.forEach(ord => {
+                if(ord.date === today && ord.status === 'completed') revenue += parseInt(ord.total.replace(/[^0-9]/g, '')) || 0;
+                if(ord.status === 'new') newCount++;
+            });
+            document.getElementById('today-revenue').innerText = revenue.toLocaleString() + " ₸";
+            document.getElementById('new-orders-count').innerText = newCount;
+            document.getElementById('total-products-count').innerText = db.products.length;
+        }
+
+        function exportToExcel() {
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+            if(users.length === 0) { alert("База бос!"); return; }
+            let csv = "Имя клиента\tТелефон\tДолг\tДедлайн\n";
+            users.forEach(u => { csv += `${u.name}\t${u.phone || '---'}\t${u.debt || 0}\t${u.deadline || '---'}\n`; });
+            let array = [255, 254];
+            for (let i = 0; i < csv.length; i++) { let code = csv.charCodeAt(i); array.push(code & 0xff, (code & 0xff00) >>> 8); }
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(new Blob([new Uint8Array(array)], { type: 'text/csv;charset=utf-16le;' }));
+            link.download = `QulanShop_Base_${new Date().toLocaleDateString()}.csv`;
+            link.click();
+        }
+
+        function downloadBackup() {
+            const data = { products: db.products, users: db.users, orders: db.orders, promos: db.promos, banners: JSON.parse(localStorage.getItem('site_banners')) };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `QulanShop_Backup_${new Date().toLocaleDateString()}.json`;
+            link.click();
+            showToast();
+        }
+
+        function restoreBackup(input) {
+            const file = input.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (confirm("Назар аударыңыз! Барлық қазіргі мәліметтер өшіп, файлдағы мәліметтермен алмастырылады.")) {
+                        if(data.products) localStorage.setItem('products', JSON.stringify(data.products));
+                        if(data.users) localStorage.setItem('users', JSON.stringify(data.users));
+                        if(data.orders) localStorage.setItem('orders', JSON.stringify(data.orders));
+                        if(data.promos) localStorage.setItem('promos', JSON.stringify(data.promos));
+                        if(data.banners) localStorage.setItem('site_banners', JSON.stringify(data.banners));
+                        location.reload();
+                    }
+                } catch (err) { alert("Қате файл!"); }
+            };
+            reader.readAsText(file);
+        }
+
+        function saveAllBanners() {
+            const banners = { main: [document.getElementById('main-banner-1').value, document.getElementById('main-banner-2').value, document.getElementById('main-banner-3').value], small: document.getElementById('small-banner').value, deadline: document.getElementById('promo-deadline').value };
+            localStorage.setItem('site_banners', JSON.stringify(banners)); showToast();
+        }
+
+        function loadBannersToAdmin() {
+            const banners = JSON.parse(localStorage.getItem('site_banners'));
+            if (banners) {
+                document.getElementById('main-banner-1').value = banners.main[0] || '';
+                document.getElementById('main-banner-2').value = banners.main[1] || '';
+                document.getElementById('main-banner-3').value = banners.main[2] || '';
+                document.getElementById('small-banner').value = banners.small || '';
+                document.getElementById('promo-deadline').value = banners.deadline || '';
+            }
+        }
+
+function printOrderReceipt(orderId) {
+    const orders = JSON.parse(localStorage.getItem('orders')) || [];
+    const ord = orders.find(o => String(o.id) === String(orderId));
+
+    if (!ord) {
+        alert("Заказ не найден!");
+        return;
+    }
+
+    const win = window.open('', '', 'width=450,height=700');
+    
+    let h = `
+    <html>
+    <head>
+        <title>QulanShop_Check_${ord.id}</title>
+        <style>
+            body { 
+                font-family: 'Inter', sans-serif; 
+                background: #f1f5f9; 
+                display: flex; 
+                justify-content: center; 
+                padding: 20px;
+            }
+            .check-card { 
+                background: white; 
+                width: 100%; 
+                max-width: 350px; 
+                border-radius: 20px; 
+                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+                padding: 25px;
+                position: relative;
+            }
+            .header { text-align: center; border-bottom: 2px dashed #e2e8f0; padding-bottom: 15px; }
+            .logo { font-weight: 900; font-size: 24px; color: #ea580c; text-transform: uppercase; }
+            .info-row { display: flex; justify-content: space-between; margin: 12px 0; font-size: 13px; }
+            .label { color: #64748b; font-weight: 500; }
+            .value { color: #1e293b; font-weight: 700; text-align: right; }
+            .product-name { 
+                background: #fff7ed; 
+                padding: 15px; 
+                border-radius: 12px; 
+                margin: 15px 0; 
+                font-weight: 800; 
+                color: #c2410c;
+                text-align: center;
+                border: 1px solid #ffedd5;
+            }
+            .total-section { 
+                background: #1e293b; 
+                color: white; 
+                padding: 15px; 
+                border-radius: 12px; 
+                text-align: center;
+                margin-top: 10px;
+            }
+            .total-price { font-size: 22px; font-weight: 900; display: block; }
+            .footer { text-align: center; font-size: 11px; color: #94a3b8; margin-top: 20px; line-height: 1.4; }
+            @media print {
+                body { background: white; padding: 0; }
+                .check-card { box-shadow: none; border: 1px solid #eee; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="check-card">
+            <div class="header">
+                <div class="logo">Qulan<span style="color:#334155">Shop</span></div>
+                <p style="font-size:12px; color:#64748b; margin-top:5px;">Электронный чек</p>
+            </div>
+
+            <div style="margin-top:20px;">
+                <div class="info-row">
+                    <span class="label">Номер заказа:</span>
+                    <span class="value">#${ord.id}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Дата:</span>
+                    <span class="value">${ord.date}</span>
+                </div>
+            </div>
+
+            <div class="product-name">
+                ${ord.product}
+            </div>
+
+            <div class="info-row">
+                <span class="label">Клиент:</span>
+                <span class="value">${ord.customer}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Телефон:</span>
+                <span class="value">${ord.phone}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Адрес:</span>
+                <span class="value">${ord.address}</span>
+            </div>
+
+            <div class="total-section">
+                <span style="font-size:10px; text-transform:uppercase; opacity:0.8;">Итого к оплате:</span>
+                <span class="total-price">${ord.total}</span>
+            </div>
+
+            <div class="footer">
+                Құланөтпес ауылы<br>
+                <strong>qulanshop.kz</strong><br>
+                Спасибо за покупку!
+            </div>
+        </div>`;
+
+    win.document.write(h);
+    win.document.close();
+
+    setTimeout(() => { 
+        win.focus(); 
+        win.print(); 
+        win.close(); 
+    }, 500);
+}
+       
+
+function sendWhatsApp(orderId) {
+    const orders = JSON.parse(localStorage.getItem('orders')) || [];
+    const ord = orders.find(o => String(o.id) === String(orderId));
+    if (!ord) return;
+
+    // Хабарлама мәтіні
+    const text = `Здравствуйте, ${ord.customer}! 👋%0A%0A📦 Ваш заказ №${ord.id} на сумму ${ord.total} принят в QulanShop.%0A🛒 Товар: ${ord.product}%0A📍 Адрес: ${ord.address}%0A%0AСпасибо за покупку! 🔥`;
+    
+    // Телефон нөмірін форматтау (8707... -> 7707...)
+    let phone = ord.phone.replace(/\D/g, '');
+    if (phone.startsWith('8')) phone = '7' + phone.substring(1);
+    
+    window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+}
     </script>
 </body>
 </html>

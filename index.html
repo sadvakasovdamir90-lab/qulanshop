@@ -365,7 +365,7 @@ window.addEventListener('offline', updateOnlineStatus);
 window.addEventListener('DOMContentLoaded', updateOnlineStatus);
 </script>
 
-  <script>
+ <script>
     // --- 1. АВТОРИЗАЦИЯ ЖӘНЕ 24 САҒАТТЫҚ ТЕКСЕРІС ---
     function checkAuth(pageUrl) {
         const isLoggedIn = localStorage.getItem('isLoggedIn');
@@ -392,7 +392,6 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
 
         const giftCardLinks = document.querySelectorAll('a[href="gift-cards.html"]');
         giftCardLinks.forEach(link => {
-            // Тек тіркелген адамға ғана көрсетеміз, әйтпесе жасырамыз
             link.parentElement.style.display = isValid ? 'block' : 'none';
         });
     }
@@ -427,32 +426,100 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
         if(chevron) chevron.style.transform = catMenu.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
     }
 
-    // --- 5. GEMINI AI CHAT ---
+    // --- 5. GEMINI AI CHAT (КӘСІБИ ЖӘНЕ МЫҚТЫ НҰСҚА) ---
     const GEMINI_API_KEY = "AIzaSyBU1eWfKxsuIJshtMzUlR4YKucfuRTvWog";
     const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-    function toggleAIChat() { document.getElementById('ai-chat-window').classList.toggle('hidden'); }
-    async function queryGemini(userMessage) {
-        const isRussian = /[а-яА-Я]/.test(userMessage);
-        const systemInstruction = `Ты Qulan AI, помощник магазина QulanShop. Отвечай кратко, дружелюбно. Язык: ${isRussian ? 'russian' : 'kazakh'}.`;
-        try {
-            const response = await fetch(GEMINI_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ contents: [{ parts: [{ text: systemInstruction + " Текст: " + userMessage }] }] })
-            });
-            const data = await response.json();
-            return data.candidates[0].content.parts[0].text.trim();
-        } catch (e) { return null; }
+    
+    function toggleAIChat() { 
+        const win = document.getElementById('ai-chat-window');
+        win.classList.toggle('hidden'); 
+        if(!win.classList.contains('hidden')) {
+            document.getElementById('chat-input').focus();
+        }
     }
+
+   async function queryGemini(userMessage) {
+    // Скриншоттағы нақты кілтің (пробелсіз)
+    const GEMINI_API_KEY = "AIzaSyC20EAvnYus71g7nShOgvwcokNnO0jGps"; 
+    
+    // Ең тұрақты және жұмыс істейтін сілтеме (v1 нұсқасы)
+    const URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+    try {
+        const response = await fetch(URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: userMessage }]
+                }]
+            })
+        });
+
+        const data = await response.json();
+
+        // Егер Google қате қайтарса (мысалы, тағы модель табылмаса)
+        if (data.error) {
+            console.error("API Error:", data.error.message);
+            // Егер gemini-1.5-flash табылмаса, ең сенімді "gemini-pro"-ға ауыстырып көруге болады
+            return "Қате: " + data.error.message;
+        }
+
+        if (data.candidates && data.candidates[0].content) {
+            return data.candidates[0].content.parts[0].text.trim();
+        } else {
+            return "Google жауап бермеді. Кейінірек көріңіз.";
+        }
+
+    } catch (e) {
+        console.error("Fetch Error:", e);
+        return "Байланыс үзілді. Интернетті немесе Live Server-ді тексеріңіз.";
+    }
+}
+
     async function sendMessage() {
         const input = document.getElementById('chat-input');
         const container = document.getElementById('chat-messages');
         if (!input || !input.value.trim()) return;
+
         const text = input.value.trim();
-        container.innerHTML += `<div class="flex justify-end mb-3"><div class="bg-orange-600 text-white p-3 rounded-2xl max-w-[85%] text-sm italic">${text}</div></div>`;
+        
+        // Пайдаланушы хабарламасы
+        container.innerHTML += `
+            <div class="flex justify-end mb-3">
+                <div class="bg-orange-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] text-sm italic shadow-md">
+                    ${text}
+                </div>
+            </div>`;
+        
         input.value = '';
+        container.scrollTop = container.scrollHeight;
+
+        // Жазу индикаторы
+        const typingId = "typing-" + Date.now();
+        container.innerHTML += `
+            <div id="${typingId}" class="flex justify-start mb-3 animate-pulse">
+                <div class="bg-gray-200 text-gray-500 p-2 px-4 rounded-2xl text-[11px] italic">
+                    Qulan AI жауап жазуда...
+                </div>
+            </div>`;
+        container.scrollTop = container.scrollHeight;
+
         const aiReply = await queryGemini(text);
-        if (aiReply) container.innerHTML += `<div class="flex justify-start mb-3"><div class="bg-white border p-3 rounded-2xl max-w-[85%] text-sm italic">${aiReply}</div></div>`;
+        
+        // Индикаторды өшіру және жауапты шығару
+        const loader = document.getElementById(typingId);
+        if (loader) loader.remove();
+
+        container.innerHTML += `
+            <div class="flex justify-start mb-3">
+                <div class="bg-white border border-gray-100 p-4 rounded-2xl rounded-tl-none shadow-lg max-w-[85%] text-sm text-gray-700 leading-relaxed italic">
+                    ${aiReply}
+                </div>
+            </div>`;
+        
         container.scrollTop = container.scrollHeight;
     }
 
@@ -480,7 +547,7 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
         `).reverse().join('');
     }
 
-    // --- 7. БАННЕРЛЕР МЕН ТАЙМЕР (ТҮЗЕТІЛДІ) ---
+    // --- 7. БАННЕРЛЕР МЕН ТАЙМЕР ---
     function loadSiteBanners() {
         const savedBanners = JSON.parse(localStorage.getItem('site_banners'));
         if (savedBanners) {
@@ -498,7 +565,6 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
         const banners = JSON.parse(localStorage.getItem('site_banners'));
         const promoSection = document.getElementById('promo-section');
         
-        // АКЦИЯ ЖОҚ БОЛСА - БЛОКТЫ ӨШІРУ
         if (!banners || !banners.deadline) { 
             if(promoSection) promoSection.style.display = 'none'; 
             return; 
@@ -528,6 +594,11 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
             if(document.getElementById('seconds')) document.getElementById('seconds').innerText = s < 10 ? '0'+s : s;
         }, 1000);
     }
+
+    // Enter пернесін тыңдау
+    document.getElementById('chat-input')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
 
     // БЕТ ЖҮКТЕЛГЕНДЕ БӘРІН ІСКЕ ҚОСУ
     window.onload = () => {

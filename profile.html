@@ -16,6 +16,24 @@
         }
         #ai-chat-window:not(.hidden) { display: flex !important; flex-direction: column; }
         .readonly-input { background-color: #f3f4f6; color: #6b7280; cursor: not-allowed; }
+
+/* Дизайн эффектілері */
+    .glass-effect { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+    .card-orange { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
+    .card-black { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
+    .card-purple { background: linear-gradient(135deg, #7c3aed 0%, #4c1d95 100%); }
+    .card-green { background: linear-gradient(135deg, #10b981 0%, #047857 100%); }
+    
+    /* Профильдегі кіші карта стилі */
+    .cert-card-mini {
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .cert-card-mini:hover { transform: translateY(-5px) scale(1.02); }
+
+
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
@@ -984,43 +1002,44 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
             });
         }
 
-     // --- 9. СЕРТИФИКАТТАРДЫ ШЫҒАРУ ---
+ // --- 9. СЕРТИФИКАТТАРДЫ ШЫҒАРУ (ПРОФИЛЬ БЕТІ) ---
 function renderCertificates() {
     const list = document.getElementById('certificates-list');
-    const emptyMsg = document.getElementById('no-certificates');
     const currentId = localStorage.getItem('currentUserId');
     const users = JSON.parse(localStorage.getItem('users')) || [];
     const user = users.find(u => u.id == currentId);
 
     if (!user || !user.certificates || user.certificates.length === 0) {
-        if(list) list.innerHTML = '';
-        if(emptyMsg) emptyMsg.classList.remove('hidden');
+        document.getElementById('no-certificates').classList.remove('hidden');
         return;
     }
 
-    if(emptyMsg) emptyMsg.classList.add('hidden');
-    
-    // Картаның сыртқы түрін жасау
     list.innerHTML = user.certificates.map((cert, index) => `
-        <div onclick="openCertModal(${index})" class="cert-card ${cert.style} p-6 rounded-[2rem] text-white relative overflow-hidden h-48 flex flex-col justify-between shadow-xl animate-modal">
+        <div onclick="openCertModal(${index})" class="cert-card-mini ${cert.style} p-5 rounded-[1.8rem] text-white h-44 flex flex-col justify-between shadow-xl animate-modal relative overflow-hidden">
+            <!-- Аттың логотипі (Водяной знак) -->
+            <img src="https://i.ibb.co/4ZRXvjwR/qulan.jpg" class="absolute right-[-5%] bottom-[-5%] w-2/3 opacity-20 pointer-events-none mix-blend-overlay rotate-[-15deg]">
+            
             <div class="relative z-10 flex justify-between items-start">
-                <span class="font-black italic text-xs uppercase opacity-80">QulanShop Gift</span>
-                <i class="fas fa-crown opacity-40"></i>
+                <div class="glass-effect px-2 py-1 rounded-lg text-[10px] font-black italic uppercase">QULANSHOP</div>
+                <div class="w-10 h-10 bg-white/10 rounded-full border border-white/30 p-0.5 overflow-hidden">
+                    <img src="https://i.ibb.co/DHYkbZCv/cart.jpg" class="w-full h-full object-cover rounded-full">
+                </div>
             </div>
+            
             <div class="relative z-10">
-                <p class="text-[10px] font-bold uppercase opacity-70 tracking-widest">Номинал</p>
-                <h3 class="text-3xl font-black italic">${Number(cert.amount).toLocaleString()} ₸</h3>
+                <p class="text-[8px] font-bold uppercase opacity-70 italic tracking-widest">Номинал</p>
+                <h3 class="text-2xl font-black italic">${Number(cert.amount).toLocaleString()} ₸</h3>
             </div>
+            
             <div class="relative z-10 flex justify-between items-end">
-                <span class="text-[10px] font-mono opacity-60">${cert.code}</span>
-                <span class="text-[9px] font-bold bg-white/20 px-2 py-1 rounded-lg uppercase">${cert.date}</span>
+                <span class="text-[9px] font-mono opacity-60">${cert.code}</span>
+                <div class="glass-effect px-2 py-0.5 rounded-md text-[8px] font-black uppercase">Gift Card</div>
             </div>
-            <i class="fas fa-gift absolute -right-4 -bottom-4 text-white/10 text-8xl rotate-12"></i>
         </div>
     `).join('');
 }
 
-// --- МОДАЛЬКА ЖӘНЕ БӨЛІСУ ФУНКЦИЯЛАРЫ ---
+// --- 12. МОДАЛЬДІ ТЕРЕЗЕ (КАРТАНЫҢ ҮЛКЕН ТҮРІ) ---
 function openCertModal(index) {
     const currentId = localStorage.getItem('currentUserId');
     const users = JSON.parse(localStorage.getItem('users')) || [];
@@ -1030,30 +1049,47 @@ function openCertModal(index) {
     const modal = document.getElementById('cert-modal');
     const content = document.getElementById('cert-modal-content');
     
+    // Мұнда карта дәл сен жіберген үлкен көлемде (Pre-view сияқты) шығады
     content.innerHTML = `
-        <div id="pdf-receipt" class="cert-card ${cert.style} p-8 rounded-[2.5rem] text-white relative overflow-hidden h-60 flex flex-col justify-between shadow-2xl">
-            <div class="relative z-10 flex justify-between items-start">
-                <span class="font-black italic text-lg uppercase">QulanShop Premium</span>
-                <img src="images/favicon.ico" class="w-8 h-8 opacity-50">
-            </div>
-            <div class="relative z-10">
-                <p class="text-xs font-bold uppercase opacity-70 tracking-[0.3em]">Подарочный сертификат</p>
-                <h3 class="text-5xl font-black italic tracking-tighter">${Number(cert.amount).toLocaleString()} ₸</h3>
-            </div>
-            <div class="relative z-10 flex justify-between items-end border-t border-white/10 pt-4">
-                <div>
-                    <p class="text-[10px] font-mono opacity-60 mb-1">CODE: ${cert.code}</p>
-                    <p class="text-[10px] font-black uppercase italic">Для: ${user.name}</p>
+        <div id="pdf-receipt" class="${cert.style} w-full aspect-[1.6/1] rounded-[2rem] p-8 md:p-12 shadow-2xl relative overflow-hidden flex flex-col justify-between text-white mx-auto">
+            <!-- Аттың логотипі (Дизайндағыдай) -->
+            <img src="https://i.ibb.co/4ZRXvjwR/qulan.jpg" class="absolute right-[-5%] bottom-[-5%] w-2/3 opacity-20 pointer-events-none mix-blend-overlay rotate-[-15deg]" alt="Watermark">
+            
+            <div class="flex justify-between items-start relative z-10">
+                <div class="glass-effect px-4 py-2 rounded-2xl border border-white/20">
+                    <span class="font-black italic text-sm md:text-xl tracking-tighter uppercase">QULANSHOP</span>
                 </div>
-                <span class="text-xs font-bold bg-white/20 px-3 py-1 rounded-xl uppercase">${cert.date}</span>
+                <div class="w-16 h-16 md:w-24 md:h-24 bg-white/10 backdrop-blur-md rounded-full border-2 border-white/30 p-1 shadow-2xl overflow-hidden">
+                    <img src="https://i.ibb.co/DHYkbZCv/cart.jpg" class="w-full h-full object-cover rounded-full">
+                </div>
             </div>
-            <i class="fas fa-gift absolute -right-10 -bottom-10 text-white/10 text-[12rem] rotate-12"></i>
+
+            <div class="relative z-10">
+                <p class="text-[10px] md:text-sm font-bold uppercase tracking-[0.3em] opacity-70 mb-1 italic">Подарочный номинал</p>
+                <div class="text-4xl md:text-6xl font-black italic tracking-tighter drop-shadow-lg">${Number(cert.amount).toLocaleString()} ₸</div>
+            </div>
+
+            <div class="flex justify-between items-end relative z-10">
+                <div>
+                    <p class="text-[9px] md:text-sm font-mono opacity-50 tracking-widest mb-1">${cert.code}</p>
+                    <p class="text-[8px] md:text-xs font-black uppercase tracking-widest opacity-90 italic">Владелец: ${user.name}</p>
+                    <p class="text-[7px] md:text-[10px] font-black uppercase tracking-widest opacity-90 italic leading-none text-yellow-300">Эксклюзивная карта QULANOTPES</p>
+                </div>
+                <div class="glass-effect px-3 py-1.5 rounded-xl text-[10px] md:text-sm font-black uppercase tracking-widest">Gift Card</div>
+            </div>
         </div>
     `;
 
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 
+    // Батырмаларды реттеу
+    document.getElementById('download-pdf-btn').onclick = () => downloadPDF(cert);
+    
+    const shareText = `Привет! Мой подарочный сертификат от QulanShop на сумму ${cert.amount} ₸! 🎁 Код: ${cert.code}`;
+    document.getElementById('share-wa-btn').onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`);
+    document.getElementById('share-tg-btn').onclick = () => window.open(`https://t.me/share/url?text=${encodeURIComponent(shareText)}`);
+}
     // Батырмаларға логика байлау
     document.getElementById('download-pdf-btn').onclick = () => downloadPDF(cert);
     

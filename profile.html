@@ -286,44 +286,42 @@
     <p class="text-[10px] text-gray-400 mt-2 font-bold uppercase tracking-widest italic">Фото профиля</p>
 </div> 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="md:col-span-2">
-            <label class="block text-xs text-gray-400 mb-1 font-bold italic">ФИО</label>
-            <input type="text" id="user-fullname-input" value="Садвакасов Дамир Бекзатович" readonly
-                   class="w-full p-3 border rounded-lg outline-none readonly-input text-sm font-semibold mb-2">
-            <div class="flex items-start gap-2 text-[11px] text-gray-500 bg-gray-50 p-3 rounded-lg border border-dashed border-gray-200">
-                <i class="fas fa-info-circle text-orange-500 mt-0.5"></i>
-                <p>После регистрации ФИО изменить невозможно. <a href="tel:+77054860793" class="text-orange-600 font-bold hover:underline">обратитесь в тех.поддержку</a>.</p>
-            </div>
-        </div>
-
-        
-
-        <div class="mt-2">
-            <label class="block text-xs text-gray-400 mb-1 font-bold italic">Номер телефона</label>
-            <input type="text" id="user-phone-input" placeholder="+7 (705) 000-00-00" 
-                   class="w-full p-3 border rounded-lg outline-none focus:border-orange-500 text-sm font-semibold">
-        </div>
-
-        <div class="mt-2">
-            <label class="block text-xs text-gray-400 mb-1 font-bold italic">Email почта</label>
-            <input type="email" id="user-email-input" placeholder="example@mail.com" 
-                   class="w-full p-3 border rounded-lg outline-none focus:border-orange-500 text-sm font-semibold">
-        </div>
-
-        <div class="md:col-span-2 mt-2">
-            <label class="block text-xs text-gray-400 mb-1 font-bold italic">Адрес проживания</label>
-            <div class="relative">
-                <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-map-marker-alt"></i></span>
-                <input type="text" id="user-address-input" placeholder="Село Кулан, ул. Жибек Жолы, дом 7" 
-                       class="w-full p-3 pl-10 border rounded-lg outline-none focus:border-orange-500 text-sm font-semibold text-gray-700">
-            </div>
+    <div class="md:col-span-2">
+        <label class="block text-xs text-gray-400 mb-1 font-bold italic">ФИО</label>
+        <input type="text" id="user-fullname-input" readonly
+               class="w-full p-3 border rounded-lg outline-none readonly-input text-sm font-semibold mb-2">
+        <div class="flex items-start gap-2 text-[11px] text-gray-500 bg-gray-50 p-3 rounded-lg border border-dashed border-gray-200">
+            <i class="fas fa-info-circle text-orange-500 mt-0.5"></i>
+            <p>После регистрации ФИО изменить невозможно. <a href="tel:+77054860793" class="text-orange-600 font-bold hover:underline">обратитесь в тех.поддержку</a>.</p>
         </div>
     </div>
 
-    <button onclick="saveProfileChanges()" 
-            class="mt-8 bg-orange-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-orange-700 transition w-full md:w-auto shadow-lg shadow-orange-200">
-        Сохранить изменения
-    </button>
+    <div class="mt-2">
+        <label class="block text-xs text-gray-400 mb-1 font-bold italic">Номер телефона</label>
+        <input type="text" id="user-phone-input" placeholder="+7 (705) 000-00-00" disabled
+               class="w-full p-3 border rounded-lg outline-none focus:border-orange-500 text-sm font-semibold disabled:bg-gray-50 disabled:text-gray-400 transition-all">
+    </div>
+
+    <div class="mt-2">
+        <label class="block text-xs text-gray-400 mb-1 font-bold italic">Email почта</label>
+        <input type="email" id="user-email-input" placeholder="example@mail.com" disabled
+               class="w-full p-3 border rounded-lg outline-none focus:border-orange-500 text-sm font-semibold disabled:bg-gray-50 disabled:text-gray-400 transition-all">
+    </div>
+
+    <div class="md:col-span-2 mt-2">
+        <label class="block text-xs text-gray-400 mb-1 font-bold italic">Адрес проживания</label>
+        <div class="relative">
+            <span class="absolute left-3 top-3 text-gray-400"><i class="fas fa-map-marker-alt"></i></span>
+            <input type="text" id="user-address-input" placeholder="Село Кулан, ул. Жибек Жолы, дом 7" disabled
+                   class="w-full p-3 pl-10 border rounded-lg outline-none focus:border-orange-500 text-sm font-semibold text-gray-700 disabled:bg-gray-50 disabled:text-gray-400 transition-all">
+        </div>
+    </div>
+</div>
+
+<button id="edit-profile-btn" onclick="toggleEditMode()" 
+        class="mt-8 bg-orange-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-orange-700 transition w-full md:w-auto shadow-lg shadow-orange-200">
+    Изменить данные
+</button>
 </div>
 
 <!-- ТАБ: МОЙ КОШЕЛЕК (Premium Stealth Design) -->
@@ -610,7 +608,7 @@
     </div>
 </div>
                 
-                <div id="tab-wish list" class="tab-content hidden bg-white rounded-xl shadow-sm p-10 md:p-20 text-center border border-gray-100">
+                <div id="tab-wishlist" class="tab-content hidden bg-white rounded-xl shadow-sm p-10 md:p-20 text-center border border-gray-100">
                     <i class="fas fa-heart-broken text-6xl md:text-8xl text-gray-200 mb-6"></i>
                     <h2 class="text-xl font-bold mb-2">У вас нет желаемых товаров</h2>
                 </div>
@@ -963,21 +961,24 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
 
 <script>
         // --- 0. СЕССИЯНЫ ТЕКСЕРУ (NEW) ---
-        window.addEventListener('DOMContentLoaded', () => {
-            const isLoggedIn = localStorage.getItem('isLoggedIn');
-            if (!isLoggedIn || isLoggedIn !== 'true') {
-                window.location.assign('auth.html');
-                return;
-            }
-            loadUserData();      // Адамның атын базадан жүктеу
-            updateDebtStatus();  // Қарызды тексеру
-            renderProfileCart(); // Себетті шығару
-            load2FAStatus();     // 2FA күйін тексеру
-            renderCertificates(); // Сертификаттарды шығару
-            updateMenuBadges();   // Менюдегі сандарды шығару
-            updateOnlineStatus(); // Интернетті тексеру
-        });
-
+window.addEventListener('DOMContentLoaded', () => {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    if (!isLoggedIn || isLoggedIn !== 'true') {
+        window.location.assign('auth.html');
+        return;
+    }
+    
+    // БӘРІНЕН БҰРЫН ОСЫ ФУНКЦИЯ ТҰРУЫ КЕРЕК
+    loadUserData();      
+    
+    updateDebtStatus();  
+    renderProfileCart(); 
+    load2FAStatus();     
+    renderCertificates(); 
+    updateMenuBadges();   
+    updateOnlineStatus(); 
+    updateNavBalance();  
+});
         // --- 1. ТАБТАР ЖҮЙЕСІ ---
         function showTab(event, tabId) {
             const currentId = localStorage.getItem('currentUserId');
@@ -1294,44 +1295,46 @@ function uploadAvatar(input) {
 }
 
 function loadUserData() {
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    const currentId = localStorage.getItem('currentUserId');
+    // 1. LocalStorage-тан деректі алу
+    const userJson = localStorage.getItem('currentUser');
     
-    // Мұнда String() қосу өте маңызды, әйтпесе базадан таппайды
-    const currentUser = users.find(u => String(u.id) === String(currentId));
+    // Элементтерді айнымалыға алу
+    const headerName = document.getElementById('user-fullname-header');
+    const nameInput = document.getElementById('user-fullname-input');
+    const avatarImg = document.getElementById('user-avatar');
 
-    if (currentUser) {
-        // 1. Аты-жөнін қою
-        if (document.getElementById('user-fullname-header'))
-            document.getElementById('user-fullname-header').innerText = currentUser.name;
+    if (userJson && userJson !== "null") {
+        const user = JSON.parse(userJson);
         
-        if (document.getElementById('user-fullname-input'))
-            document.getElementById('user-fullname-input').value = currentUser.name;
+        // 2. АТЫН АНЫҚТАУ (newUser құрылымына сәйкес тексереміз)
+        // Сенің нысаныңда 'name' қолданылады
+        const displayName = user.name || user.displayName || user.username || "Пользователь";
 
-        // 2. БОНУСТЫ ШЫҒАРУ (Байланыс орнату)
-        const bonusElem = document.getElementById('user-bonuses');
-        if (bonusElem) {
-            // Базада 'bonus' деп сақталуы керек
-            const currentBonus = currentUser.bonus || 0;
-            bonusElem.innerText = Number(currentBonus).toLocaleString();
-            console.log("Бонус жүктелді:", currentBonus);
+        // 3. Экранға шығару (Header және Инпут)
+        if (headerName) headerName.innerText = displayName;
+        if (nameInput) nameInput.value = displayName;
+
+        // 4. СУРЕТТІ ШЫҒАРУ ( newUser ішіндегі 'photo' өрісі)
+        if (avatarImg) {
+            // Егер сурет базада болса соны, болмаса 'photo'-ны, болмаса әдемі иконканы қояды
+            avatarImg.src = user.avatar || user.photo || "https://ui-avatars.com/api/?name=" + encodeURIComponent(displayName) + "&background=random";
         }
-        
-        // 3. Басқа деректер
-        if (document.getElementById('user-phone-input'))
-            document.getElementById('user-phone-input').value = currentUser.phone || "";
-        
-        if (document.getElementById('user-email-input'))
-            document.getElementById('user-email-input').value = currentUser.email || "";
 
-        if (document.getElementById('user-address-input'))
-            document.getElementById('user-address-input').value = currentUser.address || "";
-            
+        // 5. БАСҚА ДЕРЕКТЕРДІ ТОЛТЫРУ
+        if (document.getElementById('user-phone-input')) 
+            document.getElementById('user-phone-input').value = user.phone || '';
+        
+        if (document.getElementById('user-email-input')) 
+            document.getElementById('user-email-input').value = user.email || '';
+
+        if (document.getElementById('user-address-input')) 
+            document.getElementById('user-address-input').value = user.address || '';
+
+        console.log("Профиль сәтті жаңартылды:", displayName);
     } else {
-        console.error("Пайдаланушы табылмады! ID:", currentId);
+        window.location.assign('auth.html');
     }
 }
-
         function saveProfileChanges() {
             const currentId = localStorage.getItem('currentUserId');
             let users = JSON.parse(localStorage.getItem('users')) || [];
@@ -1705,6 +1708,71 @@ function updateNavBalance() {
     if (balanceEl) {
         // Санды әдемі форматта шығару (мысалы: 15 000 ₸)
         balanceEl.innerText = Number(balance).toLocaleString() + ' ₸';
+    }
+}
+
+let isEditMode = false;
+
+function toggleEditMode() {
+    const btn = document.getElementById('edit-profile-btn');
+    const phoneInput = document.getElementById('user-phone-input');
+    const emailInput = document.getElementById('user-email-input');
+    const addressInput = document.getElementById('user-address-input');
+
+    if (!isEditMode) {
+        // --- ӨЗГЕРТУ РЕЖИМІН ҚОСУ ---
+        isEditMode = true;
+        phoneInput.disabled = false;
+        emailInput.disabled = false;
+        addressInput.disabled = false;
+        
+        btn.innerText = "Сохранить изменения";
+        btn.classList.replace('bg-orange-600', 'bg-green-600'); // Жасыл түске ауыстыру (опционально)
+        phoneInput.focus();
+    } else {
+        // --- САҚТАУ РЕЖИМІН ҚОСУ ---
+        saveProfileChanges();
+    }
+}
+
+function saveProfileChanges() {
+    const currentId = localStorage.getItem('currentUserId');
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+    const userIndex = users.findIndex(u => String(u.id) === String(currentId));
+
+    if (userIndex !== -1) {
+        // 1. Деректерді базаға (users тізіміне) жаңарту
+        users[userIndex].phone = document.getElementById('user-phone-input').value;
+        users[userIndex].email = document.getElementById('user-email-input').value;
+        users[userIndex].address = document.getElementById('user-address-input').value;
+
+        // 2. LocalStorage-ты жаңарту
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        // 3. Сессияны (currentUser) жаңарту (атың жоғалып кетпеуі үшін маңызды)
+        localStorage.setItem('currentUser', JSON.stringify(users[userIndex]));
+
+        // 4. Интерфейсті қайта жабу
+        isEditMode = false;
+        document.getElementById('user-phone-input').disabled = true;
+        document.getElementById('user-email-input').disabled = true;
+        document.getElementById('user-address-input').disabled = true;
+
+        const btn = document.getElementById('edit-profile-btn');
+        btn.innerText = "Изменить данные";
+        btn.classList.replace('bg-green-600', 'bg-orange-600');
+
+        // 5. Хабарлама шығару
+        Swal.fire({
+            icon: 'success',
+            title: 'Данные обновлены',
+            timer: 2000,
+            showConfirmButton: false,
+            customClass: { popup: 'rounded-[2rem]' }
+        });
+        
+        // 6. Header-дегі атын қайта тексеру (керек болса)
+        loadUserData();
     }
 }
 

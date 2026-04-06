@@ -136,48 +136,47 @@
                 QulanShop
             </div>
 
-            <div class="flex items-center space-x-2 md:space-x-8 order-2 md:order-3">
-                <div class="relative shrink-0">
-                    <div onclick="toggleLangMenu()" class="text-[10px] md:text-sm font-bold cursor-pointer hover:text-orange-600 border px-2 py-1 md:px-3 md:py-1.5 rounded-lg flex items-center bg-white shadow-sm italic">
-                        <i class="fas fa-globe mr-1 md:mr-2 text-orange-500"></i>
-                        <span id="current-lang-text">Рус</span>
-                    </div>
-                    <div id="lang-menu" class="dropdown-animate absolute top-full right-0 mt-2 w-32 bg-white rounded-xl shadow-xl border border-gray-100 z-[100]">
-                        <div onclick="setLanguage('ru')" class="px-4 py-3 hover:bg-orange-50 cursor-pointer border-b border-gray-50 font-medium italic">Русский</div>
-                        <div onclick="setLanguage('kz')" class="px-4 py-3 hover:bg-orange-50 cursor-pointer font-medium italic">Қазақша</div>
-                    </div>
-                </div>
-
-            <button onclick="checkAuth('profile.html')" class="flex flex-col items-center hover:text-orange-600 transition shrink-0">
-    <i class="far fa-user text-lg md:text-xl"></i>
-    <span class="text-[9px] md:text-[10px] mt-1 font-medium italic">Кабинет</span>
-</button>
-
-                <a href="wishlist.html" class="flex flex-col items-center hover:text-orange-600 transition shrink-0">
-                    <i class="far fa-heart text-lg md:text-xl"></i>
-                    <span class="text-[9px] md:text-[10px] mt-1 font-medium italic">Избранное</span>
-                </a>
-
-                <a href="cart.html" class="flex flex-col items-center hover:text-orange-600 cursor-pointer relative shrink-0">
-                    <i class="fas fa-shopping-cart text-lg md:text-xl text-orange-600"></i>
-                    <span class="text-[9px] md:text-[10px] mt-1 font-medium italic">Корзина</span>
-                    <span class="absolute -top-1 -right-1.5 bg-red-500 text-white text-[8px] md:text-[10px] rounded-full px-1 font-bold shadow-sm">0</span>
-                </a>
+    <div class="flex items-center space-x-2 md:space-x-8 order-2 md:order-3">
+        
+        <div class="relative shrink-0">
+            <div onclick="toggleLangMenu()" class="text-[10px] md:text-sm font-bold cursor-pointer hover:text-orange-600 border px-2 py-1 md:px-3 md:py-1.5 rounded-lg flex items-center bg-white shadow-sm italic">
+                <i class="fas fa-globe mr-1 md:mr-2 text-orange-500"></i>
+                <span id="current-lang-text">Рус</span>
             </div>
-
-          <div class="w-full md:w-auto md:flex-1 relative order-3 md:order-2 md:mx-6 pb-3 md:pb-0">
-    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none h-10 md:h-full">
-        <i class="fas fa-search text-gray-400 text-sm md:text-base"></i>
-    </div>
-    <input type="text" 
-           id="search-input" 
-           oninput="searchProducts(this.value)" 
-           class="w-full h-10 bg-gray-50 md:bg-white border-2 border-gray-100 rounded-xl pl-10 pr-4 outline-none focus:border-orange-500 transition text-sm md:text-base" 
-           placeholder="Поиск товаров...">
-</div>
-
+            <div id="lang-menu" class="dropdown-animate absolute top-full right-0 mt-2 w-32 bg-white rounded-xl shadow-xl border border-gray-100 z-[100]">
+                <div onclick="setLanguage('ru')" class="px-4 py-3 hover:bg-orange-50 cursor-pointer border-b border-gray-50 font-medium italic">Русский</div>
+                <div onclick="setLanguage('kz')" class="px-4 py-3 hover:bg-orange-50 cursor-pointer font-medium italic">Қазақша</div>
+            </div>
         </div>
+
+        <button onclick="checkAuth('profile.html')" class="flex flex-col items-center hover:text-orange-600 transition text-gray-600">
+            <i class="far fa-user text-lg md:text-xl"></i>
+            <span class="text-[9px] md:text-[10px] mt-1 font-medium italic">Кабинет</span>
+        </button>
+
+        <button onclick="checkAuth('wishlist.html')" class="flex flex-col items-center hover:text-orange-600 transition text-gray-600">
+            <i class="far fa-heart text-lg md:text-xl"></i>
+            <span class="text-[9px] md:text-[10px] mt-1 font-medium italic">Избранное</span>
+        </button>
+
+        <button onclick="checkAuth('cart.html')" class="flex flex-col items-center hover:text-orange-600 transition text-gray-600 relative">
+            <i class="fas fa-shopping-cart text-lg md:text-xl"></i>
+            <span class="text-[9px] md:text-[10px] mt-1 font-medium italic">Корзина</span>
+            <span id="badge-cart" class="hidden absolute -top-1 -right-1 bg-orange-600 text-white text-[8px] rounded-full px-1.5 font-bold">0</span>
+        </button>
     </div>
+
+    <div class="w-full md:w-auto md:flex-1 relative order-3 md:order-2 md:mx-6 pb-3 md:pb-0">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none h-10 md:h-full">
+            <i class="fas fa-search text-gray-400 text-sm md:text-base"></i>
+        </div>
+        <input type="text" 
+               id="search-input" 
+               oninput="searchProducts(this.value)" 
+               class="w-full h-10 bg-gray-50 md:bg-white border-2 border-gray-100 rounded-xl pl-10 pr-4 outline-none focus:border-orange-500 transition text-sm md:text-base" 
+               placeholder="Поиск товаров...">
+    </div>
+</div>
 </header>
 
   <section class="container mx-auto px-4 mt-6">
@@ -569,22 +568,6 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
 </script>
 
 <script>
-    // --- 1. АВТОРИЗАЦИЯ ЖӘНЕ 24 САҒАТТЫҚ ТЕКСЕРІС ---
-    function checkAuth(pageUrl) {
-        const isLoggedIn = localStorage.getItem('isLoggedIn');
-        const lastAuthTime = localStorage.getItem('lastAuthTime'); 
-        const now = new Date().getTime();
-        const oneDay = 24 * 60 * 60 * 1000; 
-
-        if (isLoggedIn !== 'true' || !lastAuthTime || (now - lastAuthTime > oneDay)) {
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('lastAuthTime');
-            localStorage.setItem('redirectTarget', pageUrl); 
-            window.location.href = 'auth.html';
-        } else {
-            window.location.href = pageUrl;
-        }
-    }
 
     // --- 2. ЖАСЫРЫН БӨЛІМДЕРДІ БАСҚАРУ (Подарочные карты) ---
     function updatePrivateUI() {
@@ -950,12 +933,6 @@ function displayProductList(list) {
                 <h3 class="product-name text-[11px] font-bold h-8 overflow-hidden mb-3 text-gray-800 leading-tight">
                     ${escapeHTML(p.name)}
                 </h3>
-
-                <!-- Себетке салу батырмасы -->
-                <button onclick="event.stopPropagation(); addToCart('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${p.price}, '${p.img}')" 
-                        class="w-full bg-orange-600 text-white py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-orange-700 active:scale-95 transition-all shadow-md shadow-orange-100">
-                    <i class="fas fa-shopping-basket mr-1"></i> В корзину
-                </button>
             </div>`;
     }).join('');
 }

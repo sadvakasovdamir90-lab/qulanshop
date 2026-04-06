@@ -604,111 +604,149 @@ window.addEventListener('DOMContentLoaded', updateOnlineStatus);
         if (el) el.type = el.type === 'password' ? 'text' : 'password';
     };
 
- window.signInWithGoogle = function() {
-        signInWithPopup(auth, provider).then((result) => {
-            const user = result.user;
-            let users = JSON.parse(localStorage.getItem('users')) || [];
-            let existingUser = users.find(u => u.email === user.email);
+window.signInWithGoogle = function() {
+    signInWithPopup(auth, provider).then((result) => {
+        const user = result.user;
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        let existingUser = users.find(u => u.email === user.email);
 
-            if (!existingUser) {
-                Swal.fire({
-                    title: '<span style="font-family: \'Inter\', sans-serif; font-weight: 900; color: #1e293b; text-transform: uppercase; letter-spacing: -0.5px;">Завершение регистрации</span>',
-                    html: `
-                        <div style="margin-top: 20px; text-align: left;">
-                            <label style="display: block; font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; margin-left: 4px; letter-spacing: 0.5px;">Полное ФИО</label>
-                            <input id="swal-name" class="swal2-input" placeholder="Иван Иванов" value="${user.displayName || ''}" 
-                                style="width: 100%; margin: 0; padding: 15px; border-radius: 12px; border: 2px solid #f1f5f9; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.3s;">
-                            
-                            <label style="display: block; font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; margin-top: 20px; margin-left: 4px; letter-spacing: 0.5px;">Номер телефона</label>
-                            <input id="swal-phone" class="swal2-input" placeholder="+7 (707) 000-00-00" 
-                                style="width: 100%; margin: 0; padding: 15px; border-radius: 12px; border: 2px solid #f1f5f9; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.3s;">
-                            
-                            <label style="display: block; font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; margin-top: 20px; margin-left: 4px; letter-spacing: 0.5px;">Адрес проживания</label>
-                            <input id="swal-address" class="swal2-input" placeholder="Район, улица, дом" 
-                                style="width: 100%; margin: 0; padding: 15px; border-radius: 12px; border: 2px solid #f1f5f9; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.3s;">
-                        </div>
-                    `,
-                    focusConfirm: false,
-                    confirmButtonText: 'Создать аккаунт',
-                    confirmButtonColor: '#f26522',
-                    background: '#ffffff',
-                    padding: '2rem',
-                    borderRadius: '24px',
-                    customClass: {
-                        confirmButton: 'custom-swal-button'
-                    },
-                    preConfirm: () => {
-                        const name = document.getElementById('swal-name').value.trim();
-                        const phone = document.getElementById('swal-phone').value.trim();
-                        const address = document.getElementById('swal-address').value.trim();
-
-                        if (!name || !phone || !address) {
-                            Swal.showValidationMessage('Пожалуйста, заполните все поля');
-                            return false;
-                        }
-                        return { name: name, phone: phone, address: address };
-                    }
-                }).then((res) => {
-                    if (res.isConfirmed) {
-                        const newUser = { 
-                            id: user.uid, 
-                            name: res.value.name,
-                            email: user.email, 
-                            phone: res.value.phone, 
-                            address: res.value.address, 
-                            debt: 0, 
-                            giftCards: [], 
-                            photo: user.photoURL, 
-                            twoFactorEnabled: false 
-                        };
+        if (!existingUser) {
+            Swal.fire({
+                title: '<span style="font-family: \'Inter\', sans-serif; font-weight: 900; color: #1e293b; text-transform: uppercase; letter-spacing: -0.5px;">Завершение регистрации</span>',
+                html: `
+                    <div style="margin-top: 20px; text-align: left;">
+                        <label style="display: block; font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; margin-left: 4px; letter-spacing: 0.5px;">Полное ФИО</label>
+                        <input id="swal-name" class="swal2-input" placeholder="Иван Иванов" value="${user.displayName || ''}" 
+                            style="width: 100%; margin: 0; padding: 15px; border-radius: 12px; border: 2px solid #f1f5f9; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.3s;">
                         
-                        users.push(newUser); 
-                        localStorage.setItem('users', JSON.stringify(users)); 
-                        loginUser(newUser.id);
+                        <label style="display: block; font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; margin-top: 20px; margin-left: 4px; letter-spacing: 0.5px;">Номер телефона</label>
+                        <input id="swal-phone" class="swal2-input" placeholder="+7 (707) 000-00-00" 
+                            style="width: 100%; margin: 0; padding: 15px; border-radius: 12px; border: 2px solid #f1f5f9; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.3s;">
+                        
+                        <label style="display: block; font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; margin-top: 20px; margin-left: 4px; letter-spacing: 0.5px;">Адрес проживания</label>
+                        <input id="swal-address" class="swal2-input" placeholder="Район, улица, дом" 
+                            style="width: 100%; margin: 0; padding: 15px; border-radius: 12px; border: 2px solid #f1f5f9; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.3s;">
+                    </div>
+                `,
+                focusConfirm: false,
+                confirmButtonText: 'Создать аккаунт',
+                confirmButtonColor: '#f26522',
+                background: '#ffffff',
+                padding: '2rem',
+                borderRadius: '24px',
+                customClass: {
+                    confirmButton: 'custom-swal-button'
+                },
+                preConfirm: () => {
+                    const name = document.getElementById('swal-name').value.trim();
+                    const phone = document.getElementById('swal-phone').value.trim();
+                    const address = document.getElementById('swal-address').value.trim();
+
+                    if (!name || !phone || !address) {
+                        Swal.showValidationMessage('Пожалуйста, заполните все поля');
+                        return false;
                     }
-                });
-            } else {
-                loginUser(existingUser.id);
-            }
-        }).catch((error) => {
-            console.error("Google Sign-In Error:", error);
-            Swal.fire('Ошибка', 'Не удалось войти через Google', 'error');
-        });
-    };
-
-    function loginUser(userId) {
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('currentUserId', userId);
-        localStorage.setItem('lastAuthTime', new Date().getTime());
-        window.location.href = 'profile.html';
-    }
-
-    // --- EVENT LISTENERS & AUTO-LOAD ---
-    document.getElementById('reg-pass')?.addEventListener('input', (e) => window.checkPasswordStrength(e.target.value));
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            const active = ['login-section', 'reg-section', 'verify-section'].find(id => !document.getElementById(id).classList.contains('hidden-section'));
-            if (active === 'login-section') window.handleLogin();
-            else if (active === 'reg-section') window.handleStartAuth('reg');
-            else if (active === 'verify-section') window.handleConfirmCode();
+                    return { name: name, phone: phone, address: address };
+                }
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    const newUser = { 
+                        id: user.uid, 
+                        name: res.value.name, // Бұл жерде name дұрыс сақталып тұр
+                        email: user.email, 
+                        phone: res.value.phone, 
+                        address: res.value.address, 
+                        debt: 0, 
+                        giftCards: [], 
+                        photo: user.photoURL, 
+                        twoFactorEnabled: false 
+                    };
+                    
+                    users.push(newUser); 
+                    localStorage.setItem('users', JSON.stringify(users)); 
+                    
+                    // МАҢЫЗДЫ ӨЗГЕРІС: Тек ID емес, бүкіл newUser нысанын жібереміз
+                    loginUser(newUser); 
+                }
+            });
+        } else {
+            // МАҢЫЗДЫ ӨЗГЕРІС: Тек ID емес, базадан табылған пайдаланушыны толық жібереміз
+            loginUser(existingUser); 
         }
+    }).catch((error) => {
+        console.error("Google Sign-In Error:", error);
+        Swal.fire('Ошибка', 'Не удалось войти через Google', 'error');
     });
+};
 
-    const checkSavedCredentials = () => {
-        const savedLogin = localStorage.getItem('savedLogin');
-        const savedPass = localStorage.getItem('savedPass');
-        const loginInput = document.getElementById('login-identifier');
-        const passInput = document.getElementById('login-pass');
-        if (savedLogin && savedPass && loginInput && passInput) {
-            loginInput.value = savedLogin;
-            passInput.value = savedPass;
-            if (document.getElementById('remember-me')) document.getElementById('remember-me').checked = true;
+ /**
+ * QulanShop - Authentication Engine
+ */
+
+// 1. ЖҮЙЕГЕ КІРУ ФУНКЦИЯСЫ (Профильде атың шығуы үшін осы нұсқа қажет)
+function loginUser(userObject) {
+    // Жүйеге кірді деген басты белгі
+    localStorage.setItem('isLoggedIn', 'true');
+    
+    // ЕҢ МАҢЫЗДЫСЫ: Пайдаланушының бүкіл дерегін (аты, бонусы, т.б.) мәтін түрінде сақтау
+    // Профиль беті осы 'currentUser' ішінен атыңды оқиды
+    localStorage.setItem('currentUser', JSON.stringify(userObject)); 
+    
+    // ID-ді бөлек те сақтап қоямыз (басқа функциялар іздеу үшін)
+    localStorage.setItem('currentUserId', userObject.id);
+    
+    // Сессия уақыты (1 сағаттық бақылау осы жерден басталады)
+    localStorage.setItem('lastAuthTime', new Date().getTime());
+    
+    // Профильге бағыттау
+    window.location.href = 'profile.html';
+}
+
+// 2. ENTER БАТЫРМАСЫН БАСҚАНДА АВТОМАТТЫ ТҮРДЕ КІРУ/ТІРКЕЛУ
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        const loginSec = document.getElementById('login-section');
+        const regSec = document.getElementById('reg-section');
+        const verifySec = document.getElementById('verify-section');
+
+        if (loginSec && !loginSec.classList.contains('hidden-section')) {
+            if (typeof window.handleLogin === 'function') window.handleLogin();
+        } else if (regSec && !regSec.classList.contains('hidden-section')) {
+            if (typeof window.handleStartAuth === 'function') window.handleStartAuth('reg');
+        } else if (verifySec && !verifySec.classList.contains('hidden-section')) {
+            if (typeof window.handleConfirmCode === 'function') window.handleConfirmCode();
         }
-    };
+    }
+});
 
+// 3. ПАРОЛЬДІҢ ҚУАТЫН ТЕКСЕРУ (Тіркелу кезінде)
+document.getElementById('reg-pass')?.addEventListener('input', (e) => {
+    if (typeof window.checkPasswordStrength === 'function') {
+        window.checkPasswordStrength(e.target.value);
+    }
+});
+
+// 4. САҚТАЛҒАН ДЕРЕКТЕРДІ АВТО-ТОЛТЫРУ (Remember Me)
+const checkSavedCredentials = () => {
+    const savedLogin = localStorage.getItem('savedLogin');
+    const savedPass = localStorage.getItem('savedPass');
+    const loginInput = document.getElementById('login-identifier');
+    const passInput = document.getElementById('login-pass');
+    const rememberCheckbox = document.getElementById('remember-me');
+
+    if (savedLogin && savedPass && loginInput && passInput) {
+        loginInput.value = savedLogin;
+        passInput.value = savedPass;
+        if (rememberCheckbox) rememberCheckbox.checked = true;
+    }
+};
+
+// БЕТ ЖҮКТЕЛГЕНДЕ ІСКЕ ҚОСУ
+window.addEventListener('DOMContentLoaded', () => {
     checkSavedCredentials();
+    // Фокусты логин жазатын жерге қою
     setTimeout(() => document.getElementById('login-identifier')?.focus(), 500);
+});
 </script>
 
 <script src="script.js"></script>

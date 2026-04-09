@@ -181,6 +181,14 @@
 </head>
 <body class="bg-gray-50 font-sans text-gray-800">
 
+    <div id="global-loader" class="fixed inset-0 bg-white z-[9999] flex flex-col items-center justify-center transition-opacity duration-500">
+    <div class="relative">
+        <div class="w-16 h-16 border-4 border-gray-100 border-t-orange-600 rounded-full animate-spin"></div>
+        <i class="fas fa-shopping-bag absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-orange-600 text-xl"></i>
+    </div>
+    <p class="mt-4 font-black italic uppercase tracking-[0.2em] text-gray-400 text-[10px] animate-pulse">Загрузка QulanShop...</p>
+</div>
+
  <header class="bg-white shadow-sm sticky top-0 z-50">
     <div class="container mx-auto px-2 md:px-4">
         
@@ -620,6 +628,15 @@ function updateOnlineStatus() {
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 window.addEventListener('DOMContentLoaded', updateOnlineStatus);
+window.addEventListener('load', () => {
+    const loader = document.getElementById('global-loader');
+    if (loader) {
+        loader.classList.add('opacity-0'); // Әдемі жоғалу эффекті
+        setTimeout(() => {
+            loader.style.display = 'none';
+        }, 500); // 0.5 секундтан кейін толық өшеді
+    }
+});
 </script>
 
 <script>
@@ -743,6 +760,7 @@ function renderProducts() {
     if (!container) return;
     const products = JSON.parse(localStorage.getItem('products')) || [];
     displayProductList(products); 
+    
 }
 
 function displayProductList(list) {
@@ -981,11 +999,11 @@ function displayProductList(list) {
                 ${discountBadge}
 
                 <!-- Тауар суреті -->
-                <div class="w-full h-32 md:h-40 bg-gray-50 rounded-2xl mb-4 overflow-hidden flex items-center justify-center border border-gray-50">
-                    <img src="${p.img || 'images/no-photo.jpg'}" 
-                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                         onerror="this.src='https://via.placeholder.com/150?text=QulanShop'">
-                </div>
+                <div class="w-full h-32 md:h-40 bg-gray-50 rounded-2xl mb-4 overflow-hidden flex items-center justify-center border border-gray-50 p-2">
+    <img src="${p.img || 'images/no-photo.jpg'}" 
+         class="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500" 
+         onerror="this.src='https://via.placeholder.com/150?text=QulanShop'">
+</div>
 
                 <!-- Бағалар бөлімі -->
                 <div class="flex flex-col mb-1">
@@ -1092,24 +1110,28 @@ function filterByCategory(categoryName) {
                 <p class="font-black uppercase tracking-widest text-[10px]">Бұл категорияда тауар табылмады...</p>
             </div>`;
     } else {
-        container.innerHTML = filtered.map(p => `
-            <div class="bg-white rounded-3xl shadow-sm p-4 border border-gray-50 group hover:shadow-xl transition-all cursor-pointer animate-modal" onclick="location.href='product.html?id=${p.id}'">
-                <div class="h-48 bg-gray-100 rounded-2xl mb-4 overflow-hidden relative">
-                    <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                    ${p.oldPrice ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[8px] font-black px-2 py-1 rounded-full uppercase">Скидка</span>` : ''}
-                </div>
-                <h3 class="font-black italic uppercase text-sm mb-1 truncate">${p.name}</h3>
-                <div class="flex items-end gap-2">
-                    <p class="text-orange-600 font-black italic text-lg leading-none">${Number(p.price).toLocaleString()} ₸</p>
-                    ${p.oldPrice ? `<p class="text-gray-300 line-through text-[10px] font-bold mb-0.5">${Number(p.oldPrice).toLocaleString()} ₸</p>` : ''}
-                </div>
-            </div>
-        `).join('');
+    container.innerHTML = filtered.map(p => `
+    <div class="bg-white rounded-3xl shadow-sm p-4 border border-gray-50 group hover:shadow-xl transition-all cursor-pointer animate-modal flex flex-col justify-between" onclick="location.href='product.html?id=${p.id}'">
+        <div class="h-48 bg-gray-100 rounded-2xl mb-4 overflow-hidden relative flex items-center justify-center p-4">
+            <img src="${p.img}" class="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500">
+            ${p.oldPrice ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[8px] font-black px-2 py-1 rounded-full uppercase">Скидка</span>` : ''}
+        </div>
+        <h3 class="font-black italic uppercase text-sm mb-2 truncate">${p.name}</h3>
+        <div class="flex items-end gap-2">
+            <p class="text-orange-600 font-black italic text-lg leading-none">${Number(p.price).toLocaleString()} ₸</p>
+            ${p.oldPrice ? `<p class="text-gray-300 line-through text-[10px] font-bold mb-0.5">${Number(p.oldPrice).toLocaleString()} ₸</p>` : ''}
+        </div>
+    </div>
+`).join('');
     }
 
     // 4. Мәзірді жабу (Анимациямен)
     toggleCategories();
 }
+
+
+
+
 </script>
 
 

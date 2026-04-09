@@ -44,6 +44,14 @@
 </head>
 <body class="bg-gray-50 font-sans">
 
+    <div id="global-loader" class="fixed inset-0 bg-white z-[9999] flex flex-col items-center justify-center transition-opacity duration-500">
+    <div class="relative">
+        <div class="w-16 h-16 border-4 border-gray-100 border-t-orange-600 rounded-full animate-spin"></div>
+        <i class="fas fa-shopping-bag absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-orange-600 text-xl"></i>
+    </div>
+    <p class="mt-4 font-black italic uppercase tracking-[0.2em] text-gray-400 text-[10px] animate-pulse">Загрузка QulanShop...</p>
+</div>
+
 <header class="bg-white/80 backdrop-blur-md shadow-sm py-3 sm:py-4 sticky top-0 z-[100] border-b border-gray-50">
     <div class="container mx-auto px-4 flex justify-between items-center">
         
@@ -301,6 +309,15 @@
     }
 
     window.addEventListener('DOMContentLoaded', renderWishlist);
+    window.addEventListener('load', () => {
+    const loader = document.getElementById('global-loader');
+    if (loader) {
+        loader.classList.add('opacity-0'); // Әдемі жоғалу эффекті
+        setTimeout(() => {
+            loader.style.display = 'none';
+        }, 500); // 0.5 секундтан кейін толық өшеді
+    }
+});
 
 // 1. ТАУАРЛАРДЫ ШЫҒАРУ
 function renderRecommendations() {

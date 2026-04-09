@@ -52,6 +52,14 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
+    <div id="global-loader" class="fixed inset-0 bg-white z-[9999] flex flex-col items-center justify-center transition-opacity duration-500">
+    <div class="relative">
+        <div class="w-16 h-16 border-4 border-gray-100 border-t-orange-600 rounded-full animate-spin"></div>
+        <i class="fas fa-shopping-bag absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-orange-600 text-xl"></i>
+    </div>
+    <p class="mt-4 font-black italic uppercase tracking-[0.2em] text-gray-400 text-[10px] animate-pulse">Загрузка QulanShop...</p>
+</div>
+
     <div class="auth-container w-full max-w-[400px] bg-white rounded-[2.5rem] shadow-2xl p-8 md:p-10 relative overflow-hidden">
         
        <div class="text-center mb-8">
@@ -246,6 +254,15 @@ function updateOnlineStatus() {
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 window.addEventListener('DOMContentLoaded', updateOnlineStatus);
+window.addEventListener('load', () => {
+    const loader = document.getElementById('global-loader');
+    if (loader) {
+        loader.classList.add('opacity-0'); // Әдемі жоғалу эффекті
+        setTimeout(() => {
+            loader.style.display = 'none';
+        }, 500); // 0.5 секундтан кейін толық өшеді
+    }
+});
 </script>
 
 <script type="module">

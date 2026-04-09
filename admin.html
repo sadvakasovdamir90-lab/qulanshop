@@ -324,17 +324,54 @@
                             <label class="text-[10px] font-bold text-slate-500 uppercase ml-2">Маленький баннер (Промо)</label>
                             <input type="text" id="small-banner" class="w-full p-4 rounded-2xl mt-1" placeholder="URL маленькой картинки">
                         </div>
-                        <button onclick="saveAllBanners()" class="w-full bg-orange-600 py-5 rounded-2xl font-black uppercase italic tracking-widest shadow-lg shadow-orange-900/40 hover:bg-orange-500 transition-all mt-6">
-                            <i class="fas fa-save mr-2"></i> Сохранить все изменения
-                        </button>
+                        
                     </div>
                 </div>
-                <div class="mt-6 p-4 bg-orange-900/20 rounded-2xl border border-orange-500/30">
-                    <label class="text-[10px] font-black text-orange-500 uppercase ml-2 tracking-widest">Окончание Акции (Таймер)</label>
+
+                <div class="mt-6 p-6 bg-blue-900/20 rounded-[2rem] border border-blue-500/30 space-y-4">
+    <div class="flex items-center gap-3">
+        <i class="fas fa-percentage text-blue-500 text-xl"></i>
+        <h3 class="text-sm font-black uppercase italic text-blue-400">Мега Скидка (Бүкіл тауарға немесе Категорияға)</h3>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <select id="global-discount-target" class="w-full p-4 rounded-xl bg-[#0f172a] border border-slate-700 font-bold text-white outline-none focus:border-blue-500 text-xs">
+            <option value="all">Все товары (Бүкіл тауар)</option>
+            <option value="Красота и здоровье">Красота и здоровье</option>
+            <option value="Игрушки">Игрушки</option>
+            <option value="Продукты">Продукты</option>
+            <option value="Аудио техника">Аудио техника</option>
+        </select>
+
+        <input type="number" id="global-discount-percent" placeholder="Пайыз (мысалы: 20)" 
+            class="w-full bg-[#0f172a] border border-slate-700 p-4 rounded-xl font-bold text-white outline-none focus:border-blue-500 text-xs">
+    </div>
+    
+    <div class="flex flex-col sm:flex-row gap-3">
+        <button onclick="applyGlobalDiscount()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black uppercase italic text-[10px] transition-all active:scale-95 shadow-lg shadow-blue-900/40">
+            Қолдану
+        </button>
+        
+        <button onclick="resetGlobalDiscount()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-4 rounded-xl font-black uppercase italic text-[10px] transition-all">
+            Сброс (Бәрін қайтару)
+        </button>
+    </div>
+
+      <div class="mt-6 p-4">
+                    <label class="-orange-500 uppercase ml-2 tracking-widest">Окончание Акции (Таймер)</label>
                     <input type="datetime-local" id="promo-deadline" 
                         class="w-full bg-[#0f172a] border border-slate-700 p-4 rounded-xl mt-2 font-bold text-white outline-none focus:border-orange-500">
                 </div>
             </div>
+
+    <p class="text-[9px] text-slate-500 font-bold italic uppercase tracking-widest leading-relaxed">
+        * Таңдалған категорияға жеңілдік жүреді. "Сброс" бассаңыз, БҮКІЛ тауардың бағасы бастапқы қалпына келеді.
+    </p>
+</div>
+
+<button onclick="applyGlobalDiscount()" class="w-full bg-orange-600 py-5 rounded-2xl font-black uppercase italic tracking-widest shadow-lg shadow-orange-900/40 hover:bg-orange-500 transition-all mt-6">
+                            <i class="fas fa-save mr-2"></i> Сохранить все изменения
+                        </button>
 
             <!-- ТАБ: ПОДДЕРЖКА -->
 <div id="tab-support" class="tab-content space-y-6 p-2 sm:p-0">
@@ -1378,6 +1415,70 @@ function closeImageViewer() {
         modal.classList.remove('flex');
         document.body.style.overflow = 'auto'; // Скроллды қайта қосу
     }, 200);
+}
+
+
+function applyGlobalDiscount() {
+    const target = document.getElementById('global-discount-target').value;
+    const percent = parseInt(document.getElementById('global-discount-percent').value);
+    
+    if (!percent || percent <= 0 || percent >= 100) {
+        alert("Дұрыс пайыз енгізіңіз (1-99)!");
+        return;
+    }
+
+    const confirmText = target === 'all' 
+        ? `Бүкіл тауарға -${percent}% жеңілдік жасағыңыз келе ме?` 
+        : `"${target}" категориясына -${percent}% жеңілдік жасағыңыз келе ме?`;
+
+    if (confirm(confirmText)) {
+        let products = JSON.parse(localStorage.getItem('products')) || [];
+        
+        products = products.map(p => {
+            // Егер "Бәрі" таңдалса немесе категория сәйкес келсе
+            if (target === 'all' || p.category === target) {
+                // Егер бұрыннан скидка болса, бастапқы бағаны жоғалтып алмас үшін тексереміз
+                const currentBasePrice = p.oldPrice ? Number(p.oldPrice) : Number(p.price);
+                const newPrice = Math.round(currentBasePrice * (1 - percent / 100));
+                
+                return {
+                    ...p,
+                    oldPrice: currentBasePrice,
+                    price: newPrice,
+                    discountLabel: `-${percent}%`
+                };
+            }
+            return p; // Басқа тауарларға тиіспейміз
+        });
+
+        localStorage.setItem('products', JSON.stringify(products));
+        runAdvancedFilter(); // Кестені жаңарту
+        showToast(); //
+        alert("Жеңілдік сәтті қолданылды! ✅");
+    }
+}
+
+function resetGlobalDiscount() {
+    if (confirm("Бүкіл жеңілдіктерді өшіріп, бағаларды бастапқы қалпына келтіреміз бе?")) {
+        let products = JSON.parse(localStorage.getItem('products')) || [];
+        
+        products = products.map(p => {
+            if (p.oldPrice) {
+                return {
+                    ...p,
+                    price: p.oldPrice,
+                    oldPrice: null,
+                    discountLabel: null
+                };
+            }
+            return p;
+        });
+
+        localStorage.setItem('products', JSON.stringify(products));
+        runAdvancedFilter(); //
+        showToast(); //
+        alert("Бағалар қалпына келтірілді! 🔄");
+    }
 }
 
     </script>

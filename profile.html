@@ -1370,45 +1370,67 @@ function processTopUp(method) {
         }
 
         // --- 5. ПРОФИЛЬ ДЕРЕКТЕРІН БАСҚАРУ ---
-        function loadUserData() {
-            const users = JSON.parse(localStorage.getItem('users')) || [];
-            const currentId = localStorage.getItem('currentUserId');
-            const currentUser = users.find(u => u.id == currentId);
+       function loadUserData() {
+    // 1. ДЕРЕКТЕРДІ ОҚУ
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    const currentId = localStorage.getItem('currentUserId');
+    const userJson = localStorage.getItem('currentUser');
+    
+    // БАЗАДАН ҚОЛДАНУШЫНЫ ТАБУ (Сенің жазған логикаң)
+    const currentUser = users.find(u => u.id == currentId);
 
-            if (currentUser) {
-                if (document.getElementById('user-fullname-header')) 
-                    document.getElementById('user-fullname-header').innerText = currentUser.name;
-                
-                if (document.getElementById('user-fullname-input')) 
-                    document.getElementById('user-fullname-input').value = currentUser.name;
-
-                if (document.getElementById('user-phone-input')) 
-                    document.getElementById('user-phone-input').value = currentUser.phone || '';
-
-                if (document.getElementById('user-email-input')) 
-                    document.getElementById('user-email-input').value = currentUser.email || '';
-
-                if (document.getElementById('user-address-input')) 
-                    document.getElementById('user-address-input').value = currentUser.address || '';
-            }
-        }
-
-        function loadUserData() {
-    try {
-        const userJson = localStorage.getItem('currentUser');
+    // 2. ИНТЕРФЕЙСКЕ ШЫҒАРУ (Сенің мәтіндерің мен ID-лерің)
+    if (currentUser) {
+        if (document.getElementById('user-fullname-header')) 
+            document.getElementById('user-fullname-header').innerText = currentUser.name;
         
-        if (!userJson) throw new Error("Деректер бос"); // Егер дерек мүлдем жоқ болса
+        if (document.getElementById('user-fullname-input')) 
+            document.getElementById('user-fullname-input').value = currentUser.name;
+
+        if (document.getElementById('user-phone-input')) 
+            document.getElementById('user-phone-input').value = currentUser.phone || '';
+
+        if (document.getElementById('user-email-input')) 
+            document.getElementById('user-email-input').value = currentUser.email || '';
+
+        if (document.getElementById('user-address-input')) 
+            document.getElementById('user-address-input').value = currentUser.address || '';
+        
+        // ФОТОНЫ ШЫҒАРУ (Артық емес, қажетті код)
+        const avatarImg = document.getElementById('user-avatar');
+        if (avatarImg) {
+            avatarImg.src = currentUser.photo || "https://ui-avatars.com/api/?name=" + encodeURIComponent(currentUser.name) + "&background=random";
+        }
+    }
+
+    // 3. БАЛАНСТЫ ТЕҢЕСТІРУ (Сенің қосқан бөлімің)
+    if (userJson) {
+        const sessionUser = JSON.parse(userJson);
+        const dbUser = users.find(u => String(u.id) === String(sessionUser.id));
+        
+        if (dbUser) {
+            // КОШЕЛЕККЕ АҚШАНЫ ОСЫ ЖЕРДЕ ТЕҢЕСТІРЕМІЗ
+            localStorage.setItem('userBalance', dbUser.userBalance || 0);
+            
+            // Навигациядағы балансты бірден жаңарту
+            if (typeof updateNavBalance === 'function') updateNavBalance();
+        }
+    }
+
+    // 4. ҚАТЕЛЕРДІ ТЕКСЕРУ (Сенің try-catch блогың)
+    try {
+        if (!userJson) throw new Error("Деректер бос");
 
         const user = JSON.parse(userJson);
-        
-        // ... ары қарай атын шығару логикасы
         const displayName = user.name || "Пользователь";
-        document.getElementById('user-fullname-header').innerText = displayName;
+        
+        if (document.getElementById('user-fullname-header'))
+            document.getElementById('user-fullname-header').innerText = displayName;
 
     } catch (e) {
         console.error("Деректерді оқу мүмкін болмады:", e);
         // Егер деректер қате болса, сессияны тазалап, логин бетіне жібереміз
-        handleLogout(); 
+        if (typeof handleLogout === 'function') handleLogout(); 
     }
 }
 
@@ -1433,9 +1455,7 @@ function uploadAvatar(input) {
 
         reader.readAsDataURL(input.files[0]);
     }
-}
 
-function loadUserData() {
     // 1. LocalStorage-тан деректі алу
     const userJson = localStorage.getItem('currentUser');
     
@@ -1475,7 +1495,9 @@ function loadUserData() {
     } else {
         window.location.assign('auth.html');
     }
+
 }
+
 
         // --- 6. ПАРОЛЬ ЖӘНЕ ҚАУІПСІЗДІК ---
         function togglePass(inputId, btn) {
@@ -1961,10 +1983,14 @@ function initReferralSystem() {
     if (!userJson) return;
     const user = JSON.parse(userJson);
 
-    // Ссылканы жасау (auth.html-ге жібереді)
-    const refLink = window.location.origin + "/auth.html?ref=" + (user.id || 'guest');
+    // Ссылканы жасау: Гитхабта 404 бермеуі үшін ең дұрыс жолы
+    const currentUrl = window.location.href;
+    const refLink = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1) + 'auth.html?ref=' + (user.id || '123');
+    
     const linkInput = document.getElementById('referral-link');
-    if (linkInput) linkInput.value = refLink;
+    if (linkInput) {
+        linkInput.value = refLink;
+    }
 
     // Статистиканы жаңарту
     const countDisp = document.getElementById('ref-count-display');
@@ -1974,15 +2000,26 @@ function initReferralSystem() {
     if (earnedDisp) earnedDisp.innerText = (user.referralEarned || 0) + ' ₸';
 }
 
-// Ссылканы көшіру
 function copyReferralLink() {
     const linkInput = document.getElementById('referral-link');
     if (!linkInput) return;
     
+    // iPhone мен Android-та 100% көшіру үшін заманауи жолы
     linkInput.select();
-    document.execCommand('copy');
-    
-    // Әдемі хабарлама (SweetAlert)
+    linkInput.setSelectionRange(0, 99999); // iOS үшін маңызды
+
+    try {
+        navigator.clipboard.writeText(linkInput.value).then(() => {
+            showCopySuccess();
+        });
+    } catch (err) {
+        document.execCommand('copy'); // Ескі браузерлерге арналған қосалқы жол
+        showCopySuccess();
+    }
+}
+
+// Хабарлама шығару функциясы
+function showCopySuccess() {
     Swal.fire({
         toast: true,
         position: 'top-end',
@@ -2001,6 +2038,5 @@ showTab = function(event, tabId) {
     if (typeof originalShowTabWithRef === 'function') originalShowTabWithRef(event, tabId);
     if (tabId === 'tab-referral') initReferralSystem();
 };
-
     </script>
 </html>

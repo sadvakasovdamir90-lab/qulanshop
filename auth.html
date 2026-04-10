@@ -552,26 +552,46 @@ window.addEventListener('load', () => {
         }
     }
 
-    function saveFinalUser() {
-        let users = JSON.parse(localStorage.getItem('users')) || [];
-        const newUser = { id: Date.now(), name: window.tempUser.name, email: window.tempUser.isEmail ? window.tempUser.identifier : "", phone: window.tempUser.isEmail ? "" : window.tempUser.identifier, address: window.tempUser.address || "", password: window.tempUser.password, debt: 0, giftCards: [], twoFactorEnabled: false };
-        users.push(newUser);
-        localStorage.setItem('users', JSON.stringify(users));
-        loginUser(newUser.id);
+   function saveFinalUser() {
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+    const urlParams = new URLSearchParams(window.location.search);
+    const referrerId = urlParams.get('ref');
+
+    const newUser = { 
+        id: Date.now(), 
+        name: window.tempUser.name, 
+        email: window.tempUser.isEmail ? window.tempUser.identifier : "", 
+        phone: window.tempUser.isEmail ? "" : window.tempUser.identifier, 
+        address: window.tempUser.address || "", 
+        password: window.tempUser.password, 
+        userBalance: 0, 
+        debt: 0, 
+        giftCards: [], 
+        twoFactorEnabled: false 
+    };
+
+    if (referrerId) {
+        // 1. БАЗАДАҒЫ ТІЗІМДІ ЖАҢАРТУ
+        const refIndex = users.findIndex(u => String(u.id) === String(referrerId));
+        if (refIndex !== -1 && !users[refIndex].referralClaimed) {
+            users[refIndex].userBalance = (users[refIndex].userBalance || 0) + 500;
+            users[refIndex].referralEarned = 500;
+            users[refIndex].referralClaimed = true;
+            
+            // 2. ЕГЕР СЕН (ШАҚЫРУШЫ) ҚАЗІР ЖҮЙЕДЕ ОТЫРСАҢ, СЕНІҢ БАЛАНСЫҢДЫ БІРДЕН ЖАҢАРТУ
+            // Бұл сенің 'Мой кошелек' бөліміндегі ақшаны өзгертеді
+            const currentId = localStorage.getItem('currentUserId');
+            if (String(currentId) === String(referrerId)) {
+                let currentBalance = Number(localStorage.getItem('userBalance')) || 0;
+                localStorage.setItem('userBalance', currentBalance + 500);
+            }
+        }
     }
 
-    window.completeProcess = function() {
-        const p1 = document.getElementById('pass1').value;
-        const p2 = document.getElementById('pass2').value;
-        if (p1.length < 6 || p1 !== p2) return Swal.fire('Ошибка', 'Пароли не совпадают', 'error');
-        let users = JSON.parse(localStorage.getItem('users')) || [];
-        const idx = users.findIndex(u => u.email === window.tempUser.identifier || u.phone === window.tempUser.identifier);
-        if (idx !== -1) {
-            users[idx].password = p1;
-            localStorage.setItem('users', JSON.stringify(users));
-            loginUser(users[idx].id);
-        }
-    };
+    users.push(newUser);
+    localStorage.setItem('users', JSON.stringify(users));
+    loginUser(newUser); 
+}
 
     window.handleLogin = function() {
         const input = document.getElementById('login-identifier').value.trim();

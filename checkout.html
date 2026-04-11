@@ -278,96 +278,132 @@
     }
 }
     // 1-ҚАДАМ: ТӨЛЕМ МОДАЛКАСЫН АШУ
-    function startPaymentFlow() {
-        const addr = document.getElementById('user-address').value.trim();
-        const phone = document.getElementById('user-phone').value.trim();
+   // 1. ТӨЛЕМ МОДАЛКАСЫН АШҚАНДА БОНУСТЫ БАЗАДАН АЛУ
+function startPaymentFlow() {
+    const addr = document.getElementById('user-address').value.trim();
+    const phone = document.getElementById('user-phone').value.trim();
+    
+    if (!addr || !phone) { 
+        alert("Заполните адрес и телефон на странице! 🏠"); 
+        return; 
+    }
+
+    const modal = document.getElementById('payment-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
         
-        if (!addr || !phone) { 
-            alert("Заполните адрес и телефон на странице! 🏠"); 
-            return; 
-        }
+        // --- МАҢЫЗДЫ: БОНУСТЫ ТІКЕЛЕЙ БАЗАДАН (users) АЛУ ---
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        const currentId = localStorage.getItem('currentUserId');
+        const dbUser = users.find(u => String(u.id) === String(currentId));
+        
+        const balance = dbUser ? (dbUser.userBalance || 0) : 0;
+        const bonuses = dbUser ? (dbUser.bonus || 0) : 0; // 'bonus' кілтін қолданамыз
 
-        const modal = document.getElementById('payment-modal');
-        if (modal) {
-            modal.classList.remove('hidden');
-            const currentUser = JSON.parse(localStorage.getItem('currentUser')) || { balance: 0, bonuses: 0 };
-            
-            // Баланс пен бонустарды шығару
-            document.getElementById('modal-wallet-balance').innerText = `Баланс: ${Number(currentUser.balance || 0).toLocaleString()} ₸`;
-            document.getElementById('modal-bonus-available').innerText = `Доступно: ${Number(currentUser.bonuses || 0).toLocaleString()} Б`;
-            
-            calculateFinalPrice(); 
-            document.body.style.overflow = 'hidden';
-        }
+        // Экранға шығару
+        document.getElementById('modal-wallet-balance').innerText = `Баланс: ${Number(balance).toLocaleString()} ₸`;
+        document.getElementById('modal-bonus-available').innerText = `Доступно: ${Number(bonuses).toLocaleString()} Б`;
+        
+        calculateFinalPrice(); 
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+// 2. БОНУСТАРДЫ ЕСЕПТЕУ ФУНКЦИЯСЫН ЖАҢАРТУ
+ // 1. БОНУСТЫ ЖӘНЕ СОҢҒЫ БАҒАНЫ ЕСЕПТЕУ (ЖАҢАРТЫЛДЫ)
+function calculateFinalPrice() {
+    // 1. Промокодты шегеру
+    let discountAmount = baseOrderPrice * (checkoutDiscountPercent / 100);
+    let final = baseOrderPrice - discountAmount;
+    
+    const useBonuses = document.getElementById('use-bonuses-toggle')?.checked;
+    
+    if (useBonuses) {
+        // 2. Базадан нақты бонусты алу (bonus кілтімен)
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        const currentId = localStorage.getItem('currentUserId');
+        const dbUser = users.find(u => String(u.id) === String(currentId));
+        const userBonusValue = dbUser ? (Number(dbUser.bonus) || 0) : 0;
+
+        // 3. БОНУСТЫ ШЕГЕРУ
+        final = final - userBonusValue;
     }
 
-    // БОНУСТАРДЫ ЕСЕПТЕУ
-    function calculateFinalPrice() {
-        let final = baseOrderPrice;
-        const useBonuses = document.getElementById('use-bonuses-toggle')?.checked;
+    // Баға 0-ден төмен болмауы керек
+    if (final < 0) final = 0;
 
-        if (useBonuses) {
-            const currentUser = JSON.parse(localStorage.getItem('currentUser')) || { bonuses: 0 };
-            final = final - (Number(currentUser.bonuses) || 0);
-            if (final < 0) final = 0;
-        }
-
-        const modalPriceDisplay = document.getElementById('modal-final-price');
-        if (modalPriceDisplay) {
-            modalPriceDisplay.innerText = final.toLocaleString() + " ₸";
-        }
+    // 4. ЭКРАНДАҒЫ БАҒАЛАРДЫ ЖАҢАРТУ
+    const formattedPrice = Math.round(final).toLocaleString() + " ₸";
+    
+    // Модалкадағы соңғы баға (сенің кодың)
+    const modalPriceDisplay = document.getElementById('modal-final-price');
+    if (modalPriceDisplay) {
+        modalPriceDisplay.innerText = formattedPrice;
     }
 
+    // Растау терезесіндегі баға (display-total)
+    const finalDisplay = document.getElementById('display-total');
+    if (finalDisplay) {
+        finalDisplay.innerText = formattedPrice;
+    }
+}
+
+// 2. БАЛАНС ПЕН БОНУСТЫ БІРГЕ ТЕКСЕРУ ЛОГИКАСЫ (СЕНІҢ ИДЕЯҢ)
 function goToAddressFlow() {
-    // 1. Деректер мен модалкадағы соңғы есептелген бағаны алу
     const name = document.getElementById('user-name').value;
     const addr = document.getElementById('user-address').value;
     const phone = document.getElementById('user-phone').value;
     
-    // Модалкадағы соңғы бағаны (промокод пен бонус есептелген) аламыз
+    // Модалкадағы соңғы баға (бонус пен промокод есептелгеннен кейінгі сома)
     const finalPriceText = document.getElementById('modal-final-price').innerText;
     const finalPriceValue = parseInt(finalPriceText.replace(/\D/g, '')) || 0;
     
-    // Қолданушының қазіргі балансын алу
-    const currentUser = JSON.parse(localStorage.getItem('currentUser')) || { balance: 0 };
-    const userBalance = Number(currentUser.balance) || 0;
+    // Базадан нақты балансты алу
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    const currentId = localStorage.getItem('currentUserId');
+    const dbUser = users.find(u => String(u.id) === String(currentId));
+    const userBalance = dbUser ? (Number(dbUser.userBalance) || 0) : 0;
 
-    // 2. ЕГЕР Q-Wallet ТАҢДАЛСА - БАЛАНСТЫ ТЕКСЕРУ
+    // ЕГЕР Q-Wallet ТАНДАЛСА
     if (selectedMethod === 'Q-Wallet') {
-        if (userBalance < finalPriceValue) {
-            // АҚША ЖЕТПЕСЕ ОСЫ ЖЕРДЕ SweetAlert ШЫҒАДЫ
+        
+        // --- ТВОЯ НОВАЯ ЛОГИКА: ОПЛАТА БОНУСАМИ ---
+        // 1. Если итоговая цена 0 ₸ (полностью покрыто бонусами)
+        if (finalPriceValue === 0) {
+            console.log("Оплата полностью за счет бонусов");
+        } 
+        // 2. Если цена больше 0, проверяем, хватает ли денег на кошельке
+        else if (userBalance < finalPriceValue) {
             Swal.fire({
                 target: document.getElementById('payment-modal'), 
                 icon: 'warning',
                 title: 'Недостаточно средств',
                 html: `
                     <div class="text-sm italic font-bold">
-                        На вашем балансе: <span class="text-orange-600">${userBalance.toLocaleString()} ₸</span><br>
-                        Сумма к оплате: <span class="text-gray-900">${finalPriceValue.toLocaleString()} ₸</span><br>
-                        <div class="mt-2 text-red-600">Не хватает: ${(finalPriceValue - userBalance).toLocaleString()} ₸</div>
+                        На балансе: <span class="text-orange-600">${userBalance.toLocaleString()} ₸</span><br>
+                        К оплате осталось: <span class="text-gray-900">${finalPriceValue.toLocaleString()} ₸</span><br>
+                        <div class="mt-3 p-2 bg-blue-50 rounded-xl text-[10px] uppercase text-blue-600">
+                            Совет: Если у вас есть бонусы, включите их, чтобы оплатить покупку полностью или частично!
+                        </div>
                     </div>
                 `,
                 confirmButtonText: 'ПОНЯТНО',
                 confirmButtonColor: '#ea580c',
-                customClass: {
-                    popup: 'rounded-[2rem]',
-                    confirmButton: 'rounded-xl px-8 py-3 font-black italic'
-                }
+                customClass: { popup: 'rounded-[2.5rem]', confirmButton: 'rounded-xl px-8 py-3 font-black' }
             });
-            return; // Функцияны тоқтату, келесі бетке өткізбейді
+            return;
         }
     }
 
-    // 3. ЕГЕР БӘРІ ДҰРЫС БОЛСА - ДЕРЕКТЕРДІ КӨШІРУ
-    const confirmName = document.getElementById('confirm-name');
-    if (confirmName) confirmName.innerText = name || '---';
-
+    // БӘРІ ДҰРЫС БОЛСА, РАСТАУ БЕТІНЕ ӨТУ
+    document.getElementById('confirm-name').innerText = name || '---';
     document.getElementById('confirm-address').innerText = addr || '---';
     document.getElementById('confirm-phone').innerText = phone || '---';
-    document.getElementById('display-method').innerText = selectedMethod;
+    
+    // Если оплата 0 ₸, меняем название метода для красоты
+    document.getElementById('display-method').innerText = (finalPriceValue === 0) ? "Бонусы (Q-Coins)" : selectedMethod;
     document.getElementById('display-total').innerText = finalPriceText;
 
-    // 4. ТЕРЕЗЕЛЕРДІ АУЫСТЫРУ
     document.getElementById('payment-modal').classList.add('hidden');
     document.getElementById('final-checkout-modal').classList.remove('hidden');
 }
@@ -412,10 +448,13 @@ function goToAddressFlow() {
     }
 
     // ТАПСЫРЫСТЫ АЯҚТАУ
-   function finishOrder() {
+ function finishOrder() {
     const total = document.getElementById('display-total').innerText;
     let orders = JSON.parse(localStorage.getItem('orders')) || [];
     
+    // Определяем метод оплаты (если 0 тенге — пишем "Бонусы")
+    const finalPaymentMethod = (parseInt(total.replace(/\D/g, '')) === 0) ? "Бонусы (Q-Coins)" : selectedMethod;
+
     orders.unshift({
         id: "ORD-" + Math.floor(1000 + Math.random() * 9000),
         customer: document.getElementById('user-name').value,
@@ -423,24 +462,51 @@ function goToAddressFlow() {
         address: document.getElementById('user-address').value,
         product: cart.map(i => `${i.name} (x${i.quantity})`).join(", "),
         total: total,
-        payment: selectedMethod,
+        payment: finalPaymentMethod,
         status: 'new',
         date: new Date().toLocaleString()
     });
 
     localStorage.setItem('orders', JSON.stringify(orders));
     localStorage.setItem('new_order_signal', 'true');
+
+    // --- ЛОГИКА СПИСАНИЯ БОНУСОВ (ЖАҢАРТЫЛДЫ) ---
+    if (document.getElementById('use-bonuses-toggle')?.checked) {
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        const currentId = localStorage.getItem('currentUserId');
+        const userIdx = users.findIndex(u => String(u.id) === String(currentId));
+        
+        if (userIdx !== -1) {
+            const dbUser = users[userIdx];
+            const currentBonus = Number(dbUser.bonus) || 0;
+
+            // Бонус шегерілгенге дейінгі тауар бағасын есептеу
+            let discountAmount = baseOrderPrice * (checkoutDiscountPercent / 100);
+            let priceBeforeBonus = baseOrderPrice - discountAmount;
+
+            // Нақты қанша бонус жұмсалатынын анықтаймыз (не тауардың бағасы, не барлық бонус)
+            const usedBonus = Math.min(currentBonus, priceBeforeBonus);
+
+            // Тек жұмсалған бөлігін ғана шегереміз
+            dbUser.bonus = currentBonus - usedBonus; 
+            
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('currentUser', JSON.stringify(dbUser));
+            console.log(`Жұмсалды: ${usedBonus}, Қалды: ${dbUser.bonus} ✅`);
+        }
+    }
+    // ------------------------------------------
     
-    // МӘЛІМЕТТЕРДІ ТАЗАЛАУ (Артық код өшірілген жоқ, тек жаңалары қосылды)
+    // МӘЛІМЕТТЕРДІ ТАЗАЛАУ
     localStorage.removeItem('qulanCart'); 
-    localStorage.removeItem('finalCartTotal'); //
-    localStorage.removeItem('isPromoApplied'); // Промокод флагын өшіру
-    localStorage.removeItem('appliedPromoCode'); // Қолданылған кодты өшіру
+    localStorage.removeItem('finalCartTotal'); 
+    localStorage.removeItem('isPromoApplied'); 
+    localStorage.removeItem('appliedPromoCode'); 
 
     // Модалканы жабамыз
     closeAllModals();
 
-    // Әдемі SweetAlert хабарламасы (Сенің бұрынғы кодың)
+    // Әдемі SweetAlert хабарламасы
     Swal.fire({
         title: 'ЗАКАЗ ПРИНЯТ!',
         html: `
@@ -449,7 +515,7 @@ function goToAddressFlow() {
                 <div class="bg-gray-50 p-3 rounded-2xl border border-gray-100 mt-4">
                     <div class="flex justify-between text-[11px] uppercase font-black italic">
                         <span class="text-gray-400">Способ оплаты:</span>
-                        <span class="text-orange-600">${selectedMethod}</span>
+                        <span class="text-orange-600">${finalPaymentMethod}</span>
                     </div>
                     <div class="flex justify-between text-sm font-black italic mt-1">
                         <span class="text-gray-900">Итого к оплате:</span>
@@ -517,28 +583,6 @@ function applyCheckoutPromo() {
     calculateFinalPrice();
 }
 
-// 2. БАҒАНЫ ҚАЙТА ЕСЕПТЕУ (ЖАҢАРТЫЛҒАН НҰСҚА)
-function calculateFinalPrice() {
-    // Негізгі бағадан промокод пайызын шегереміз
-    let discountAmount = baseOrderPrice * (checkoutDiscountPercent / 100);
-    let final = baseOrderPrice - discountAmount;
-    
-    // Егер бонустар қосылса, оны да шегереміз
-    const useBonuses = document.getElementById('use-bonuses-toggle')?.checked;
-    if (useBonuses) {
-        const currentUser = JSON.parse(localStorage.getItem('currentUser')) || { bonuses: 0 };
-        final = final - (Number(currentUser.bonuses) || 0);
-    }
-
-    // Баға 0-ден төмен болмауы керек
-    if (final < 0) final = 0;
-
-    // Модалкадағы бағаны жаңарту
-    const modalPriceDisplay = document.getElementById('modal-final-price');
-    if (modalPriceDisplay) {
-        modalPriceDisplay.innerText = Math.round(final).toLocaleString() + " ₸";
-    }
-}
 
 </script>
 </body>

@@ -239,6 +239,8 @@
     </div>
 </div>
 
+<div id="recaptcha-container"></div>
+
 <!-- Скрипт бөлімі -->
 <script>
 function updateOnlineStatus() {
@@ -467,68 +469,93 @@ window.addEventListener('load', () => {
     };
 
     // Код жіберу
-    window.handleStartAuth = function(mode) {
-        window.currentProcess = mode;
-        const inputId = (mode === 'reg') ? 'reg-identifier' : 'forgot-identifier';
-        const inputVal = document.getElementById(inputId).value.trim();
-        const isEmail = inputVal.includes('@');
+   window.handleStartAuth = function(mode) {
+    window.currentProcess = mode;
+    const inputId = (mode === 'reg') ? 'reg-identifier' : 'forgot-identifier';
+    const inputVal = document.getElementById(inputId).value.trim();
+    const isEmail = inputVal.includes('@');
 
-        // Forgot кезінде тек идентификаторды сақтаймыз
-        window.tempUser = {
-            identifier: inputVal,
-            isEmail: isEmail
-        };
+    // Деректерді сақтау
+    window.tempUser = {
+        identifier: inputVal,
+        isEmail: isEmail
+    };
 
-        // Тіркелу болса ғана пароль мен есімді қосамыз
-        if (mode === 'reg') {
-            window.tempUser.name = document.getElementById('reg-name')?.value || "Пользователь";
-            window.tempUser.password = document.getElementById('reg-pass')?.value || "";
-        }
+    if (mode === 'reg') {
+        window.tempUser.name = document.getElementById('reg-name')?.value || "Пользователь";
+        window.tempUser.password = document.getElementById('reg-pass')?.value || "";
+    }
 
-        if (!window.validateData(window.tempUser)) return;
-        window.toggleLoading(true);
+    if (!window.validateData(window.tempUser)) return;
+    window.toggleLoading(true);
 
-        if (isEmail) {
-            const code = Math.floor(100000 + Math.random() * 900000);
-            window.generatedEmailCode = code;
-            emailjs.send('service_5dfhk7r', 'template_wpsnlxp', {
-                to_email: inputVal, to_name: window.tempUser.name || "Пользователь", otp_code: code 
-            }).then(() => {
+    if (isEmail) {
+        // --- EMAIL АРҚЫЛ КОД ЖІБЕРУ (EmailJS) ---
+        const code = Math.floor(100000 + Math.random() * 900000);
+        window.generatedEmailCode = code;
+        emailjs.send('service_5dfhk7r', 'template_wpsnlxp', {
+            to_email: inputVal, 
+            to_name: window.tempUser.name || "Пользователь", 
+            otp_code: code 
+        }).then(() => {
+            window.toggleLoading(false);
+            Swal.fire('Успешно!', 'Код отправлен на Email 📧', 'success');
+            window.switchMode('verify');
+            window.startTimer();
+        }).catch((error) => {
+            window.toggleLoading(false);
+            Swal.fire('Ошибка', 'Не удалось отправить почту: ' + error.text, 'error');
+        });
+    } else {
+        // --- FIREBASE SMS АРҚЫЛ КОД ЖІБЕРУ ---
+        // Нөмірді форматтау (+7...)
+        const phoneNumber = inputVal.startsWith('+') ? inputVal : '+7' + inputVal.replace(/\D/g, '').slice(-10);
+        
+        // reCAPTCHA дайындау (Көрінбейтін режим)
+        const appVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 
+            'size': 'invisible' 
+        });
+
+        signInWithPhoneNumber(auth, phoneNumber, appVerifier)
+            .then((result) => {
                 window.toggleLoading(false);
-                Swal.fire('Успешно!', 'Код отправлен на Email 📧', 'success');
+                window.confirmationResult = result; // Кодты тексеру үшін сақтаймыз
+                Swal.fire('Успешно!', 'Код отправлен по SMS! 📱', 'success');
                 window.switchMode('verify');
                 window.startTimer();
-            }).catch(() => {
+            }).catch((error) => {
                 window.toggleLoading(false);
-                Swal.fire('Ошибка', 'Не удалось отправить почту', 'error');
+                console.error("Firebase SMS Error:", error);
+                Swal.fire('Ошибка SMS', 'Проверьте номер или настройки Firebase: ' + error.message, 'error');
+                // Қате болса да экранды ауыстыру (тест үшін)
+                window.switchMode('verify');
+                window.startTimer();
             });
-        } else {
-            const phoneNumber = inputVal.replace(/\s+/g, '');
-            signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier)
+    }
+};
+
+window.handleConfirmCode = function() {
+    const code = document.getElementById('verify-code').value;
+    
+    // 1. Егер Email арқылы жіберілсе
+    if (window.tempUser.isEmail) {
+        if (code == window.generatedEmailCode) proceedRegistration();
+        else Swal.fire('Ошибка', 'Неверный код из Email!', 'error');
+    } else {
+        // 2. ЕГЕР SMS АРҚЫЛ ЖІБЕРІЛСЕ (FIREBASE)
+        if (window.confirmationResult) {
+            window.confirmationResult.confirm(code)
                 .then((result) => {
-                    window.toggleLoading(false);
-                    window.confirmationResult = result;
-                    window.switchMode('verify');
-                    window.startTimer();
-                }).catch(() => {
-                    window.toggleLoading(false);
-                    window.switchMode('verify');
-                    window.startTimer();
+                    console.log("Firebase SMS расталды!");
+                    proceedRegistration(); // Тіркеуді/Кіруді аяқтау
+                })
+                .catch((error) => {
+                    console.error("SMS Verify Error:", error);
+                    Swal.fire('Ошибка', 'SMS коды қате немесе ескірген!', 'error');
                 });
         }
-    };
-
-    window.handleConfirmCode = function() {
-        const code = document.getElementById('verify-code').value;
-        if (window.tempUser.isEmail) {
-            if (code == window.generatedEmailCode) proceedRegistration();
-            else Swal.fire('Ошибка', 'Неверный код!', 'error');
-        } else {
-            if (window.confirmationResult) {
-                window.confirmationResult.confirm(code).then(() => proceedRegistration()).catch(() => proceedRegistration()); 
-            } else proceedRegistration();
-        }
-    };
+    }
+};
 
     function proceedRegistration() {
         if (window.currentProcess === 'forgot') window.switchMode('new-pass');

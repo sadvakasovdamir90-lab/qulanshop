@@ -995,24 +995,36 @@ function changeOrderStatus(orderId, newStatus) {
         const customerName = order.customer.toLowerCase().trim();
         const customerPhone = order.phone.replace(/\D/g, ''); 
 
-        let user = users.find(u => 
+        let userIndex = users.findIndex(u => 
             u.name.toLowerCase().trim() === customerName || 
             (u.phone && u.phone.replace(/\D/g, '') === customerPhone)
         );
 
-        if (user) {
+        if (userIndex !== -1) {
+            let user = users[userIndex]; // Пайдаланушыны объект ретінде аламыз
+            
             // БОНУС ЕСЕПТЕУ (3% кэшбэк)
             const cashbackPercent = 3; 
             const orderSum = parseInt(order.total.replace(/\D/g, '')) || 0;
             const earnedBonus = Math.floor(orderSum * (cashbackPercent / 100));
 
-            // ПАЙДАЛАНУШЫНЫҢ БОНУСЫН ЖАҢАРТУ (user.bonus немесе user.bonuses екенін тексер)
+            // ПАЙДАЛАНУШЫНЫҢ БОНУСЫН ЖАҢАРТУ
             user.bonus = (Number(user.bonus) || 0) + earnedBonus;
+
+            // --- МАҢЫЗДЫ ҚОСЫМША: СЕССИЯНЫ ЖАҢАРТУ ---
+            // Егер қазіргі кіріп тұрған адам осы бонус алған адам болса, оның сессиясын жаңартамыз
+            const currentId = localStorage.getItem('currentUserId');
+            if (String(currentId) === String(user.id)) {
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                localStorage.setItem('userBonuses', user.bonus); // Ескі кодтармен сәйкестік үшін
+            }
+            // ------------------------------------------
 
             // ҚАРЫЗ ЖҮЙЕСІ (Наличные болса)
             if (order.payment === "Наличные") {
                 user.debt = (Number(user.debt) || 0) + orderSum;
                 user.debtDate = new Date().toISOString().split('T')[0];
+                user.lastDebtOrder = "#" + order.id; // Қай тапсырыстан қарыз екенін сақтау
             }
 
             // СКЛАДТЫ АЗАЙТУ
@@ -1027,6 +1039,7 @@ function changeOrderStatus(orderId, newStatus) {
             alert("⚠️ Клиент базадан табылмады! Бонус қосылмады.");
         }
 
+        // БАРЛЫҚ ӨЗГЕРІСТЕРДІ САҚТАУ
         localStorage.setItem('users', JSON.stringify(users));
         localStorage.setItem('orders', JSON.stringify(orders));
 

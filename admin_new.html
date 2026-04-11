@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QulanShop — Интернет-магазин</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .slider-container { display: flex; transition: transform 0.5s ease-in-out; }
+        .slide { min-width: 100%; }
+        .dropdown-animate { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, opacity 0.3s ease; opacity: 0; }
+        .dropdown-animate.active { max-height: 600px; opacity: 1; }
+        .category-item { transform: translateY(-10px); transition: transform 0.3s ease; }
+        .active .category-item { transform: translateY(0); }
+        .product-card { transition: opacity 0.3s ease, transform 0.3s ease; }
+        .footer-link:hover { color: #ea580c; padding-left: 4px; }
+        .footer-link { transition: all 0.3s; }
+
+/* Скролл жолағын жасыру (iPhone және Android үшін) */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;  /* IE/Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* Басылған батырманың стилі */
+.sort-btn.active {
+    background-color: #ea580c !important; /* Orange-600 */
+    color: white !important;
+    border-color: #ea580c !important;
+}
+
+.sort-btn.active i {
+    color: white !important;
+}
+
+
+/* Toast хабарлама стилі */
+.toast-success {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e293b;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: bold;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from { bottom: -50px; opacity: 0; }
+    to { bottom: 20px; opacity: 1; }
+}
+
+/* Прогресс бар стилі */
+.stock-bar {
+    width: 100%;
+    height: 4px;
+    background: #f1f5f9;
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+.stock-bar-fill {
+    height: 100%;
+    background: #ef4444;
+    transition: width 0.5s ease-in-out;
+}
+
+.floating-cart {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    background: #ea580c;
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 25px rgba(234, 88, 12, 0.4);
+    z-index: 40;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.floating-cart:hover { transform: scale(1.1); }
+
+/* Хабарлама (Toast) ең жоғары қабатта тұруы керек */
+/* Хабарлама (Toast) ең жоғары қабатта тұруы керек */
+
+#custom-toast {
+    z-index: 9999 !important; /* Ең жоғарғы қабат */
+    pointer-events: none;
+}
+
+#custom-toast > div {
+    pointer-events: auto; /* Хабарламаның өзі басылатындай болу керек */
+}
+
+/* Анимация: Жоғарыдан әдемі түсу */
+.animate-ios-slide {
+    animation: ios-slide 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes ios-slide {
+    from { transform: translateY(-100px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+#custom-toast > div {
+    pointer-events: auto; /* Хабарламаның өзі және батырмасы басылады */
+}
+
+/* AI Chat терезесі */
+#ai-chat-wrapper {
+    z-index: 9998 !important;
+}
+
+/* Анимация: Пайда болу */
+@keyframes toastIn {
+    from { opacity: 0; transform: translate(-50%, -20px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.toast-active {
+    animation: toastIn 0.5s ease forwards;
+}
+
+/* Мәзірдің бастапқы күйі (Жасырулы) */
+#category-menu {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-20px) scale(0.95);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); /* Жұмсақ анимация */
+    pointer-events: none;
+}
+
+/* Мәзір ашық болғандағы күйі */
+#category-menu.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+/* Категориялардың үстіне барғандағы эффект */
+.category-item {
+    transition: background-color 0.3s ease;
+}
+
+
+#category-menu {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-20px) scale(0.95);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    pointer-events: none;
+}
+
+#category-menu.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+
+    <div id="global-loader" class="fixed inset-0 bg-white z-[9999] flex flex-col items-center justify-center transition-opacity duration-500">
+    <div class="relative">
+        <div class="w-16 h-16 border-4 border-gray-100 border-t-orange-600 rounded-full animate-spin"></div>
+        <i class="fas fa-shopping-bag absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-orange-600 text-xl"></i>
+    </div>
+    <p class="mt-4 font-black italic uppercase tracking-[0.2em] text-gray-400 text-[10px] animate-pulse">Загрузка QulanShop...</p>
+</div>
+
+ <header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="container mx-auto px-2 md:px-4">
+        
+        <div class="flex flex-wrap items-center justify-between py-3 md:py-4 gap-y-3 md:gap-y-0">
+            
+            <div class="text-xl md:text-3xl font-bold text-orange-600 cursor-pointer shrink-0 order-1" onclick="location.reload()">
+                QulanShop
+            </div>
+
+    <div class="flex items-center space-x-2 md:space-x-8 order-2 md:order-3">
+        
+        <div class="relative shrink-0">
+            <div onclick="toggleLangMenu()" class="text-[10px] md:text-sm font-bold cursor-pointer hover:text-orange-600 border px-2 py-1 md:px-3 md:py-1.5 rounded-lg flex items-center bg-white shadow-sm italic">
+                <i class="fas fa-globe mr-1 md:mr-2 text-orange-500"></i>
+                <span id="current-lang-text">Рус</span>
+            </div>
+            <div id="lang-menu" class="dropdown-animate absolute top-full right-0 mt-2 w-32 bg-white rounded-xl shadow-xl border border-gray-100 z-[100]">
+                <div onclick="setLanguage('ru')" class="px-4 py-3 hover:bg-orange-50 cursor-pointer border-b border-gray-50 font-medium italic">Русский</div>
+                <div onclick="setLanguage('kz')" class="px-4 py-3 hover:bg-orange-50 cursor-pointer font-medium italic">Қазақша</div>
+            </div>
+        </div>
+
+      <button onclick="handleCabinetClick()" class="flex flex-col items-center hover:text-orange-600 transition text-gray-600">
+    <i class="far fa-user text-lg md:text-xl"></i>
+    <span id="txt-cabinet-btn" class="text-[9px] md:text-[10px] mt-1 font-medium italic">Админстратор</span>
+</button>
+
+        <button onclick="checkAuth('wishlist.html')" class="flex flex-col items-center hover:text-orange-600 transition text-gray-600">
+            <i class="far fa-heart text-lg md:text-xl"></i>
+            <span class="text-[9px] md:text-[10px] mt-1 font-medium italic">Избранное</span>
+        </button>
+
+        <button onclick="checkAuth('cart.html')" class="flex flex-col items-center hover:text-orange-600 transition text-gray-600 relative">
+            <i class="fas fa-shopping-cart text-lg md:text-xl"></i>
+            <span class="text-[9px] md:text-[10px] mt-1 font-medium italic">Корзина</span>
+            <span id="badge-cart" class="hidden absolute -top-1 -right-1 bg-orange-600 text-white text-[8px] rounded-full px-1.5 font-bold">0</span>
+        </button>
+    </div>
+
+    <div class="w-full md:w-auto md:flex-1 relative order-3 md:order-2 md:mx-6 pb-3 md:pb-0">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none h-10 md:h-full">
+            <i class="fas fa-search text-gray-400 text-sm md:text-base"></i>
+        </div>
+        <input type="text" 
+               id="search-input" 
+               oninput="searchProducts(this.value)" 
+               class="w-full h-10 bg-gray-50 md:bg-white border-2 border-gray-100 rounded-xl pl-10 pr-4 outline-none focus:border-orange-500 transition text-sm md:text-base" 
+               placeholder="Поиск товаров...">
+    </div>
+</div>
+</header>
+
+  <section class="container mx-auto px-4 mt-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="md:col-span-3 h-48 md:h-80 rounded-2xl relative overflow-hidden shadow-lg">
+            <div class="slider-container h-full flex" id="slider">
+                <div class="slide min-w-full h-full">
+                    <img id="slider-img-1" src="images/banner.jpg" alt="Баннер 1" class="w-full h-full object-cover">
+                </div>
+                <div class="slide min-w-full h-full">
+                    <img id="slider-img-2" src="images/banner1.jpg" alt="Баннер 2" class="w-full h-full object-cover">
+                </div>
+                <div class="slide min-w-full h-full">
+                    <img id="slider-img-3" src="images/banner2.jpg" alt="Баннер 3" class="w-full h-full object-cover">
+                </div>
+            </div>
+        </div>
+
+        <div class="hidden md:block h-80 rounded-2xl overflow-hidden shadow-sm border-2 border-orange-100">
+            <img id="small-banner-img" src="images/banner1000.jpg" alt="Жеткізу" class="w-full h-full object-cover">
+        </div>
+    </div>
+</section>
+
+
+<section id="promo-section" class="container mx-auto px-4 mt-8">
+    <div class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-orange-100 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+        <div class="absolute -right-10 -top-10 w-40 h-40 bg-orange-50 rounded-full blur-3xl"></div>
+        
+        <div class="flex items-center gap-4 relative z-10">
+            <div class="w-14 h-14 bg-orange-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-orange-200">
+                <i class="fas fa-bolt animate-bounce"></i>
+            </div>
+            <div>
+                <h3 class="font-black italic uppercase text-lg tracking-tighter">Успей купить!</h3>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest italic">До конца мега-акции осталось:</p>
+            </div>
+        </div>
+
+        <div class="flex gap-3 relative z-10" id="countdown-timer">
+            <div class="text-center">
+                <div id="days" class="w-14 h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center text-xl font-black italic shadow-xl">00</div>
+                <span class="text-[8px] font-black uppercase text-gray-400 mt-1 block">Дней</span>
+            </div>
+            <div class="text-center">
+                <div id="hours" class="w-14 h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center text-xl font-black italic shadow-xl">00</div>
+                <span class="text-[8px] font-black uppercase text-gray-400 mt-1 block">Часов</span>
+            </div>
+            <div class="text-center">
+                <div id="minutes" class="w-14 h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center text-xl font-black italic shadow-xl">00</div>
+                <span class="text-[8px] font-black uppercase text-gray-400 mt-1 block">Мин</span>
+            </div>
+            <div class="text-center">
+                <div id="seconds" class="w-14 h-14 bg-orange-600 text-white rounded-2xl flex items-center justify-center text-xl font-black italic shadow-xl animate-pulse">00</div>
+                <span class="text-[8px] font-black uppercase text-gray-400 mt-1 block">Сек</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+ <section class="container mx-auto px-4 mt-12 mb-20 relative">
+    <div class="relative inline-block w-full md:w-auto">
+        <button onclick="toggleCategories()" class="bg-orange-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-orange-700 transition inline-flex items-center w-full md:w-auto justify-center italic">
+            <i class="fas fa-bars mr-3"></i> 
+            <span id="txt-cat-btn">Категории товаров</span>
+            <i class="fas fa-chevron-down ml-3 text-xs transition-transform duration-300 transform" id="cat-chevron"></i>
+        </button>
+
+        <div id="category-menu" class="absolute top-full left-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 italic z-40 w-full md:w-80 overflow-hidden">
+    <div class="py-2">
+    <div onclick="filterByCategory('all')" class="category-item flex items-center px-6 py-4 hover:bg-orange-50 cursor-pointer border-b border-gray-50 transition-colors">
+        <i class="fas fa-th-large w-8 text-gray-400 text-xl"></i>
+        <span class="font-bold ml-4 text-sm uppercase">Все товары</span>
+    </div>
+
+    <div onclick="filterByCategory('Красота и здоровье')" class="category-item flex items-center px-6 py-4 hover:bg-orange-50 cursor-pointer border-b border-gray-50 transition-colors">
+        <i class="fas fa-magic w-8 text-pink-500 text-xl"></i>
+        <span class="font-bold ml-4 text-sm">Красота и здоровье</span>
+    </div>
+
+    <div onclick="filterByCategory('Игрушки')" class="category-item flex items-center px-6 py-4 hover:bg-orange-50 cursor-pointer border-b border-gray-50 transition-colors">
+        <i class="fas fa-puzzle-piece w-8 text-orange-500 text-xl"></i>
+        <span class="font-bold ml-4 text-sm uppercase">Игрушки</span>
+    </div>
+
+    <div onclick="filterByCategory('Продукты')" class="category-item flex items-center px-6 py-4 hover:bg-orange-50 cursor-pointer border-b border-gray-50 transition-colors">
+        <i class="fas fa-shopping-basket w-8 text-orange-500 text-xl"></i>
+        <span class="font-bold ml-4 text-sm uppercase">Продукты</span>
+    </div>
+
+    <div onclick="filterByCategory('Аудио техника')" class="category-item flex items-center px-6 py-4 hover:bg-orange-50 cursor-pointer border-b border-gray-50 transition-colors">
+        <i class="fas fa-headphones w-8 text-indigo-600 text-xl"></i>
+        <span class="font-bold ml-4 text-sm uppercase">Аудио техника</span>
+             </div>
+         </div>
+    </div>
+</section>
+
+<!-- Сұрыптау және Фильтр (Адаптивті нұсқа) -->
+<div class="container mx-auto px-4 mt-6 flex gap-2 overflow-x-auto pb-3 no-scrollbar shrink-0">
+    <button id="btn-sort-cheap" onclick="sortProducts('cheap')" 
+        class="sort-btn bg-white border border-gray-200 px-5 py-2.5 rounded-full text-[11px] md:text-xs font-bold whitespace-nowrap shadow-sm transition-all active:scale-95">
+        <i class="fas fa-sort-amount-down-alt mr-1 text-gray-400"></i> Сначала дешевые
+    </button>
+    
+    <button id="btn-sort-expensive" onclick="sortProducts('expensive')" 
+        class="sort-btn bg-white border border-gray-200 px-5 py-2.5 rounded-full text-[11px] md:text-xs font-bold whitespace-nowrap shadow-sm transition-all active:scale-95">
+        <i class="fas fa-sort-amount-up mr-1 text-gray-400"></i> Сначала дорогие
+    </button>
+    
+    <button id="btn-filter-discount" onclick="filterDiscount()" 
+        class="sort-btn bg-red-50 border border-red-100 text-red-600 px-5 py-2.5 rounded-full text-[11px] md:text-xs font-bold whitespace-nowrap shadow-sm transition-all active:scale-95">
+        🔥 Со скидкой
+    </button>
+
+    <!-- Барлығын қайтару батырмасы (UX үшін керек) -->
+    <button onclick="renderProducts()" 
+        class="bg-gray-100 text-gray-500 px-5 py-2.5 rounded-full text-[11px] md:text-xs font-bold whitespace-nowrap transition-all active:scale-95">
+        Сброс
+    </button>
+</div>
+
+   <section class="container mx-auto px-4 mt-12 mb-20">
+    <h2 class="text-xl md:text-2xl font-bold mb-6 italic" id="txt-hits">Хиты продаж</h2>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="products-container"></div>
+        
+    
+        </div>
+
+    </div>
+</section>
+
+<section class="container mx-auto px-4 mt-16 mb-10">
+    <h2 class="text-2xl font-black italic uppercase text-center mb-8">Вопросы и <span class="text-orange-600">ответы</span></h2>
+    
+    <div class="max-w-3xl mx-auto space-y-4">
+        <!-- Вопрос 1 -->
+        <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+            <button onclick="toggleFAQ(1)" class="w-full flex justify-between items-center p-6 text-left hover:bg-gray-50 transition-all">
+                <span class="font-bold text-gray-800">Как работает доставка в село Кулан?</span>
+                <i id="faq-icon-1" class="fas fa-plus text-orange-500 transition-transform"></i>
+            </button>
+            <div id="faq-ans-1" class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out bg-gray-50/50">
+                <p class="p-6 text-sm text-gray-600 leading-relaxed italic">
+                    Мы доставляем заказы ежедневно с 09:00 до 20:00. По самому селу Кулан доставка осуществляется в течение 1 часа. Также есть доставка в ближайшие аулы по договоренности.
+                </p>
+            </div>
+        </div>
+
+        <!-- Вопрос 2 -->
+        <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+            <button onclick="toggleFAQ(2)" class="w-full flex justify-between items-center p-6 text-left hover:bg-gray-50 transition-all">
+                <span class="font-bold text-gray-800">Можно ли оплатить при получении?</span>
+                <i id="faq-icon-2" class="fas fa-plus text-orange-500 transition-transform"></i>
+            </button>
+            <div id="faq-ans-2" class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out bg-gray-50/50">
+                <p class="p-6 text-sm text-gray-600 leading-relaxed italic">
+                    Да, вы можете оплатить наличными курьеру или сделать Kaspi перевод при получении товара. Мы доверяем нашим клиентам!
+                </p>
+            </div>
+        </div>
+
+        <!-- Вопрос 3 -->
+        <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+            <button onclick="toggleFAQ(3)" class="w-full flex justify-between items-center p-6 text-left hover:bg-gray-50 transition-all">
+                <span class="font-bold text-gray-800">Как работают бонусы Q-Coins?</span>
+                <i id="faq-icon-3" class="fas fa-plus text-orange-500 transition-transform"></i>
+            </button>
+            <div id="faq-ans-3" class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out bg-gray-50/50">
+                <p class="p-6 text-sm text-gray-600 leading-relaxed italic">
+                    За каждую покупку вам начисляется 3% кэшбэка в виде Q-Coins. 1 Q-Coin = 1 тенге. Вы можете оплатить ими до 50% стоимости вашего следующего заказа в личном кабинете.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="recent-viewed-section" class="container mx-auto px-4 mt-12 mb-10 hidden">
+    <h2 class="text-xl font-bold mb-6 italic text-gray-500">Вы недавно смотрели</h2>
+    <div class="grid grid-cols-2 md:grid-cols-6 gap-4" id="recent-container"></div>
+</section>
+
+
+<script>
+    // Тауар бетіне өту функциясы
+    function goToProduct(url) {
+        window.location.href = url;
+    }
+
+    // Себетке қосу функциясы (бұрынғы логика)
+  function addToCart(id, name, price, img) {
+    let cart = JSON.parse(localStorage.getItem('qulanCart')) || [];
+    let item = cart.find(i => i.id === id);
+    
+    if (item) { 
+        item.quantity += 1; 
+    } else { 
+        cart.push({ id, name, price, image: img, quantity: 1 }); 
+    }
+    
+    localStorage.setItem('qulanCart', JSON.stringify(cart));
+    
+    // Создание профессионального уведомления (Toast)
+    const toast = document.createElement('div');
+    toast.className = "toast-success";
+    // Текст изменен на русский: "добавлен в корзину!"
+    toast.innerHTML = `<i class="fas fa-check-circle text-orange-500 text-lg"></i> <span>${name} добавлен в корзину!</span>`;
+    document.body.appendChild(toast);
+
+    // Плавное исчезновение через 2 секунды
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease'; // Добавил для плавности
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
+
+    // Обновление счетчика корзины (если функция существует)
+    if (typeof updateCartBadge === 'function') {
+        updateCartBadge();
+    }
+}
+</script>
+
+   <footer class="bg-white border-t border-gray-200 pt-16 pb-8 mt-20">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-12 text-center md:text-left">
+            
+            <div class="space-y-4">
+                <h4 class="text-3xl font-extrabold text-orange-600 italic tracking-tighter">QulanShop</h4>
+                <p class="text-gray-500 text-sm leading-relaxed italic">
+                    Крупнейший и надежный интернет-магазин в селе Кулан. <br>Мы выбираем качество и скорость!
+                </p>
+                <div class="flex justify-center md:justify-start space-x-4 pt-2">
+                    <a href="https://www.instagram.com/qulanshop/?hl=ru" class="w-10 h-10 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 text-white rounded-full flex items-center justify-center hover:scale-110 transition shadow-lg">
+                        <i class="fab fa-instagram text-xl"></i>
+                    </a>
+                    <a href="https://wa.me/7712730203" class="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center hover:scale-110 transition shadow-lg">
+                        <i class="fab fa-whatsapp text-xl"></i>
+                    </a>
+                    <a href="https://t.me/qulanshop" class="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center hover:scale-110 transition shadow-lg">
+                        <i class="fab fa-telegram-plane text-xl"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-lg mb-6 text-gray-800 uppercase tracking-widest italic" id="footer-useful">Полезное</h4>
+                <ul class="space-y-4 text-gray-600 font-medium italic">
+                    <li><a href="delivery.html" class="footer-link hover:text-orange-600 transition-all">Доставка и оплата</a></li>
+                    <li><a href="return.html" class="footer-link hover:text-orange-600 transition-all">Возврат товара</a></li>
+                    <li><a href="gift-cards.html" class="footer-link hover:text-orange-600 transition-all">Подарочные карты</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-lg mb-6 text-gray-800 uppercase tracking-widest italic">Компания</h4>
+                <ul class="space-y-4 text-gray-600 font-medium italic">
+                    <li><a href="about.html" class="footer-link hover:text-orange-600 transition-all">О нас</a></li>
+                    <li><a href="contacts.html" class="footer-link hover:text-orange-600 transition-all">Контакты</a></li>
+                    <li><a href="address.html" class="footer-link hover:text-orange-600 transition-all">Адрес магазина</a></li>
+                </ul>
+            </div>
+
+            <div class="bg-orange-50 p-6 rounded-2xl border border-orange-100">
+                <h4 class="font-bold text-orange-700 mb-2 italic">График работы:</h4>
+                <p class="text-orange-800 text-sm font-bold">Ежедневно: 09:00 - 20:00</p>
+                <p class="text-orange-600 text-xs mt-2 italic">Заказы на сайте принимаются 24/7</p>
+            </div>
+        </div>
+
+        <div class="border-t border-gray-100 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-gray-400 text-xs italic">© 2026 QulanShop. Все права защищены.</p>
+            <div class="flex space-x-6">
+                <img src="https://avatars.mds.yandex.net/i?id=d776b62d94604098bc75db369540f84c5ecb1435-5277308-images-thumbs&n=13" class="h-4 opacity-50 hover:opacity-100 transition" alt="Visa">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" class="h-6 opacity-50 hover:opacity-100 transition" alt="Mastercard">
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+<div id="ai-chat-wrapper" class="fixed bottom-8 right-8 z-[100]">
+    <button onclick="toggleAIChat()" class="relative group">
+        <div class="absolute -inset-1 bg-orange-600 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
+        <div class="relative bg-orange-600 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-robot text-3xl"></i>
+            <span class="absolute top-0 right-0 flex h-4 w-4">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-4 w-4 bg-red-500"></span>
+            </span>
+        </div>
+    </button>
+
+    <div id="ai-chat-window" class="hidden absolute bottom-20 right-0 w-[350px] md:w-[400px] bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 overflow-hidden flex flex-col transform transition-all duration-300">
+        <div class="bg-gradient-to-r from-orange-600 to-orange-500 p-5 text-white flex justify-between items-center shadow-lg">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/20 p-2 rounded-lg">
+                    <i class="fas fa-robot text-2xl"></i>
+                </div>
+                <div>
+                    <p class="font-bold italic text-sm leading-none">Qulan AI Assistant</p>
+                    <p class="text-[10px] text-orange-100 mt-1 italic">Онлайн • Көмекке дайын</p>
+                </div>
+            </div>
+            <button onclick="toggleAIChat()" class="hover:rotate-90 transition-transform duration-300 p-2 text-xl">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div id="chat-messages" class="h-96 overflow-y-auto p-5 space-y-4 bg-gray-50/50 text-sm italic">
+            <div class="flex justify-start">
+                <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 max-w-[85%] text-gray-700 leading-relaxed">
+                    Қайырлы күн! ✨ Мен **Qulan AI** көмекшісімін. <br><br>Тауар іздеуге, жеткізу туралы білуге немесе менеджермен байланысуға көмектесе аламын. Не істейміз?
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 bg-white border-t border-gray-100">
+            <div class="relative flex items-center">
+                <input type="text" id="chat-input" 
+                    class="w-full border-2 border-gray-100 rounded-2xl py-3 pl-4 pr-12 outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-50 transition-all text-sm" 
+                    placeholder="Сұрағыңызды жазыңыз...">
+                <button onclick="sendMessage()" class="absolute right-2 bg-orange-600 text-white w-10 h-10 rounded-xl hover:bg-orange-700 transition flex items-center justify-center">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+
+#cat-chevron {
+    display: inline-block; /* Айналу эффектісі үшін міндетті */
+    transition: transform 0.3s ease-in-out;
+}
+
+.dropdown-animate {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out, opacity 0.3s ease;
+    opacity: 0;
+}
+
+.dropdown-animate.active {
+    max-height: 600px;
+    opacity: 1;
+}
+
+#cat-chevron {
+    display: inline-block;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Category item ішіндегі тексттің мобильдіде де әдемі тұруы үшін */
+.category-item span {
+    white-space: nowrap;
+}
+
+</style>
+
+<!-- Барлық беттің астына қосатын HTML -->
+<div id="offline-overlay" class="fixed inset-0 bg-white/90 backdrop-blur-xl z-[9999] flex-col items-center justify-center hidden">
+    <div class="text-center p-8 animate-modal">
+        <i class="fas fa-wifi-slash text-5xl text-orange-600 mb-4"></i>
+        <h2 class="text-xl font-black italic uppercase">Интернет <span class="text-orange-600">үзілді</span></h2>
+        <p class="text-[10px] font-bold text-gray-400 uppercase mt-2 mb-6 italic">Байланысты тексеріп, қайта көріңіз</p>
+        <button onclick="location.reload()" class="bg-slate-900 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase">Жаңарту</button>
+    </div>
+</div>
+
+
+
+<!-- Скрипт бөлімі -->
+<script>
+function updateOnlineStatus() {
+    const overlay = document.getElementById('offline-overlay');
+    if (!navigator.onLine) {
+        overlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    } else {
+        overlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+window.addEventListener('DOMContentLoaded', updateOnlineStatus);
+window.addEventListener('load', () => {
+    const loader = document.getElementById('global-loader');
+    if (loader) {
+        loader.classList.add('opacity-0'); // Әдемі жоғалу эффекті
+        setTimeout(() => {
+            loader.style.display = 'none';
+        }, 500); // 0.5 секундтан кейін толық өшеді
+    }
+});
+</script>
+
+<script>
+
+    // --- 2. ЖАСЫРЫН БӨЛІМДЕРДІ БАСҚАРУ (Подарочные карты) ---
+    function updatePrivateUI() {
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        const lastAuthTime = localStorage.getItem('lastAuthTime');
+        const now = new Date().getTime();
+        const isValid = isLoggedIn === 'true' && (lastAuthTime && (now - lastAuthTime < 24 * 60 * 60 * 1000));
+
+        const giftCardLinks = document.querySelectorAll('a[href="gift-cards.html"]');
+        giftCardLinks.forEach(link => {
+            link.parentElement.style.display = isValid ? 'block' : 'none';
+        });
+    }
+
+    // --- 3. ТІЛ ЖҮЙЕСІ ЖӘНЕ СЛАЙДЕР ---
+    const slider = document.getElementById('slider');
+    let slideIndex = 0;
+    setInterval(() => { slideIndex = (slideIndex + 1) % 3; if(slider) slider.style.transform = `translateX(-${slideIndex * 100}%)`; }, 4000);
+
+    function toggleLangMenu() { document.getElementById('lang-menu').classList.toggle('active'); }
+    function setLanguage(lang) { localStorage.setItem('qulan_lang', lang); applyLanguage(lang); document.getElementById('lang-menu').classList.remove('active'); }
+
+    function applyLanguage(lang) {
+        const isKz = lang === 'kz';
+        const els = {
+            'current-lang-text': isKz ? "Қазақша" : "Русский",
+            'txt-cabinet': isKz ? "Профиль" : "Профиль",
+            'txt-fav': isKz ? "Таңдаулы" : "Избранное",
+            'txt-cart': isKz ? "Себет" : "Корзина",
+            'txt-cat-btn': isKz ? "Тауарлар категориясы" : "Категории товаров",
+            'txt-hits': isKz ? "Хит тауарлар" : "Хиты продаж"
+        };
+        for (let id in els) { const el = document.getElementById(id); if(el) el.innerText = els[id]; }
+        document.querySelectorAll('.btn-add-cart').forEach(btn => btn.innerText = isKz ? "Себетке салу" : "В корзину");
+    }
+
+    // --- 4. КАТЕГОРИЯЛАР ---
+ function toggleCategories() {
+    const catMenu = document.getElementById('category-menu');
+    const chevron = document.getElementById('cat-chevron');
+    
+    if (catMenu) {
+        // 'active' класын қосу/алу (бұл CSS-тегі анимацияны іске қосады)
+        catMenu.classList.toggle('active');
+        
+        // Стрелканың (chevron) айналуы
+        const isOpen = catMenu.classList.contains('active');
+        if (chevron) {
+            chevron.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+    }
+}
+
+    // --- 5. GEMINI AI CHAT (КӘСІБИ ЖӘНЕ МЫҚТЫ НҰСҚА) ---
+    const GEMINI_API_KEY = "AIzaSyBU1eWfKxsuIJshtMzUlR4YKucfuRTvWog";
+    
+    function toggleAIChat() { 
+        const win = document.getElementById('ai-chat-window');
+        win.classList.toggle('hidden'); 
+        if(!win.classList.contains('hidden')) {
+            document.getElementById('chat-input').focus();
+        }
+    }
+
+    async function queryGemini(userMessage) {
+        const API_KEY = "AIzaSyC20EAvnYus71g7nShOgvwcokNnO0jGps"; 
+        const URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+
+        try {
+            const response = await fetch(URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ contents: [{ parts: [{ text: userMessage }] }] })
+            });
+            const data = await response.json();
+            if (data.error) return "Қате: " + data.error.message;
+            if (data.candidates && data.candidates[0].content) {
+                return data.candidates[0].content.parts[0].text.trim();
+            } else {
+                return "Google жауап бермеді. Кейінірек көріңіз.";
+            }
+        } catch (e) {
+            return "Байланыс үзілді. Интернетті немесе Live Server-ді тексеріңіз.";
+        }
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('chat-input');
+        const container = document.getElementById('chat-messages');
+        if (!input || !input.value.trim()) return;
+
+        const text = input.value.trim();
+        container.innerHTML += `<div class="flex justify-end mb-3"><div class="bg-orange-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] text-sm italic shadow-md">${text}</div></div>`;
+        input.value = '';
+        container.scrollTop = container.scrollHeight;
+
+        const typingId = "typing-" + Date.now();
+        container.innerHTML += `<div id="${typingId}" class="flex justify-start mb-3 animate-pulse"><div class="bg-gray-200 text-gray-500 p-2 px-4 rounded-2xl text-[11px] italic">Qulan AI жауап жазуда...</div></div>`;
+        container.scrollTop = container.scrollHeight;
+
+        const aiReply = await queryGemini(text);
+        const loader = document.getElementById(typingId);
+        if (loader) loader.remove();
+
+        container.innerHTML += `<div class="flex justify-start mb-3"><div class="bg-white border border-gray-100 p-4 rounded-2xl rounded-tl-none shadow-lg max-w-[85%] text-sm text-gray-700 leading-relaxed italic">${aiReply}</div></div>`;
+        container.scrollTop = container.scrollHeight;
+    }
+
+    // Қауіпсіздік үшін escapeHTML (Іздеу мен рендер үшін керек)
+    function escapeHTML(str) {
+        if (!str) return "";
+        return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    // --- 6. ТАУАРЛАР ЖҮЙЕСІ (РЕНДЕР) ---
+function renderProducts() {
+    const container = document.getElementById('products-container');
+    if (!container) return;
+    const products = JSON.parse(localStorage.getItem('products')) || [];
+    displayProductList(products); 
+    
+}
+
+function displayProductList(list) {
+    const container = document.getElementById('products-container');
+    if (!container) return;
+
+    if (list.length === 0) {
+        container.innerHTML = `<div class="col-span-full text-center py-20 italic text-gray-400">Товары временно отсутствуют...</div>`;
+        return;
+    }
+
+    const wishlist = JSON.parse(localStorage.getItem('qulanWishlist')) || [];
+
+    // Тізімді кері ретпен шығару (жаңа тауар бірінші)
+    container.innerHTML = [...list].reverse().map(p => {
+        const isFavorite = wishlist.includes(String(p.id));
+        const heartClass = isFavorite ? 'fas fa-heart text-red-500' : 'far fa-heart text-gray-400';
+
+        let discountBadge = "";
+        if (p.oldPrice && Number(p.oldPrice) > Number(p.price)) {
+            const discountPercent = Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100);
+            discountBadge = `
+                <div class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-lg z-20 shadow-md">
+                    -${discountPercent}%
+                </div>`;
+        }
+
+        return `
+            <div class="product-card bg-white rounded-[2rem] p-4 shadow-sm hover:shadow-xl border border-gray-100 relative group cursor-pointer transition-all duration-300 flex flex-col justify-between" 
+                 onclick="saveToHistory('${p.id}'); location.href='product.html?id=${p.id}'">
+                
+                ${discountBadge}
+
+                <!-- ЖҮРЕКШЕ (ИЗБРАННОЕ) -->
+                <div onclick="event.stopPropagation(); toggleWishlist('${p.id}')" 
+                        class="absolute top-2 right-2 z-30 w-9 h-9 bg-white/90 backdrop-blur-sm shadow-sm rounded-full flex items-center justify-center border border-gray-100 active:scale-90 transition-all">
+                    <i id="wish-icon-${p.id}" class="${heartClass} text-lg"></i>
+                </div>
+
+                <!-- Тауар суреті -->
+                <div class="w-full h-36 md:h-44 bg-gray-50 rounded-2xl mb-3 overflow-hidden flex items-center justify-center border border-gray-50">
+                    <img src="${p.img || 'images/no-photo.jpg'}" 
+                         class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" 
+                         onerror="this.src='https://via.placeholder.com/150'">
+                </div>
+
+                <!-- Ақпарат бөлімі -->
+                <div class="flex flex-col flex-grow">
+                    <!-- Ескі баға -->
+                    <div class="h-4">
+                        ${p.oldPrice ? `<span class="text-[10px] text-gray-400 line-through font-bold">${Number(p.oldPrice).toLocaleString()} ₸</span>` : ''}
+                    </div>
+                    
+                    <!-- Жаңа баға -->
+                    <p class="text-orange-600 font-black text-xl leading-none mb-1">${Number(p.price).toLocaleString()} ₸</p>
+                    
+                    <!-- Тауар аты (Аты бағаның астында анық көрінуі үшін) -->
+                    <h3 class="product-name text-xs font-bold text-gray-700 leading-tight h-8 overflow-hidden mb-3">
+                        ${escapeHTML(p.name)}
+                    </h3>
+                </div>
+
+                <!-- Себетке салу батырмасы -->
+                <button onclick="event.stopPropagation(); checkAuth('cart.html')" 
+                        class="w-full bg-orange-600 text-white py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-orange-700 active:scale-95 transition-all shadow-md shadow-orange-100 mt-auto">
+                    <i class="fas fa-shopping-basket mr-1"></i> В корзину
+                </button>
+            </div>`;
+    }).join('');
+}
+// --- 8. ІЗДЕУ ЖҮЙЕСІ (АТЫ ЖӘНЕ АРТИКУЛ БОЙЫНША) ---
+function searchProducts(query) {
+    const products = JSON.parse(localStorage.getItem('products')) || [];
+    const searchTerm = query.toLowerCase().trim();
+
+    if (!searchTerm) {
+        renderProducts();
+        return;
+    }
+
+    const filtered = products.filter(p => {
+        const nameMatch = p.name ? p.name.toLowerCase().includes(searchTerm) : false;
+        const articleMatch = p.article ? p.article.toLowerCase().includes(searchTerm) : false;
+        return nameMatch || articleMatch;
+    });
+
+    displayProductList(filtered);
+}
+
+    // --- 7. БАННЕРЛЕР МЕН ТАЙМЕР ---
+    function loadSiteBanners() {
+        const savedBanners = JSON.parse(localStorage.getItem('site_banners'));
+        if (savedBanners) {
+            if (savedBanners.main && savedBanners.main[0]) document.getElementById('slider-img-1').src = savedBanners.main[0];
+            if (savedBanners.main && savedBanners.main[1]) document.getElementById('slider-img-2').src = savedBanners.main[1];
+            if (savedBanners.main && savedBanners.main[2]) document.getElementById('slider-img-3').src = savedBanners.main[2];
+            if (savedBanners.small) { 
+                const el = document.getElementById('small-banner-img');
+                if(el) el.src = savedBanners.small;
+            }
+        }
+    }
+
+    function startGlobalTimer() {
+        const banners = JSON.parse(localStorage.getItem('site_banners'));
+        const promoSection = document.getElementById('promo-section');
+        if (!banners || !banners.deadline) { 
+            if(promoSection) promoSection.style.display = 'none'; 
+            return; 
+        }
+        const targetDate = new Date(banners.deadline).getTime();
+        const interval = setInterval(() => {
+            const now = new Date().getTime();
+            const diff = targetDate - now;
+            if (diff <= 0) { 
+                clearInterval(interval); 
+                if(promoSection) promoSection.style.display = 'none'; 
+                return; 
+            }
+            if(promoSection) promoSection.style.display = 'block';
+            const d = Math.floor(diff / (1000*60*60*24));
+            const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+            const m = Math.floor((diff % (1000*60*60)) / (1000*60));
+            const s = Math.floor((diff % (1000*60)) / 1000);
+            if(document.getElementById('days')) document.getElementById('days').innerText = d < 10 ? '0'+d : d;
+            if(document.getElementById('hours')) document.getElementById('hours').innerText = h < 10 ? '0'+h : h;
+            if(document.getElementById('minutes')) document.getElementById('minutes').innerText = m < 10 ? '0'+m : m;
+            if(document.getElementById('seconds')) document.getElementById('seconds').innerText = s < 10 ? '0'+s : s;
+        }, 1000);
+    }
+
+    document.getElementById('chat-input')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    function renderRecentHistory() {
+    const historyIds = JSON.parse(localStorage.getItem('qulanHistory')) || [];
+    const allProducts = JSON.parse(localStorage.getItem('products')) || [];
+    const container = document.getElementById('recent-container');
+    const section = document.getElementById('recent-viewed-section');
+
+    if (historyIds.length === 0) return;
+
+    // Идентификаторлар бойынша тауарларды жинау
+    const recentProducts = historyIds.map(id => allProducts.find(p => String(p.id) === String(id))).filter(p => p);
+
+    if (recentProducts.length > 0) {
+        section.classList.remove('hidden');
+        container.innerHTML = recentProducts.map(p => `
+            <div class="bg-white p-2 rounded-2xl shadow-sm border opacity-70 hover:opacity-100 transition" onclick="location.href='product.html?id=${p.id}'">
+                <img src="${p.img}" class="w-full h-20 object-cover rounded-xl mb-2">
+                <p class="text-[10px] font-bold truncate">${p.name}</p>
+                <p class="text-orange-600 text-[10px] font-black">${Number(p.price).toLocaleString()} ₸</p>
+            </div>
+        `).join('');
+    }
+}
+
+    window.onload = () => {
+        applyLanguage(localStorage.getItem('qulan_lang') || 'ru');
+        renderProducts();
+        loadSiteBanners();
+        startGlobalTimer();
+        updatePrivateUI();
+        updateNavBalance();
+    };
+
+    // Батырмалардың активті күйін басқару
+function setActiveBtn(id) {
+    document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+    if (id) document.getElementById(id).classList.add('active');
+}
+
+// 1. Баға бойынша сұрыптау
+function sortProducts(type) {
+    let products = JSON.parse(localStorage.getItem('products')) || [];
+    
+    if (type === 'cheap') {
+        products.sort((a, b) => Number(a.price) - Number(b.price));
+        setActiveBtn('btn-sort-cheap');
+    } else if (type === 'expensive') {
+        products.sort((a, b) => Number(b.price) - Number(a.price));
+        setActiveBtn('btn-sort-expensive');
+    }
+    
+    displayProductList(products);
+}
+
+// 2. Тек жеңілдігі барларды фильтрлеу
+function filterDiscount() {
+    let products = JSON.parse(localStorage.getItem('products')) || [];
+    let discounted = products.filter(p => p.oldPrice && Number(p.oldPrice) > Number(p.price));
+    
+    setActiveBtn('btn-filter-discount');
+    displayProductList(discounted);
+}
+
+function displayProductList(list) {
+    const container = document.getElementById('products-container');
+    if (!container) return;
+
+    // 1. Егер тізім бос болса, хабарлама шығару
+    if (!list || list.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full text-center py-20 italic text-gray-400 animate-pulse">
+                Товары по вашему запросу не найдены...
+            </div>`;
+        return;
+    }
+
+    function saveToHistory(id) {
+    let history = JSON.parse(localStorage.getItem('qulanHistory')) || [];
+    if (!history.includes(id)) {
+        history.unshift(id); 
+        if (history.length > 6) history.pop(); 
+        localStorage.setItem('qulanHistory', JSON.stringify(history));
+    }
+}
+
+    // 2. Рендеринг (Тауарларды карта түрінде шығару)
+    container.innerHTML = list.map(p => {
+        // Жеңілдік (Скидка) есептеу
+        let discountBadge = "";
+        if (p.oldPrice && Number(p.oldPrice) > Number(p.price)) {
+            const discountPercent = Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100);
+            discountBadge = `
+                <div class="absolute top-3 left-3 bg-red-500 text-white text-[9px] font-black px-2 py-1 rounded-lg uppercase shadow-lg z-10 animate-bounce">
+                    -${discountPercent}%
+                </div>`;
+        }
+
+        return `
+            <div class="product-card bg-white rounded-[2rem] p-3 shadow-sm hover:shadow-xl border border-gray-100 relative group cursor-pointer transition-all duration-300" 
+                 onclick="location.href='product.html?id=${p.id}'">
+                
+                ${discountBadge}
+
+                <!-- Тауар суреті -->
+                <div class="w-full h-32 md:h-40 bg-gray-50 rounded-2xl mb-4 overflow-hidden flex items-center justify-center border border-gray-50 p-2">
+    <img src="${p.img || 'images/no-photo.jpg'}" 
+         class="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500" 
+         onerror="this.src='https://via.placeholder.com/150?text=QulanShop'">
+</div>
+
+                <!-- Бағалар бөлімі -->
+                <div class="flex flex-col mb-1">
+                    ${p.oldPrice ? `<span class="text-[10px] text-gray-400 line-through font-bold">${Number(p.oldPrice).toLocaleString()} ₸</span>` : '<span class="text-[10px] opacity-0">0</span>'}
+                    <p class="text-orange-600 font-black text-xl italic leading-none">${Number(p.price).toLocaleString()} ₸</p>
+                </div>
+
+                <!-- Тауар аты -->
+                <h3 class="product-name text-[11px] font-bold h-8 overflow-hidden mb-3 text-gray-800 leading-tight">
+                    ${escapeHTML(p.name)}
+                </h3>
+            </div>`;
+    }).join('');
+}
+
+function toggleFAQ(id) {
+    const ans = document.getElementById(`faq-ans-${id}`);
+    const icon = document.getElementById(`faq-icon-${id}`);
+    
+    // Закрываем другие, если нужно (опционально)
+    // document.querySelectorAll('[id^="faq-ans-"]').forEach(el => {
+    //     if(el.id !== `faq-ans-${id}`) el.style.maxHeight = '0';
+    // });
+
+    if (ans.style.maxHeight === '0px' || !ans.style.maxHeight) {
+        ans.style.maxHeight = '200px'; // Достаточная высота для текста
+        icon.style.transform = 'rotate(45deg)';
+        icon.classList.replace('fa-plus', 'fa-times');
+    } else {
+        ans.style.maxHeight = '0px';
+        icon.style.transform = 'rotate(0deg)';
+        icon.classList.replace('fa-times', 'fa-plus');
+    }
+}
+
+function saveToHistory(id) {
+    let history = JSON.parse(localStorage.getItem('qulanHistory')) || [];
+    if (!history.includes(id)) {
+        history.unshift(id); // Басына қосу
+        if (history.length > 6) history.pop(); // Тек соңғы 6-ауын сақтау
+        localStorage.setItem('qulanHistory', JSON.stringify(history));
+    }
+}
+
+// displayProductList ішіндегі тауар картасының HTML-іне мынаны қосамыз:
+// onclick="saveToHistory('${p.id}'); location.href='product.html?id=${p.id}'"
+
+
+// 1. Избранное-ға қосу/алу
+function toggleWishlist(productId) {
+    let wishlist = JSON.parse(localStorage.getItem('qulanWishlist')) || [];
+    const icon = document.getElementById(`wish-icon-${productId}`);
+
+    if (wishlist.includes(String(productId))) {
+        wishlist = wishlist.filter(id => id !== String(productId));
+        if (icon) {
+            icon.classList.replace('fas', 'far');
+            icon.classList.replace('text-red-500', 'text-gray-400');
+        }
+    } else {
+        wishlist.push(String(productId));
+        if (icon) {
+            icon.classList.replace('far', 'fas');
+            icon.classList.replace('text-gray-400', 'text-red-500');
+        }
+    }
+    localStorage.setItem('qulanWishlist', JSON.stringify(wishlist));
+}
+
+// 2. Қарау тарихына сақтау
+function saveToHistory(id) {
+    let history = JSON.parse(localStorage.getItem('qulanHistory')) || [];
+    if (!history.includes(id)) {
+        history.unshift(id); 
+        if (history.length > 6) history.pop(); 
+        localStorage.setItem('qulanHistory', JSON.stringify(history));
+    }
+}
+
+
+function filterByCategory(categoryName) {
+    // 1. Базадан (localStorage) тауарларды оқимыз
+    const products = JSON.parse(localStorage.getItem('products')) || [];
+    const container = document.getElementById('products-container'); // Тауарлар тұратын контейнер ID-і
+    
+    if (!container) return;
+
+    // 2. Сүзу логикасы
+    let filtered;
+    if (categoryName === 'all') {
+        filtered = products; // Бәрін көрсету
+        document.getElementById('txt-cat-btn').innerText = "Категории товаров";
+    } else {
+        // Тауардың категориясы біз басқан атқа сәйкес келуі керек
+        filtered = products.filter(p => p.category === categoryName);
+        document.getElementById('txt-cat-btn').innerText = categoryName;
+    }
+
+    // 3. Тауарларды экранға шығару (Сенің дизайныңмен)
+    if (filtered.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full py-20 text-center opacity-50 italic">
+                <i class="fas fa-search text-5xl mb-4"></i>
+                <p class="font-black uppercase tracking-widest text-[10px]">Бұл категорияда тауар табылмады...</p>
+            </div>`;
+    } else {
+    container.innerHTML = filtered.map(p => `
+    <div class="bg-white rounded-3xl shadow-sm p-4 border border-gray-50 group hover:shadow-xl transition-all cursor-pointer animate-modal flex flex-col justify-between" onclick="location.href='product.html?id=${p.id}'">
+        <div class="h-48 bg-gray-100 rounded-2xl mb-4 overflow-hidden relative flex items-center justify-center p-4">
+            <img src="${p.img}" class="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500">
+            ${p.oldPrice ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[8px] font-black px-2 py-1 rounded-full uppercase">Скидка</span>` : ''}
+        </div>
+        <h3 class="font-black italic uppercase text-sm mb-2 truncate">${p.name}</h3>
+        <div class="flex items-end gap-2">
+            <p class="text-orange-600 font-black italic text-lg leading-none">${Number(p.price).toLocaleString()} ₸</p>
+            ${p.oldPrice ? `<p class="text-gray-300 line-through text-[10px] font-bold mb-0.5">${Number(p.oldPrice).toLocaleString()} ₸</p>` : ''}
+        </div>
+    </div>
+`).join('');
+    }
+
+    // 4. Мәзірді жабу (Анимациямен)
+    toggleCategories();
+}
+
+// --- АДМИН/КАБИНЕТ ЛОГИКАСЫ ---
+function handleCabinetClick() {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+    // 1. Егер адам жүйеге кірмеген болса - логин бетіне жіберу
+    if (!isLoggedIn || isLoggedIn !== 'true' || !currentUser) {
+        window.location.assign('auth.html');
+        return;
+    }
+
+    // 2. ЕГЕР БҰЛ АДМИН БОЛСА - ТІКЕЛЕЙ admin.html-ге (Тауар қосатын жаққа)
+    // Мұнда телефоның немесе атың бойынша тексеріс жүреді
+    if (currentUser.name === "Administrator" || currentUser.phone === "77054860793") {
+        window.location.assign('admin.html');
+    } else {
+        // 3. Егер жай клиент болса - өз кабинетіне (profile.html)
+        window.location.assign('profile.html');
+    }
+}
+
+// БЕТ ЖҮКТЕЛГЕНДЕ БАТЫРМАНЫҢ АТЫН АВТОМАТТЫ ТҮРДЕ ӨЗГЕРТУ
+window.addEventListener('DOMContentLoaded', () => {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const btnText = document.getElementById('txt-cabinet-btn');
+    
+    if (currentUser && (currentUser.name === "Administrator" || currentUser.phone === "77054860793")) {
+        if (btnText) btnText.innerText = "Админ"; // Саған "Админ" деп көрінеді
+    }
+});
+
+
+</script>
+
+
+<!-- 1. Алдымен SweetAlert2 (бұлсыз Alert шықпайды) -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- 2. Сосын сенің тексеруші файлың -->
+<script src="./auth-guard.js"></script>
+
+
+<div id="image-viewer-modal" class="hidden fixed inset-0 bg-black/95 backdrop-blur-xl z-[3000] flex items-center justify-center p-4 md:p-10" onclick="closeImageViewer()">
+    <button class="absolute top-6 right-6 text-white/50 hover:text-white text-4xl transition-all">&times;</button>
+    <img id="full-res-image" src="" class="max-w-full max-h-full rounded-2xl shadow-2xl transform transition-transform duration-300 scale-95" onclick="event.stopPropagation()">
+</div>
+
+</body>
+
+</html>

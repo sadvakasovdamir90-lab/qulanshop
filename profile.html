@@ -1095,7 +1095,7 @@ window.addEventListener('DOMContentLoaded', () => {
     
     // БӘРІНЕН БҰРЫН ОСЫ ФУНКЦИЯ ТҰРУЫ КЕРЕК
     loadUserData();      
-    
+    renderWallet();
     updateDebtStatus();  
     renderProfileCart(); 
     load2FAStatus();     
@@ -1130,18 +1130,32 @@ window.addEventListener('DOMContentLoaded', () => {
 
         // Кошелекті рендер жасау
 function renderWallet() {
-    const balance = localStorage.getItem('userBalance') || 0;
-    const bonuses = localStorage.getItem('userBonuses') || 0;
-    
-    // Экрандағы баланстарды жаңарту
-    const mainBalanceEl = document.getElementById('wallet-balance-main');
-    const bonusEl = document.getElementById('wallet-bonuses');
-    
-    if(mainBalanceEl) mainBalanceEl.innerText = Number(balance).toLocaleString() + ' ₸';
-    if(bonusEl) bonusEl.innerText = Number(bonuses).toLocaleString();
-    
-    // Навигациядағы балансты да жаңарту
-    updateNavBalance(); 
+    // 1. Ең алдымен негізгі users базасын оқимыз
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    // 2. Қазіргі кіріп тұрған адамның ID-ін аламыз
+    const currentId = localStorage.getItem('currentUserId');
+    // 3. Базадан сол адамды табамыз (Ең соңғы жаңарған дерек осында)
+    const user = users.find(u => String(u.id) === String(currentId));
+
+    if (user) {
+        // 4. Бонусты базадағы мәнмен теңестіреміз
+        const bonuses = user.bonus || 0; 
+        const balance = user.userBalance || 0;
+
+        // 5. Сенің HTML-іңдегі ID бойынша экранға шығарамыз
+        const bonusEl = document.getElementById('wallet-bonuses');
+        const mainBalanceEl = document.getElementById('wallet-balance-main');
+        
+        if(bonusEl) {
+            bonusEl.innerText = Number(bonuses).toLocaleString(); // Санды осында жазады
+        }
+        if(mainBalanceEl) {
+            mainBalanceEl.innerText = Number(balance).toLocaleString();
+        }
+        
+        // Навигациядағы балансты да жаңарту
+        updateNavBalance();
+    }
 }
 
 // Пополнить басқанда әдістерді көрсету

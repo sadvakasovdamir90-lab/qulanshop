@@ -211,6 +211,51 @@
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .custom-scroll::-webkit-scrollbar { width: 3px; }
 .custom-scroll::-webkit-scrollbar-thumb { background: #f1f5f9; }
+
+/* Уведомление панелінің негізгі стилі (ПК үшін) */
+.notify-dropdown-panel {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 1rem;
+    width: 320px;
+    background-color: white;
+    border-radius: 2rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid #f1f5f9;
+    z-index: 9999;
+    overflow: hidden;
+}
+
+/* МОБИЛЬДІ АДАПТАЦИЯ (iPhone, Android) */
+@media (max-width: 768px) {
+    .notify-dropdown-panel {
+        position: fixed !important; /* Экранға жабысып тұрады */
+        top: auto !important;
+        bottom: 0 !important; /* Астыңғы жаққа бекіту */
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important; /* Экранның толық ені */
+        margin-top: 0 !important;
+        border-radius: 2.5rem 2.5rem 0 0 !important; /* Тек жоғарғы бұрыштары жұмыр */
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
+        animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Астынан шығу анимациясы */
+    }
+
+    /* Астынан шығу анимациясы */
+    @keyframes slideUp {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+    }
+}
+
+/* Категория табтарының стилі */
+.notify-tab {
+    font-size: 8px; font-weight: 900; text-transform: uppercase;
+    padding: 8px 14px; border-radius: 12px; background: #f1f5f9;
+    color: #94a3b8; cursor: pointer; white-space: nowrap; transition: 0.3s;
+}
+.notify-tab.active { background: #ea580c; color: white; }
     </style>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800">
@@ -255,22 +300,28 @@
             <span class="text-[9px] md:text-[10px] mt-1 font-medium italic">Избранное</span>
         </button>
 
-<div id="notify-wrapper" class="hidden relative flex flex-col items-center">
-        <button onclick="toggleNotifyMenu()" class="relative flex flex-col items-center outline-none group">
+<div id="notify-wrapper" class="hidden relative">
+    <button onclick="toggleNotifyMenu()" class="flex flex-col items-center outline-none group">
         <div class="relative">
             <i class="far fa-bell text-xl md:text-2xl transition-transform group-active:scale-90 text-gray-600"></i>
             <div id="notify-dot" class="hidden absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-600 rounded-full border-2 border-white animate-pulse"></div>
         </div>
-        <span class="text-[9px] md:text-[10px] mt-1 font-bold italic uppercase tracking-tighter">Уведомление</span>
+        <span class="text-[9px] md:text-[10px] mt-1 font-bold italic uppercase tracking-tighter">Хабарлама</span>
     </button>
 
-    <div id="notify-dropdown" class="hidden absolute top-full right-0 mt-4 w-[320px] bg-white rounded-[2.5rem] shadow-2xl border border-gray-100 z-[9999] overflow-hidden transform origin-top-right transition-all">
-        <div class="p-6 border-b border-gray-50 bg-gray-50/50">
-            <h4 class="font-black italic uppercase text-[12px] tracking-widest text-slate-800">Центр уведомлений</h4>
+    <div id="notify-dropdown" class="hidden notify-dropdown-panel">
+        <div class="p-5 border-b border-gray-50 bg-gray-50/50">
+            <div class="flex justify-between items-center">
+                <h4 class="font-black italic uppercase text-[12px] tracking-widest text-slate-800">Центр уведомлений</h4>
+                <button onclick="toggleNotifyMenu()" class="md:hidden text-gray-400 p-2">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
             <div class="flex gap-2 mt-3 overflow-x-auto no-scrollbar" id="notify-tabs"></div>
         </div>
-        <div id="notify-list" class="max-h-[380px] overflow-y-auto p-4 space-y-3 bg-white custom-scroll">
-            <div class="py-12 text-center text-gray-300 italic text-[10px] font-bold uppercase">Уведомления не найден</div>
+        
+        <div id="notify-list" class="max-h-[380px] md:max-h-[400px] overflow-y-auto p-4 space-y-3 bg-white custom-scroll">
+            <div class="py-12 text-center text-gray-300 italic text-[10px] font-bold uppercase">Хабарламалар жоқ</div>
         </div>
     </div>
 </div>
@@ -1201,18 +1252,23 @@ document.addEventListener('DOMContentLoaded', () => {
 // 1. Менюді ашу/жабу функциясы
 function toggleNotifyMenu() {
     const dropdown = document.getElementById('notify-dropdown');
-    if (!dropdown) return; // Егер терезе табылмаса, тоқтату
+    const isMobile = window.innerWidth <= 768;
+
+    if (!dropdown) return;
 
     dropdown.classList.toggle('hidden');
 
-    // Егер меню ашылса
     if (!dropdown.classList.contains('hidden')) {
-        // Қызыл нүктені өшіру
-        const dot = document.getElementById('notify-dot');
-        if (dot) dot.classList.add('hidden');
-        
-        // Хабарламаларды экранға шығару
+        document.getElementById('notify-dot')?.classList.add('hidden');
         renderNotifyContent('all');
+        
+        // Телефонда артқы беттің скроллын тоқтату
+        if (isMobile) {
+            document.body.style.overflow = 'hidden';
+        }
+    } else {
+        // Жабылғанда скроллды қайта қосу
+        document.body.style.overflow = 'auto';
     }
 }
 

@@ -1357,79 +1357,43 @@ window.addEventListener('click', (e) => {
 });
 
 window.addEventListener('storage', (e) => {
+    // Сигналдың бар екенін және ол бос емес екенін тексереміз
     if (e.key === 'global_push_signal' && e.newValue && e.newValue !== "null") {
         const data = JSON.parse(e.newValue);
         
+        // Хабарламаны өшіру (синхронизация) сигналы болса
         if (data.action === 'sync_list') {
             localStorage.setItem('qulanshop_notifications', JSON.stringify(data.newList));
             if (typeof renderNotifyContent === 'function') renderNotifyContent('all');
             return;
         }
 
+        // Жаңа хабарлама қосу
         if (localStorage.getItem('isLoggedIn') === 'true' && data.message) {
             let list = JSON.parse(localStorage.getItem('qulanshop_notifications')) || [];
+            
+            // Қайталанбау үшін ID арқылы тексереміз
             if (!list.find(n => n.id === data.id)) {
                 list.push(data);
                 localStorage.setItem('qulanshop_notifications', JSON.stringify(list));
                 
+                // Хабарлама келгенін білдіретін нүктені жағу
                 const dot = document.getElementById('notify-dot');
                 if (dot) dot.classList.remove('hidden');
                 
-                // Егер SweetAlert немесе Push функциясы болса
                 if (typeof showMobileStyledPush === 'function') {
                     showMobileStyledPush(data.message);
                 }
             }
         }
         
-        // Сигналды тазалау (сәл кідіріспен, өйткені бірнеше вкладка ашық болуы мүмкін)
-        setTimeout(() => {
-            localStorage.setItem('global_push_signal', "null");
-        }, 500);
+        // 🔥 ӨЗІНЕН-ӨЗІ ЖІБЕРУДІ ТОҚТАТАТЫН ЕҢ МАҢЫЗДЫ ЖОЛ:
+        // Сигналды өңдеп болған соң, оны бірден тазалаймыз
+        localStorage.setItem('global_push_signal', "null");
     }
 });
 
-function checkScheduledNotifications() {
-    let scheduledQueue = JSON.parse(localStorage.getItem('scheduled_notifications')) || [];
-    if (scheduledQueue.length === 0) return;
 
-    const now = new Date();
-    // Жергілікті уақытты YYYY-MM-DDTHH:mm форматында алу
-    const currentStr = now.getFullYear() + '-' + 
-                      String(now.getMonth() + 1).padStart(2, '0') + '-' + 
-                      String(now.getDate()).padStart(2, '0') + 'T' + 
-                      String(now.getHours()).padStart(2, '0') + ':' + 
-                      String(now.getMinutes()).padStart(2, '0');
-
-    let remainingQueue = [];
-    let updated = false;
-
-    scheduledQueue.forEach(task => {
-        if (task.scheduledAt <= currentStr) {
-            // 1. Хабарламаны "Историяға" қосу
-            let history = JSON.parse(localStorage.getItem('qulanshop_notifications')) || [];
-            if (!history.find(h => h.id === task.id)) {
-                history.push(task);
-                localStorage.setItem('qulanshop_notifications', JSON.stringify(history));
-            }
-
-            // 2. Сигнал жіберу
-            localStorage.setItem('global_push_signal', JSON.stringify(task));
-            setTimeout(() => localStorage.setItem('global_push_signal', "null"), 1000);
-            
-            updated = true;
-        } else {
-            remainingQueue.push(task);
-        }
-    });
-
-    if (updated) {
-        localStorage.setItem('scheduled_notifications', JSON.stringify(remainingQueue));
-        // Егер админ панель ашық болса, тізімді жаңарту
-        if(typeof renderScheduledList === 'function') renderScheduledList();
-    }
-}
-setInterval(checkScheduledNotifications, 10000); // 10 секунд сайын тексеру
 </script>
 
 

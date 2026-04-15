@@ -607,12 +607,11 @@ window.handleConfirmCode = function() {
         }
     }
 
- function saveFinalUser() {
+function saveFinalUser() {
     let users = JSON.parse(localStorage.getItem('users')) || [];
     const urlParams = new URLSearchParams(window.location.search);
     const referrerId = urlParams.get('ref');
 
-    // 1. ЖАҢА ҚОЛДАНУШЫ НЫСАНЫ
     const newUser = { 
         id: Date.now(), 
         name: window.tempUser.name, 
@@ -627,43 +626,44 @@ window.handleConfirmCode = function() {
         referralEarned: 0,
         giftCards: [], 
         twoFactorEnabled: false,
-        isWelcomed: false // МЫНАУ МІНДЕТТІ: Хабарлама келуі үшін керек
+        isWelcomed: false 
     };
 
-    // 2. РЕФЕРАЛДЫҚ ЖҮЙЕ (Сенің кодың өзгеріссіз қалды)
+    // 1. ҚҰТТЫҚТАУ ХАБАРЛАМАСЫН ДАЙЫНДАУ (БЕТ АУЫСПАЙ ТҰРЫП САҚТАУ)
+    const welcomePush = {
+        id: Date.now(),
+        message: `Қош келдіңіз, ${newUser.name}! ✨ QulanShop-ты таңдағаныңызға рахмет. Профиль бөлімінде сіздің жеке әмияныңыз бен бонустарыңыз дайын!`,
+        category: "🎉 QULANSHOP",
+        link: "profile.html",
+        time: new Date().toLocaleTimeString().slice(0, 5)
+    };
+
+    // Хабарламалар тарихына бірден қосамыз
+    let notifications = JSON.parse(localStorage.getItem('qulanshop_notifications')) || [];
+    notifications.push(welcomePush);
+    localStorage.setItem('qulanshop_notifications', JSON.stringify(notifications));
+
+    // Қолданушыға белгі қою
+    newUser.isWelcomed = true;
+
+    // 2. РЕФЕРАЛ ЖҮЙЕСІ (Өзгеріссіз қалды)
     if (referrerId) {
         const refIndex = users.findIndex(u => String(u.id) === String(referrerId));
-        const alreadyExists = users.find(u => 
-            (u.phone && u.phone === newUser.phone && newUser.phone !== "") || 
-            (u.email && u.email === newUser.email && newUser.email !== "")
-        );
-
-        if (refIndex !== -1 && !alreadyExists) {
+        if (refIndex !== -1) {
             users[refIndex].userBalance = (Number(users[refIndex].userBalance) || 0) + 500;
             users[refIndex].referralEarned = (Number(users[refIndex].referralEarned) || 0) + 500;
             users[refIndex].referralCount = (Number(users[refIndex].referralCount) || 0) + 1;
-            
             if(!users[refIndex].referralHistory) users[refIndex].referralHistory = [];
-            users[refIndex].referralHistory.push({
-                from: newUser.name,
-                date: new Date().toLocaleString(),
-                amount: 500
-            });
-
-            const currentId = localStorage.getItem('currentUserId');
-            if (String(currentId) === String(referrerId)) {
-                localStorage.setItem('userBalance', users[refIndex].userBalance);
-            }
-            console.log("Бонус базаға жазылды! ✅");
+            users[refIndex].referralHistory.push({ from: newUser.name, date: new Date().toLocaleString(), amount: 500 });
         }
     }
 
-    // 3. ДЕРЕКТЕРДІ САҚТАУ
+    // 3. БАЗАҒА САҚТАУ
     users.push(newUser);
     localStorage.setItem('users', JSON.stringify(users));
 
-    // 4. ҚАРСЫ АЛУ ХАБАРЛАМАСЫН ЖІБЕРУ (Сақталғаннан кейін)
-    sendWelcomeNotificationOnce(newUser);
+    // 4. НҮКТЕНІ ЖАҒУ СИГНАЛЫ
+    localStorage.setItem('global_push_signal', JSON.stringify(welcomePush));
 
     // 5. ЖҮЙЕГЕ КІРГІЗУ
     loginUser(newUser); 
@@ -824,49 +824,6 @@ function loginUser(userObject) {
     
     // Сессия уақыты (1 сағаттық бақылау осы жерден басталады)
     localStorage.setItem('lastAuthTime', new Date().getTime());
-
-    function sendWelcomeNotificationOnce(user) {
-    // 1. Қолданушының бұрын құттықтау алғанын тексеру
-    if (user.isWelcomed) return;
-
-    // 2. Қарсы алу хабарламасы
-   function sendWelcomeNotificationOnce(user) {
-    // Егер бұрын құттықтау алса, тоқтату
-    if (user.isWelcomed) return;
-
-    // Хабарлама мазмұны
-    const welcomePush = {
-        id: Date.now(),
-        message: `Қош келдіңіз, ${user.name}! ✨ QulanShop-ты таңдағаныңызға рахмет. Профиль бөлімінде сіздің жеке әмияныңыз бен бонустарыңыз дайын!`,
-        category: "🎉 ҚҰТТЫҚТАУ",
-        link: "profile.html",
-        time: new Date().toLocaleTimeString().slice(0, 5)
-    };
-
-    // 1. Хабарламалар тізіміне қосу
-    let notifications = JSON.parse(localStorage.getItem('qulanshop_notifications')) || [];
-    notifications.push(welcomePush);
-    localStorage.setItem('qulanshop_notifications', JSON.stringify(notifications));
-
-    // 2. Қолданушының статусын жаңарту
-    user.isWelcomed = true;
-    localStorage.setItem('currentUser', JSON.stringify(user));
-
-    let users = JSON.parse(localStorage.getItem('users')) || [];
-    const index = users.findIndex(u => String(u.id) === String(user.id));
-    if (index !== -1) {
-        users[index].isWelcomed = true;
-        localStorage.setItem('users', JSON.stringify(users));
-    }
-
-    // 3. "Уведомления" батырмасында қызыл нүкте жануы үшін сигнал жіберу
-    localStorage.setItem('global_push_signal', JSON.stringify(welcomePush));
-}
-
-    // Қызыл нүктені жағу
-    const dot = document.getElementById('notify-dot');
-    if (dot) dot.classList.remove('hidden');
-}
     
     // Профильге бағыттау
     window.location.href = 'profile.html';
@@ -917,6 +874,34 @@ window.addEventListener('DOMContentLoaded', () => {
     // Фокусты логин жазатын жерге қою
     setTimeout(() => document.getElementById('login-identifier')?.focus(), 500);
 });
+
+
+/**
+ * Жаңа қолданушыға бір реттік құттықтау хабарламасын жіберу
+ */
+function sendWelcomeNotificationOnce(user) {
+    if (user.isWelcomed) return; // Егер бұрын жіберілсе, тоқтатады
+
+    const welcomePush = {
+        id: Date.now(),
+        message: `Қош келдіңіз, ${user.name}! ✨ QulanShop-ты таңдағаныңызға рахмет. Профиль бөлімінде сіздің жеке әмияныңыз бен бонустарыңыз дайын!`,
+        category: "🎉 ҚҰТТЫҚТАУ",
+        link: "profile.html",
+        time: new Date().toLocaleTimeString().slice(0, 5)
+    };
+
+    // 1. Хабарламаны тарихқа сақтау
+    let notifications = JSON.parse(localStorage.getItem('qulanshop_notifications')) || [];
+    notifications.push(welcomePush);
+    localStorage.setItem('qulanshop_notifications', JSON.stringify(notifications));
+
+    // 2. Статусты жаңарту
+    user.isWelcomed = true;
+    localStorage.setItem('currentUser', JSON.stringify(user));
+
+    // 3. Басты беттегі қоңырауда нүкте жануы үшін сигнал жіберу
+    localStorage.setItem('global_push_signal', JSON.stringify(welcomePush));
+}
 </script>
 
 <script src="script.js"></script>

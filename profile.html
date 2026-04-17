@@ -363,10 +363,10 @@
         <div class="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-100 flex items-center justify-center">
             <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=random" class="w-full h-full object-cover">
         </div>
-        <label for="avatar-upload" class="absolute bottom-0 right-0 bg-orange-600 text-white p-2 rounded-full shadow-lg cursor-pointer hover:bg-orange-700 transition-all">
-            <i class="fas fa-camera text-sm"></i>
-            <input type="file" id="avatar-upload" class="hidden" accept="image/*" onchange="uploadAvatar(this)">
-        </label>
+       <label id="camera-icon" for="avatar-upload" class="hidden absolute bottom-0 right-0 bg-orange-600 text-white p-2 rounded-full shadow-lg cursor-pointer hover:bg-orange-700 transition-all">
+    <i class="fas fa-camera text-sm"></i>
+    <input type="file" id="avatar-upload" class="hidden" accept="image/*" onchange="uploadAvatar(this)">
+</label>
     </div>
     <p class="text-[10px] text-gray-400 mt-2 font-bold uppercase tracking-widest italic">Фото профиля</p>
 </div> 
@@ -1125,6 +1125,7 @@ window.addEventListener('DOMContentLoaded', () => {
     updateMenuBadges();   
     updateOnlineStatus(); 
     updateNavBalance();  
+    renderMyOrders();
 });
         // --- 1. ТАБТАР ЖҮЙЕСІ ---
         function showTab(event, tabId) {
@@ -1475,53 +1476,58 @@ function processTopUp(method) {
 }
 
         // Фотоны жүктеп, базаға сақтау функциясы
-function uploadAvatar(input) {
+    function uploadAvatar(input) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
 
         reader.onload = function(e) {
             const base64Image = e.target.result; // Суреттің коды
             
-            // 1. Экранда бірден көрсету
-            document.getElementById('user-avatar').src = base64Image;
+            // 1. Экранда бірден көрсету (Preview)
+            const avatarPreview = document.getElementById('user-avatar');
+            if (avatarPreview) avatarPreview.src = base64Image;
             
-            // 2. Уақытша currentUser нысанын жаңарту (сақтау батырмасын басқанда толық сақталады)
+            // 2. Уақытша currentUser (сессияны) жаңарту
             let currentUser = JSON.parse(localStorage.getItem('currentUser'));
             if (currentUser) {
-                currentUser.photo = base64Image; // немесе 'photo', сенің newUser құрылымыңа сәйкес
+                currentUser.photo = base64Image; 
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            }
+
+            // --- ЖАҢА: НЕГІЗГІ БАЗАНЫ (users) ЖАҢАРТУ ---
+            // Бұл бөлім фотоны базаға мәңгілікке бекітеді (Бетті жаңартсаң да жоғалмайды)
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+            const currentId = localStorage.getItem('currentUserId');
+            const userIndex = users.findIndex(u => String(u.id) === String(currentId));
+
+            if (userIndex !== -1) {
+                users[userIndex].photo = base64Image; 
+                localStorage.setItem('users', JSON.stringify(users));
+                console.log("Фото базаға сәтті сақталды ✅");
             }
         };
 
         reader.readAsDataURL(input.files[0]);
     }
 
-    // 1. LocalStorage-тан деректі алу
+    // --- СЕНІҢ ҚАЖЕТТІ КОДТАРЫҢ (ТИІСПЕДІМ) ---
     const userJson = localStorage.getItem('currentUser');
-    
-    // Элементтерді айнымалыға алу
     const headerName = document.getElementById('user-fullname-header');
     const nameInput = document.getElementById('user-fullname-input');
     const avatarImg = document.getElementById('user-avatar');
 
     if (userJson && userJson !== "null") {
         const user = JSON.parse(userJson);
-        
-        // 2. АТЫН АНЫҚТАУ (newUser құрылымына сәйкес тексереміз)
-        // Сенің нысаныңда 'name' қолданылады
         const displayName = user.name || user.displayName || user.username || "Пользователь";
 
-        // 3. Экранға шығару (Header және Инпут)
         if (headerName) headerName.innerText = displayName;
         if (nameInput) nameInput.value = displayName;
 
-        // 4. СУРЕТТІ ШЫҒАРУ ( newUser ішіндегі 'photo' өрісі)
         if (avatarImg) {
             // Егер сурет базада болса соны, болмаса 'photo'-ны, болмаса әдемі иконканы қояды
-            avatarImg.src = user.avatar || user.photo || "https://ui-avatars.com/api/?name=" + encodeURIComponent(displayName) + "&background=random";
+            avatarImg.src = user.photo || user.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(displayName) + "&background=random";
         }
 
-        // 5. БАСҚА ДЕРЕКТЕРДІ ТОЛТЫРУ
         if (document.getElementById('user-phone-input')) 
             document.getElementById('user-phone-input').value = user.phone || '';
         
@@ -1535,7 +1541,6 @@ function uploadAvatar(input) {
     } else {
         window.location.assign('auth.html');
     }
-
 }
 
 
@@ -1993,29 +1998,39 @@ function updateNavBalance() {
     }
 }
 
-let isEditMode = false;
+// 1. Беттің басында осы айнымалының барына көз жеткіз
+let isEditMode = false; 
 
 function toggleEditMode() {
     const btn = document.getElementById('edit-profile-btn');
-    const phoneInput = document.getElementById('user-phone-input');
-    const emailInput = document.getElementById('user-email-input');
-    const addressInput = document.getElementById('user-address-input');
+    const cameraIcon = document.getElementById('camera-icon'); // Камера белгісі
+    const inputs = ['user-phone-input', 'user-email-input', 'user-address-input'];
 
     if (!isEditMode) {
-        // --- ӨЗГЕРТУ РЕЖИМІН ҚОСУ ---
+        // РЕДАКТОРЛАУДЫ ҚОСУ
         isEditMode = true;
-        phoneInput.disabled = false;
-        emailInput.disabled = false;
-        addressInput.disabled = false;
+        inputs.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.disabled = false;
+        });
+        
+        // КАМЕРАНЫ КӨРСЕТУ
+        if (cameraIcon) cameraIcon.classList.remove('hidden'); 
         
         btn.innerText = "Сохранить изменения";
-        btn.classList.replace('bg-orange-600', 'bg-green-600'); // Жасыл түске ауыстыру (опционально)
-        phoneInput.focus();
+        btn.style.backgroundColor = "#16a34a"; // Жасыл түс
     } else {
-        // --- САҚТАУ РЕЖИМІН ҚОСУ ---
-        saveProfileChanges();
+        // САҚТАУ БАСЫЛҒАНДА КАМЕРАНЫ ҚАЙТА ЖАСЫРУ
+        if (cameraIcon) cameraIcon.classList.add('hidden'); 
+        saveProfileChanges(); // Сақтау функциясын шақыру
     }
 }
+
+        // ФОТОАППАРАТ БЕЛГІСІН ҚАЙТА ЖАСЫРУ
+        if (cameraIcon) {
+            cameraIcon.classList.add('hidden'); // Қайтадан "hidden" қосамыз
+        }
+    
 
 function saveProfileChanges() {
     const currentId = localStorage.getItem('currentUserId');
@@ -2068,8 +2083,10 @@ if (!emailRegex.test(email)) return Swal.fire('Қате', 'Email форматы 
     }
 }
 
+// 1. Тапсырыстарды Каспи стилінде шығару
+// 1. ТАПСЫРЫСТАРДЫ КАСПИ СТИЛІНДЕ ШЫҒАРУ (БІРТУМАС ФУНКЦИЯ)
 function renderMyOrders() {
-    const container = document.getElementById('my-orders-list');
+    const container = document.getElementById('my-orders-list'); // HTML-дегі нақты ID
     const noOrdersMsg = document.getElementById('no-orders-msg');
     const userJson = localStorage.getItem('currentUser');
     
@@ -2077,55 +2094,188 @@ function renderMyOrders() {
 
     const currentUser = JSON.parse(userJson);
     const allOrders = JSON.parse(localStorage.getItem('orders')) || [];
+    const allProducts = JSON.parse(localStorage.getItem('products')) || [];
 
-    // Пайдаланушыны телефоны немесе аты арқылы сүзу
+    // Қолданушыны телефоны немесе аты арқылы табу (Ең сенімді әдіс)
     const myOrders = allOrders.filter(ord => 
         (ord.phone && ord.phone.replace(/\D/g, '') === currentUser.phone.replace(/\D/g, '')) || 
-        ord.customer === currentUser.name
+        (ord.customer && ord.customer.trim() === currentUser.name.trim()) ||
+        String(ord.userId) === String(currentUser.id)
     );
 
     if (myOrders.length === 0) {
         container.innerHTML = '';
-        noOrdersMsg.classList.remove('hidden');
+        if (noOrdersMsg) noOrdersMsg.classList.remove('hidden');
         return;
     }
 
-    noOrdersMsg.classList.add('hidden');
-    container.innerHTML = myOrders.map(ord => {
-        // Статусқа байланысты стильдер
-        let statusHtml = '';
-        if (ord.status === 'delivering') {
-            statusHtml = `<span class="bg-blue-50 text-blue-600 text-[9px] font-black px-3 py-1.5 rounded-lg border border-blue-100 animate-pulse uppercase"><i class="fas fa-truck-fast mr-1"></i> В пути</span>`;
-        } else if (ord.status === 'completed') {
-            statusHtml = `<span class="bg-green-50 text-green-600 text-[9px] font-black px-3 py-1.5 rounded-lg border border-green-100 uppercase"><i class="fas fa-check-circle mr-1"></i> Доставлено</span>`;
-        } else {
-            statusHtml = `<span class="bg-orange-50 text-orange-600 text-[9px] font-black px-3 py-1.5 rounded-lg border border-orange-100 uppercase"><i class="fas fa-clock mr-1"></i> Обработка</span>`;
+    if (noOrdersMsg) noOrdersMsg.classList.add('hidden');
+
+    container.innerHTML = myOrders.reverse().map(ord => {
+        // Тауар суретін алу логикасы
+        const pureName = ord.product ? ord.product.split('(')[0].trim() : (ord.productName || "");
+        const productData = allProducts.find(p => p.name.trim() === pureName);
+        const itemImg = productData ? productData.img : 'https://via.placeholder.com/150'; 
+
+        // Статус стильдері (Каспи түстері)
+        let statusClass = 'bg-orange-50 text-orange-600 border-orange-100';
+        let statusText = ord.status || 'Обработка';
+
+        if (ord.status === 'delivering' || ord.status === 'В пути') {
+            statusClass = 'bg-blue-50 text-blue-600 border-blue-100 animate-pulse';
+            statusText = 'В пути';
+        } else if (ord.status === 'completed' || ord.status === 'Доставлено') {
+            statusClass = 'bg-green-50 text-green-600 border-green-100';
+            statusText = 'Доставлено';
         }
 
         return `
-            <div class="bg-gray-50/50 p-4 rounded-2xl border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition-all hover:bg-white hover:shadow-md">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm border border-gray-100">
-                        <i class="fas fa-shopping-bag text-orange-500"></i>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">#${ord.id}</span>
-                            <span class="text-[9px] font-bold text-gray-300 uppercase">${ord.date}</span>
+            <div class="bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm mb-4 transition-all">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-4 min-w-0">
+                        <div class="w-16 h-16 bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 shrink-0">
+                            <img src="${itemImg}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/150'">
                         </div>
-                        <h4 class="font-black text-sm text-gray-800 uppercase italic leading-tight">${ord.product}</h4>
+                        <div class="min-w-0">
+                            <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">#ORD-${ord.id}</p>
+                            <h4 class="font-black text-xs md:text-sm text-gray-800 uppercase italic truncate">${ord.product || ord.productName}</h4>
+                            <p class="text-[9px] text-gray-300 font-bold mt-1">${ord.date || ''}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-black text-gray-900 text-sm">${ord.total || ord.totalPrice + ' ₸'}</p>
+                        <span class="inline-block mt-2 px-2 py-1 rounded-lg border ${statusClass} text-[8px] font-black uppercase italic">${statusText}</span>
                     </div>
                 </div>
-                <div class="flex items-center justify-between w-full md:w-auto gap-6">
-                    <div class="text-right">
-                        <p class="text-lg font-black text-orange-600 italic leading-none">${ord.total}</p>
-                        <p class="text-[8px] text-gray-400 font-bold uppercase mt-1 italic">${ord.payment}</p>
-                    </div>
-                    ${statusHtml}
+
+                <div class="flex gap-2">
+                    <button onclick="trackOrder('${ord.status}', '${ord.id}')" 
+                        class="flex-1 py-3 bg-gray-950 text-white rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all">
+                        Отследить заказ
+                    </button>
+                    <button onclick="showOrderReceipt('${ord.id}')" class="px-5 py-3 border-2 border-orange-500 text-orange-500 rounded-xl font-black uppercase text-[10px] active:scale-95">
+                        Чек
+                    </button>
                 </div>
             </div>
         `;
     }).join('');
+}
+
+function trackOrder(status, orderId) {
+    const orders = JSON.parse(localStorage.getItem('orders')) || [];
+    const order = orders.find(o => String(o.id) === String(orderId));
+    
+    if (!order) return;
+
+    // Бүгінгі күнді орысша форматта алу (мысалы: 17 апреля)
+    const dateOptions = { day: 'numeric', month: 'long' };
+    const formattedDate = new Date().toLocaleDateString('ru-RU', dateOptions);
+
+    const isCancelled = order.status === 'cancelled';
+    const isStep1 = true; // Ваша заявка одобрена (всегда true для созданных)
+    const isStep2 = order.status === 'delivering' || order.status === 'completed'; // Принят & Передан
+    const isStep3 = order.status === 'completed'; // Доставка
+
+    const getStepHtml = (active, label, info, showDate = false, isLast = false) => `
+        <div class="flex gap-4">
+            <div class="flex flex-col items-center">
+                <div class="w-7 h-7 rounded-full flex items-center justify-center ${active ? 'bg-green-600 text-white shadow-lg shadow-green-100' : 'bg-gray-100 text-gray-300'} z-10 transition-all duration-500">
+                    <i class="fas ${active ? 'fa-check text-[10px]' : 'fa-circle text-[4px]'}"></i>
+                </div>
+                ${!isLast ? `<div class="w-[2px] h-12 ${active ? 'bg-green-600' : 'bg-gray-100'} -mt-1 -mb-1 transition-all duration-500"></div>` : ''}
+            </div>
+            <div class="pt-0.5 pb-8">
+                <p class="text-[13px] font-black uppercase italic ${active ? 'text-gray-900' : 'text-gray-300'} leading-none">${label}</p>
+                <p class="text-[10px] font-bold ${active ? 'text-gray-400' : 'text-gray-200'} uppercase mt-1.5 italic leading-tight">${info}</p>
+                ${active && showDate ? `<p class="text-[10px] font-black text-green-600 mt-1 uppercase">${formattedDate}</p>` : ''}
+            </div>
+        </div>
+    `;
+
+    Swal.fire({
+        title: `<div class="text-center pt-2"><p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Детали доставки</p><p class="text-lg font-black italic uppercase">Заказ №${orderId}</p></div>`,
+        html: `
+            <div class="text-left py-6 px-2">
+                ${isCancelled ? `
+                    <div class="bg-red-50 p-6 rounded-[2rem] border border-red-100 text-center mb-4">
+                        <i class="fas fa-ban text-red-500 text-2xl mb-2"></i>
+                        <p class="text-red-600 font-black uppercase italic text-sm">Заказ отменен</p>
+                        <p class="text-red-400 text-[9px] font-bold uppercase mt-1 italic">Отменен клиентом</p>
+                    </div>
+                ` : `
+                    ${getStepHtml(isStep1, "Ваша заявка одобрена", "Проверка данных завершена", true)}
+                    ${getStepHtml(isStep2, "Принят продавцом", "Магазин упаковывает ваш товар", isStep2)}
+                    ${getStepHtml(isStep2, "Передан курьеру", "Товар передан в службу доставки", isStep2)}
+                    ${getStepHtml(isStep3, "Доставка", isStep3 ? "Товар успешно доставлен" : "Служба доставки свяжется в ближайшее время", isStep3, true)}
+                `}
+            </div>
+
+            <div class="space-y-3">
+                ${(!isStep2 && !isCancelled) ? `
+                    <button onclick="cancelMyOrder('${orderId}')" class="w-full py-4 bg-red-50 text-red-600 rounded-2xl font-black uppercase italic text-[10px] tracking-widest hover:bg-red-100 transition-all border border-red-100">
+                        Отменить заказ
+                    </button>
+                ` : ''}
+                
+                <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[9px] font-black text-gray-400 uppercase italic">Помощь:</span>
+                        <a href="https://wa.me/77054860793" class="text-[10px] font-black text-orange-600 uppercase border-b-2 border-orange-200 pb-0.5">Чат с поддержкой</a>
+                    </div>
+                </div>
+            </div>
+        `,
+        showConfirmButton: false,
+        showCloseButton: true,
+        customClass: { popup: 'rounded-[3rem] p-8' }
+    });
+}
+
+// Клиент жағынан заказды тоқтату функциясы
+function cancelMyOrder(orderId) {
+    Swal.fire({
+        title: 'Уверены?',
+        text: "Вы хотите отменить этот заказ?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#000',
+        cancelButtonColor: '#f3f4f6',
+        confirmButtonText: 'ДА, ОТМЕНИТЬ',
+        cancelButtonText: '<span style="color: #999">НЕТ</span>',
+        customClass: { popup: 'rounded-[2.5rem]' }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            let orders = JSON.parse(localStorage.getItem('orders')) || [];
+            const index = orders.findIndex(o => String(o.id) === String(orderId));
+
+            if (index !== -1) {
+                // 1. Статусты өзгерту
+                orders[index].status = 'cancelled';
+                localStorage.setItem('orders', JSON.stringify(orders));
+
+                // 2. Админге хабарлама (Админ панельдегі поддержка бөліміне түседі)
+                let tickets = JSON.parse(localStorage.getItem('support_tickets')) || [];
+                tickets.push({
+                    id: Date.now(),
+                    name: orders[index].customer || "Клиент",
+                    message: `❌ ЗАКАЗ №${orderId} ОТМЕНЕН КЛИЕНТОМ.`,
+                    date: new Date().toLocaleString(),
+                    status: 'new'
+                });
+                localStorage.setItem('support_tickets', JSON.stringify(tickets));
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Заказ отменен',
+                    confirmButtonColor: '#ea580c',
+                    customClass: { popup: 'rounded-[2rem]' }
+                }).then(() => {
+                    location.reload(); // Тізімді жаңарту
+                });
+            }
+        }
+    });
 }
 
 // Таб ашылғанда тізімді жаңарту
@@ -2342,11 +2492,18 @@ function renderUserOrders() {
 }
 
 // 2. Чекті SweetAlert арқылы шығару (Алдыңғы берген кодым)
-function showOrderReceipt(orderId) {
+ function showOrderReceipt(orderId) {
     const orders = JSON.parse(localStorage.getItem('orders')) || [];
     const order = orders.find(o => String(o.id) === String(orderId));
 
     if (!order) return;
+
+    // Деректердің барын тексеру (Undefined болмауы үшін)
+    const prodName = order.productName || order.product || "Тауар атауы жоқ";
+    
+    // Мәтіннен тек сандарды алу (NaN болмауы үшін)
+    const rawPrice = String(order.totalPrice || order.total || "0").replace(/\D/g, '');
+    const finalPrice = Number(rawPrice).toLocaleString();
 
     Swal.fire({
         title: '<div class="font-black italic uppercase">Qulan<span class="text-orange-600">Shop</span></div>',
@@ -2354,7 +2511,7 @@ function showOrderReceipt(orderId) {
             <div class="text-left mt-4 border-t border-dashed border-gray-300 pt-4 italic">
                 <div class="flex justify-between text-[10px] font-bold mb-2">
                     <span class="text-gray-400 uppercase">ЗАКАЗ №:</span>
-                    <span>${order.id}</span>
+                    <span>ORD-${order.id}</span>
                 </div>
                 <div class="flex justify-between text-[10px] font-bold mb-4">
                     <span class="text-gray-400 uppercase">ДАТА:</span>
@@ -2362,13 +2519,13 @@ function showOrderReceipt(orderId) {
                 </div>
                 <div class="bg-gray-50 p-3 rounded-xl mb-4">
                     <div class="flex justify-between font-black text-sm uppercase">
-                        <span>${order.productName}</span>
-                        <span>${Number(order.totalPrice).toLocaleString()} ₸</span>
+                        <span>${prodName}</span>
+                        <span>${finalPrice} ₸</span>
                     </div>
                 </div>
                 <div class="flex justify-between items-center border-t border-gray-200 pt-4">
                     <span class="font-black text-xl uppercase italic">ИТОГО:</span>
-                    <span class="text-2xl font-black text-orange-600">${Number(order.totalPrice).toLocaleString()} ₸</span>
+                    <span class="text-2xl font-black text-orange-600">${finalPrice} ₸</span>
                 </div>
             </div>
         `,
@@ -2382,7 +2539,4 @@ function showOrderReceipt(orderId) {
 window.addEventListener('DOMContentLoaded', renderUserOrders);
 
     </script>
-
-    <script src="./script-rassylka.js"></script>
-</body>
 </html>

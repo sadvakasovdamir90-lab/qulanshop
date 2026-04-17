@@ -980,42 +980,69 @@
             function renderProducts() { runAdvancedFilter(); }
 
             // --- 1. ЖАҢАРТЫЛҒАН: VIP ЖҮЙЕСІ БАР КЛИЕНТТЕР ТІЗІМІ ---
-            function renderUsers() {
-                const list = document.getElementById('admin-user-list');
-                const totalElem = document.getElementById('total-debt-amount');
-                const debtorsCountElem = document.getElementById('debtors-count');
-                let users = JSON.parse(localStorage.getItem('users')) || db.users;
-                let total = 0; let debtorsCount = 0;
-                if (!list) return;
+         function renderUsers() {
+    const list = document.getElementById('admin-user-list');
+    const totalElem = document.getElementById('total-debt-amount');
+    const debtorsCountElem = document.getElementById('debtors-count');
+    
+    // Мәліметтерді әрқашан LocalStorage-тан жаңадан оқимыз
+    let users = JSON.parse(localStorage.getItem('users')) || (typeof db !== 'undefined' ? db.users : []);
+    let total = 0; 
+    let debtorsCount = 0;
+    
+    if (!list) return;
 
-                list.innerHTML = users.map(u => {
-                    const d = Number(u.debt || 0); total += d; if (d > 0) debtorsCount++;
-                    // VIP Тексеріс: Егер қарызы жоқ және базада бұрыннан болса
-                    const isVip = d === 0 && u.id < (Date.now() - 86400000); 
+    list.innerHTML = users.map(u => {
+        const d = Number(u.debt || 0); 
+        total += d; 
+        if (d > 0) debtorsCount++;
+        
+        // VIP Тексеріс: Егер қарызы жоқ және базада 24 сағаттан көп болса
+        const isVip = d === 0 && u.id < (Date.now() - 86400000); 
+        const currentBalance = Number(u.userBalance || 0);
 
-                    return `
-                    <tr class="border-b border-slate-800 hover:bg-slate-800/20 transition">
-                        <td class="p-6">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center font-black text-[10px] text-orange-500 uppercase">${u.name.charAt(0)}</div>
-                                <div>
-                                    <p class="text-white font-bold uppercase text-xs">${escapeHTML(u.name)} ${isVip ? '<i class="fas fa-crown text-yellow-500 ml-1"></i>' : ''}</p>
-                                    <p class="text-[9px] text-slate-500">${u.phone || ''}</p>
-                                </div>
-                                <button onclick="addMoneyToUser('${u.id}')" class="text-blue-500 hover:text-blue-700 ml-3">
-        <i class="fas fa-plus-circle"></i> Қосу
-    </button>
-                            </div>
-                        </td>
-                        <td class="p-6 text-center"><span class="${d > 0 ? 'text-red-500 bg-red-500/10' : 'text-green-500 bg-green-500/10'} px-2 py-1 rounded text-[9px] font-black uppercase">${d > 0 ? 'Должник' : 'Чист'}</span></td>
-                        <td class="p-6 font-black ${d > 0 ? 'text-red-500' : 'text-slate-500'} italic text-sm">${d.toLocaleString()} ₸</td>
-                        <td class="p-6 text-slate-400 text-xs">${u.deadline || '—'}</td>
-                        <td class="p-6 text-right">${d > 0 ? `<button onclick="payDebt('${u.id}')" class="text-green-500 text-[10px] uppercase font-bold hover:underline">Жабу</button>` : '—'}</td>
-                    </tr>`;
-                }).join('');
-                if (totalElem) totalElem.innerText = total.toLocaleString() + " ₸";
-                if (debtorsCountElem) debtorsCountElem.innerText = debtorsCount;
-            }
+        return `
+            <tr class="border-b border-slate-800 hover:bg-slate-800/20 transition">
+                <td class="p-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center font-black text-[10px] text-orange-500 uppercase">
+                            ${u.name.charAt(0)}
+                        </div>
+                        <div>
+                            <p class="text-white font-bold uppercase text-xs">
+                                ${escapeHTML(u.name)} ${isVip ? '<i class="fas fa-crown text-yellow-500 ml-1"></i>' : ''}
+                            </p>
+                            <p class="text-[9px] text-slate-500">${u.phone || 'Нет номера'}</p>
+                        </div>
+                    </div>
+                </td>
+                <td class="p-6 text-center">
+                    <p class="text-white font-black text-xs">${currentBalance.toLocaleString()} ₸</p>
+                    <p class="text-[8px] text-slate-500 uppercase font-bold">Баланс</p>
+                </td>
+                <td class="p-6 text-center">
+                    <span class="${d > 0 ? 'text-red-500 bg-red-500/10' : 'text-green-500 bg-green-500/10'} px-2 py-1 rounded text-[9px] font-black uppercase">
+                        ${d > 0 ? 'Должник' : 'Чист'}
+                    </span>
+                </td>
+                <td class="p-6 font-black ${d > 0 ? 'text-red-500' : 'text-slate-500'} italic text-sm">
+                    ${d.toLocaleString()} ₸
+                </td>
+                <td class="p-6 text-slate-400 text-xs">${u.debtDate || u.deadline || '—'}</td>
+                <td class="p-6 text-right">
+                    <div class="flex justify-end gap-2">
+                        <button onclick="addMoneyToUser('${u.id}')" class="bg-blue-600/20 text-blue-500 px-3 py-1.5 rounded-lg font-black uppercase text-[9px] hover:bg-blue-600 hover:text-white transition-all">
+                            <i class="fas fa-plus-circle mr-1"></i> Баланс +/-
+                        </button>
+                        ${d > 0 ? `<button onclick="payDebt('${u.id}')" class="bg-green-600/20 text-green-500 px-3 py-1.5 rounded-lg font-black uppercase text-[9px] hover:bg-green-600 hover:text-white transition-all">Жабу</button>` : ''}
+                    </div>
+                </td>
+            </tr>`;
+    }).join('');
+
+    if (totalElem) totalElem.innerText = total.toLocaleString() + " ₸";
+    if (debtorsCountElem) debtorsCountElem.innerText = debtorsCount;
+}
 
             function payDebt(userId) {
                 let users = JSON.parse(localStorage.getItem('users')) || [];
@@ -1169,102 +1196,119 @@
     }
 
     // 3. ТАПСЫРЫСТАР ТІЗІМІН ШЫҒАРУ
-    function renderOrders() {
-        const container = document.getElementById('orders-list');
-        if (!container) return;
-        const orders = JSON.parse(localStorage.getItem('orders')) || [];
+  function renderOrders() {
+    const container = document.getElementById('orders-list');
+    if (!container) return;
+    const orders = JSON.parse(localStorage.getItem('orders')) || [];
 
-        if (orders.length === 0) {
-            container.innerHTML = `<p class="text-slate-500 italic p-6 text-center">Заказов пока нет...</p>`;
-            return;
+    container.innerHTML = orders.map(ord => {
+        // Статусқа байланысты түстер мен анимациялар
+        let statusBadge = 'border-slate-800 opacity-60';
+        let statusLabel = '';
+
+        if (ord.status === 'new') {
+            statusBadge = 'border-orange-500 animate-pulse';
+        } else if (ord.status === 'delivering') {
+            statusBadge = 'border-blue-500 bg-blue-500/5';
+            statusLabel = '<span class="text-blue-400 text-[8px] font-black uppercase italic">[ В ПУТИ ]</span>';
+        } else if (ord.status === 'cancelled') {
+            statusBadge = 'border-red-600 bg-red-600/10'; // Тоқтатылған заказ қызыл болады
+            statusLabel = '<span class="text-red-500 text-[8px] font-black uppercase italic">[ ОТМЕНЕН КЛИЕНТОМ ]</span>';
         }
 
-        container.innerHTML = orders.map(ord => {
-            let statusBadge = ord.status === 'new' ? 'border-orange-500 animate-pulse' : (ord.status === 'delivering' ? 'border-blue-500 bg-blue-500/5' : 'border-slate-800 opacity-60');
-            return `
-                <div onclick="viewOrderDetails('${ord.id}')" class="bg-[#1e293b] p-6 rounded-[2rem] border ${statusBadge} shadow-xl mb-4 transition-all cursor-pointer hover:scale-[1.01] active:scale-95 group">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="space-y-1">
-                            <div class="flex items-center gap-3">
-                                <span class="bg-orange-600 text-[10px] font-black px-3 py-1 rounded-full uppercase italic">${ord.id}</span>
-                                <span class="text-slate-400 text-xs font-bold italic">${ord.date}</span>
-                                ${ord.status === 'delivering' ? '<span class="text-blue-400 text-[8px] font-black uppercase italic">[ В ПУТИ ]</span>' : ''}
-                            </div>
-                            <h4 class="text-xl font-black italic text-white uppercase mt-2 group-hover:text-orange-500 transition-colors">${escapeHTML(ord.product)}</h4>
-                            <p class="text-sm text-slate-400 font-bold italic"><i class="fas fa-user mr-2 text-orange-500"></i>${escapeHTML(ord.customer)} (${ord.phone})</p>
+        return `
+            <div onclick="viewOrderDetails('${ord.id}')" class="bg-[#1e293b] p-6 rounded-[2rem] border ${statusBadge} shadow-xl mb-4 transition-all cursor-pointer hover:scale-[1.01] group">
+                <div class="flex flex-col md:flex-row justify-between gap-4">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-3">
+                            <span class="bg-orange-600 text-[10px] font-black px-3 py-1 rounded-full uppercase italic">${ord.id}</span>
+                            <span class="text-slate-400 text-xs font-bold italic">${ord.date}</span>
+                            ${statusLabel}
                         </div>
-                        <div class="text-right flex flex-col justify-between items-end">
-                            <p class="text-2xl font-black text-orange-500 italic">${ord.total}</p>
-                            <p class="text-[9px] text-slate-500 font-black uppercase italic">Детали <i class="fas fa-arrow-right ml-1"></i></p>
-                        </div>
+                        <h4 class="text-xl font-black italic text-white uppercase mt-2 group-hover:text-orange-500">${escapeHTML(ord.product)}</h4>
+                        <p class="text-sm text-slate-400 font-bold italic">${escapeHTML(ord.customer)} (${ord.phone})</p>
                     </div>
-                </div>`;
-        }).join('');
-    }
+                    <div class="text-right">
+                        <p class="text-2xl font-black text-orange-500 italic">${ord.total}</p>
+                    </div>
+                </div>
+            </div>`;
+    }).join('');
+}
 
             // --- 3. ЖАҢА: ТАПСЫРЫС МӘЛІМЕТТЕРІН МОДАЛКАҒА ШЫҒАРУ ---
     function viewOrderDetails(orderId) {
-        const orders = JSON.parse(localStorage.getItem('orders')) || [];
-        const products = JSON.parse(localStorage.getItem('products')) || [];
-        // ID-ді қауіпсіз салыстыру
-        const ord = orders.find(o => String(o.id) === String(orderId));
-        
-        if (!ord) return;
+    const orders = JSON.parse(localStorage.getItem('orders')) || [];
+    const products = JSON.parse(localStorage.getItem('products')) || [];
+    
+    // ID-ді қауіпсіз салыстыру
+    const ord = orders.find(o => String(o.id) === String(orderId));
+    if (!ord) return;
 
-        const prodInfo = products.find(p => p.name === ord.product);
-        const imgUrl = prodInfo ? (prodInfo.img || 'https://via.placeholder.com/150') : 'https://via.placeholder.com/150';
-        const content = document.getElementById('order-detail-content');
+    // СУРЕТТІ ТАБУ: Тауар атынан (x1) деген сияқтыларды алып тастап іздейміз
+    const pureName = ord.product ? ord.product.split('(')[0].trim() : "";
+    const prodInfo = products.find(p => p.name.trim() === pureName);
+    const imgUrl = prodInfo ? (prodInfo.img || 'https://via.placeholder.com/150') : 'https://via.placeholder.com/150';
+    
+    const content = document.getElementById('order-detail-content');
+    const isCancelled = ord.status === 'cancelled'; // Клиент өзі өшірген статус
 
-        // Тырнақшалардан қате кетпеуі үшін таза "Backticks" әдісін қолданамыз
-        content.innerHTML = `
-            <div class="flex gap-4 border-b border-slate-700 pb-6 mb-4 items-center">
-                <img src="${imgUrl}" class="w-24 h-24 rounded-3xl object-cover border border-slate-700 shadow-2xl">
-                <div>
-                    <p class="text-[10px] text-slate-500 uppercase font-black italic mb-1">Товар:</p>
-                    <h4 class="text-white font-black uppercase italic text-lg leading-tight">${escapeHTML(ord.product)}</h4>
-                    <p class="text-orange-500 font-black text-2xl mt-1">${ord.total}</p>
-                </div>
+    content.innerHTML = `
+        <div class="flex gap-4 border-b border-slate-700 pb-6 mb-4 items-center">
+            <img src="${imgUrl}" class="w-24 h-24 rounded-3xl object-cover border border-slate-700 shadow-2xl ${isCancelled ? 'grayscale opacity-50' : ''}">
+            <div>
+                <p class="text-[10px] text-slate-500 uppercase font-black italic mb-1">Товар:</p>
+                <h4 class="text-white font-black uppercase italic text-lg leading-tight">${escapeHTML(ord.product)}</h4>
+                <p class="text-orange-500 font-black text-2xl mt-1">${ord.total}</p>
             </div>
-            <div class="grid grid-cols-2 gap-6 text-sm italic">
-                <div><p class="text-[9px] text-slate-500 font-black mb-1">Клиент:</p><p class="text-white font-bold">${escapeHTML(ord.customer)}</p><p class="text-orange-500 font-bold">${ord.phone}</p></div>
-                <div><p class="text-[9px] text-slate-500 font-black mb-1">Адрес:</p><p class="text-slate-300 text-xs">${escapeHTML(ord.address)}</p></div>
-                <div class="col-span-2 bg-slate-800/40 p-4 rounded-2xl border border-slate-700">
-                    <p class="text-[9px] text-slate-500 font-black mb-1">Комментарий:</p>
-                    <p class="text-slate-300 text-xs">${ord.comment || 'Нет комментария'}</p>
-                </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6 text-sm italic">
+            <div><p class="text-[9px] text-slate-500 font-black mb-1 uppercase">Клиент:</p><p class="text-white font-bold">${escapeHTML(ord.customer)}</p><p class="text-orange-500 font-bold">${ord.phone}</p></div>
+            <div><p class="text-[9px] text-slate-500 font-black mb-1 uppercase">Адрес:</p><p class="text-slate-300 text-xs">${escapeHTML(ord.address)}</p></div>
+            <div class="col-span-2 bg-slate-800/40 p-4 rounded-2xl border border-slate-700">
+                <p class="text-[9px] text-slate-500 font-black mb-1 uppercase">Комментарий:</p>
+                <p class="text-slate-300 text-xs">${ord.comment || 'Нет комментария'}</p>
             </div>
-        <div class="pt-6 flex flex-wrap gap-2">
-        <!-- Чек батырмасы -->
-        <button onclick="printOrderReceipt('${ord.id}')" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-3 rounded-2xl font-black uppercase italic text-[10px] flex items-center gap-2">
-            <i class="fas fa-print"></i> Чек
-        </button>
+        </div>
 
-        <!-- ЖАҢА: WhatsApp батырмасы -->
-        <button onclick="sendWhatsApp('${ord.id}')" class="bg-green-600 hover:bg-green-500 text-white px-4 py-3 rounded-2xl font-black uppercase italic text-[10px] flex items-center gap-2">
-            <i class="fab fa-whatsapp text-lg"></i> Написать
-        </button>
-        
-        ${ord.status === 'new' ? `<button onclick="updateOrderStatus('${ord.id}', 'delivering'); hideModal('order-detail-modal')" class="flex-1 bg-blue-600 py-3 rounded-2xl font-black uppercase italic text-[10px]">В путь</button>` : ''}
-        <button onclick="changeOrderStatus('${ord.id}', 'completed'); hideModal('order-detail-modal')" class="flex-1 bg-green-600 py-3 rounded-2xl font-black uppercase italic text-[10px]">Принять</button>
-        <button onclick="deleteOrder('${ord.id}'); hideModal('order-detail-modal')" class="bg-red-500/20 text-red-500 px-4 py-3 rounded-2xl font-black uppercase italic text-[10px]">Удалить</button>
-    </div>
+        <div class="pt-6">
+            ${isCancelled ? `
+                <div class="p-6 bg-red-600/10 border-2 border-red-600/20 rounded-[2rem] text-center">
+                    <i class="fas fa-ban text-red-500 text-2xl mb-2"></i>
+                    <p class="text-red-500 font-black uppercase italic tracking-widest text-sm">Заказ отменен клиентом</p>
+                    <p class="text-slate-500 text-[10px] mt-1 font-bold italic">Все операции заблокированы</p>
+                </div>
+            ` : `
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="printOrderReceipt('${ord.id}')" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-3 rounded-2xl font-black uppercase italic text-[10px] flex items-center gap-2 transition-all">
+                        <i class="fas fa-print"></i> Чек
+                    </button>
 
-    <div class="pt-6 flex flex-wrap gap-2">
-        <button onclick="printOrderReceipt('${ord.id}')" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-3 rounded-2xl font-black uppercase italic text-[10px] flex items-center gap-2">
-            <i class="fas fa-print"></i> Чек
-        </button>
+                    <button onclick="sendWhatsApp('${ord.id}')" class="bg-green-600 hover:bg-green-500 text-white px-4 py-3 rounded-2xl font-black uppercase italic text-[10px] flex items-center gap-2 transition-all">
+                        <i class="fab fa-whatsapp text-lg"></i> Написать
+                    </button>
 
-        <button onclick="processRefund('${ord.id}'); hideModal('order-detail-modal')" class="bg-red-600 hover:bg-red-500 text-white px-4 py-3 rounded-2xl font-black uppercase italic text-[10px] flex items-center gap-2">
-            <i class="fas fa-undo"></i> Возврат жасау
-        </button>
+                    <button onclick="processRefund('${ord.id}'); hideModal('order-detail-modal')" class="bg-red-600/20 hover:bg-red-600/30 text-red-500 px-4 py-3 rounded-2xl font-black uppercase italic text-[10px] flex items-center gap-2 transition-all">
+                        <i class="fas fa-undo"></i> Возврат
+                    </button>
+                    
+                    <div class="w-full flex gap-2 mt-2">
+                        ${ord.status === 'new' ? `<button onclick="updateOrderStatus('${ord.id}', 'delivering'); hideModal('order-detail-modal')" class="flex-1 bg-blue-600 py-4 rounded-2xl font-black uppercase italic text-[10px] shadow-lg">В путь</button>` : ''}
+                        <button onclick="changeOrderStatus('${ord.id}', 'completed'); hideModal('order-detail-modal')" class="flex-1 bg-green-600 py-4 rounded-2xl font-black uppercase italic text-[10px] shadow-lg">Принять</button>
+                    </div>
+                </div>
+            `}
 
-        ${ord.status === 'new' ? `<button onclick="updateOrderStatus('${ord.id}', 'delivering'); hideModal('order-detail-modal')" class="flex-1 bg-blue-600 py-3 rounded-2xl font-black uppercase italic text-[10px]">В путь</button>` : ''}
-        <button onclick="changeOrderStatus('${ord.id}', 'completed'); hideModal('order-detail-modal')" class="flex-1 bg-green-600 py-3 rounded-2xl font-black uppercase italic text-[10px]">Принять</button>
-    </div>
-        `;
-        showModal('order-detail-modal');
-    }
-
+            <div class="mt-6 flex justify-center border-t border-slate-700 pt-4">
+                <button onclick="deleteOrder('${ord.id}'); hideModal('order-detail-modal')" class="text-slate-600 hover:text-red-500 text-[9px] font-black uppercase tracking-[0.2em] transition-all">
+                    <i class="fas fa-trash-alt mr-1"></i> Удалить запись
+                </button>
+            </div>
+        </div>
+    `;
+    showModal('order-detail-modal');
+}
             
 
             // --- 4. ЖАҢАРТЫЛҒАН: СТАТУС ӨЗГЕРТУ + СКЛАДТЫ АЗАЙТУ ---
@@ -1894,91 +1938,106 @@
         });
     }
 
-    function addMoneyToUser(userId) {
-        let users = JSON.parse(localStorage.getItem('users')) || [];
-        const index = users.findIndex(u => String(u.id) === String(userId));
+  function addMoneyToUser(userId) {
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+    const index = users.findIndex(u => String(u.id) === String(userId));
 
-        if (index === -1) return;
+    if (index === -1) return;
 
-        const user = users[index];
-        const currentBalance = Number(user.userBalance || 0);
+    const user = users[index];
+    const currentBalance = Number(user.userBalance || 0);
 
-        // 1. SweetAlert2 арқылы терезе ашу
-        Swal.fire({
-            title: `<span class="text-orange-600 uppercase font-black italic">${user.name}</span>`,
-            html: `
-                <div class="p-2">
-                    <div class="bg-slate-100 p-4 rounded-2xl mb-6 border border-slate-200">
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Текущий счет:</p>
-                        <p class="text-2xl font-black text-slate-800 italic">${currentBalance.toLocaleString()} ₸</p>
-                    </div>
-                    <label class="text-[10px] font-black text-slate-500 uppercase italic mb-2 block">Введите сумму (₸):</label>
-                    <input type="number" id="manual-amount" class="swal2-input w-full m-0 rounded-xl border-slate-200 text-center font-bold" placeholder="0">
+    // 1. SweetAlert2 арқылы терезе ашу
+    Swal.fire({
+        title: `<span class="text-orange-600 uppercase font-black italic">${user.name}</span>`,
+        html: `
+            <div class="p-2">
+                <div class="bg-slate-100 p-4 rounded-2xl mb-6 border border-slate-200">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Текущий счет:</p>
+                    <p class="text-2xl font-black text-slate-800 italic">${currentBalance.toLocaleString()} ₸</p>
                 </div>
-            `,
-            showCancelButton: true,
-            showDenyButton: true,
-            confirmButtonText: '<i class="fas fa-plus mr-2"></i> Қосу',
-            denyButtonText: '<i class="fas fa-minus mr-2"></i> Алып қою',
-            cancelButtonText: 'Бас тарту',
-            confirmButtonColor: '#16a34a', // Жасыл
-            denyButtonColor: '#dc2626',    // Қызыл
-            customClass: { popup: 'rounded-[2.5rem]' }
-        }).then((result) => {
-            const amount = parseInt(document.getElementById('manual-amount').value);
-            
-            if (!amount || amount <= 0) {
-                if (!result.isDismissed) Swal.fire('Қате!', 'Дұрыс сома енгізіңіз', 'error');
+                <label class="text-[10px] font-black text-slate-500 uppercase italic mb-2 block">Введите сумму (₸):</label>
+                <input type="number" id="manual-amount" class="swal2-input w-full m-0 rounded-xl border-slate-200 text-center font-bold" placeholder="0">
+            </div>
+        `,
+        showCancelButton: true,
+        showDenyButton: true,
+        confirmButtonText: '<i class="fas fa-plus mr-2"></i> Қосу',
+        denyButtonText: '<i class="fas fa-minus mr-2"></i> Алып қою',
+        cancelButtonText: 'Бас тарту',
+        confirmButtonColor: '#16a34a', // Жасыл
+        denyButtonColor: '#dc2626',    // Қызыл
+        customClass: { popup: 'rounded-[2.5rem]' }
+    }).then((result) => {
+        if (result.isDismissed) return;
+
+        const amount = parseInt(document.getElementById('manual-amount').value);
+        
+        if (!amount || amount <= 0) {
+            Swal.fire('Қате!', 'Дұрыс сома енгізіңіз', 'error');
+            return;
+        }
+
+        let finalMessage = "";
+        let noteMessage = "";
+        let trxType = "";
+        let trxDesc = "";
+
+        if (result.isConfirmed) {
+            // АҚША ҚОСУ
+            user.userBalance = currentBalance + amount;
+            finalMessage = `${user.name} балансына ${amount.toLocaleString()} ₸ қосылды ✅`;
+            noteMessage = `Вам поступило ${amount.toLocaleString()} ₸`;
+            trxType = 'plus';
+            trxDesc = 'Пополнение администратором';
+        } else if (result.isDenied) {
+            // АҚШАНЫ АЛЫП ҚОЮ
+            if (currentBalance < amount) {
+                Swal.fire('Қате!', 'Баланста мұндай сома жоқ!', 'error');
                 return;
             }
-            // Ақша қосылған сәтте:
-    addToHistory(amount, 'plus', 'Администратордан толтыру');
+            user.userBalance = currentBalance - amount;
+            finalMessage = `${user.name} балансынан ${amount.toLocaleString()} ₸ алынды ➖`;
+            noteMessage = `С вашего счета списано ${amount.toLocaleString()} ₸`;
+            trxType = 'minus';
+            trxDesc = 'Списание администратором';
+        }
 
-            let finalMessage = "";
-            let noteMessage = "";
+        if (result.isConfirmed || result.isDenied) {
+            // --- ТРАНЗАКЦИЯЛАР ТАРИХЫНА ЖАЗУ (ЖАҢА) ---
+            if (!user.transactions) user.transactions = [];
+            user.transactions.unshift({
+                id: 'ADM-' + Date.now(),
+                date: new Date().toLocaleString(),
+                amount: amount,
+                description: trxDesc,
+                type: trxType
+            });
 
-            if (result.isConfirmed) {
-                // АҚША ҚОСУ
-                user.userBalance = currentBalance + amount;
-                finalMessage = `${user.name} балансына ${amount} ₸ қосылды ✅`;
-                noteMessage = `Вам поступило ${amount.toLocaleString()} ₸`;
-            } else if (result.isDenied) {
-                // АҚШАНЫ АЛЫП ҚОЮ
-                if (currentBalance < amount) {
-                    Swal.fire('Қате!', 'Баланста мұндай сома жоқ!', 'error');
-                    return;
-                }
-                user.userBalance = currentBalance - amount;
-                finalMessage = `${user.name} балансынан ${amount} ₸ алынды ➖`;
-                noteMessage = `С вашего счета списано ${amount.toLocaleString()} ₸`;
+            // ХАБАРЛАМА ЖҮЙЕСІ (Notifications)
+            if (!user.notifications) user.notifications = [];
+            user.notifications.push({
+                id: Date.now(),
+                message: noteMessage,
+                date: new Date().toLocaleString(),
+                isNew: true
+            });
+
+            // САҚТАУ
+            localStorage.setItem('users', JSON.stringify(users));
+
+            // Егер қазіргі қолданушы болса, оның сессиясын жаңарту
+            const currentUserId = localStorage.getItem('currentUserId');
+            if (String(currentUserId) === String(userId)) {
+                localStorage.setItem('userBalance', user.userBalance);
+                localStorage.setItem('currentUser', JSON.stringify(user));
             }
 
-            if (result.isConfirmed || result.isDenied) {
-                // ХАБАРЛАМА ЖҮЙЕСІ (Notifications)
-                if (!user.notifications) user.notifications = [];
-                user.notifications.push({
-                    id: Date.now(),
-                    message: noteMessage,
-                    date: new Date().toLocaleString(),
-                    isNew: true
-                });
-
-                // САҚТАУ
-                localStorage.setItem('users', JSON.stringify(users));
-
-                // Егер қазіргі қолданушы болса, оның сессиясын жаңарту
-                const currentUserId = localStorage.getItem('currentUserId');
-                if (String(currentUserId) === String(userId)) {
-                    localStorage.setItem('userBalance', user.userBalance);
-                    localStorage.setItem('currentUser', JSON.stringify(user));
-                }
-
-                Swal.fire('Сәтті!', finalMessage, 'success');
-                renderUsers(); // Админ бетін жаңарту
-            }
-        });
-    }
-
+            Swal.fire('Сәтті!', finalMessage, 'success');
+            if (typeof renderUsers === "function") renderUsers(); // Админ бетін жаңарту
+        }
+    });
+}
 
     function setNotifyTemplate(text) {
         const area = document.getElementById('admin-notify-text');

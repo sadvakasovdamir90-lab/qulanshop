@@ -5,8 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QulanShop — Интернет-магазин</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="apple-touch-icon" href="icon.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ea580c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
+<script>
+  // Service Worker-ді тіркеу
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+
+  // "Орнату" батырмасын шығару логикасы
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    // Осы жерде өзіңнің арнайы батырмаңды көрсетуге болады
+    console.log("QulanShop қосымшасын орнатуға дайын!");
+  });
+</script>
     <style>
         .slider-container { display: flex; transition: transform 0.5s ease-in-out; }
         .slide { min-width: 100%; }
@@ -666,39 +688,49 @@
         </div>
     </button>
 
-    <div id="ai-chat-window" class="hidden absolute bottom-20 right-0 w-[350px] md:w-[400px] bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 overflow-hidden flex flex-col transform transition-all duration-300">
-        <div class="bg-gradient-to-r from-orange-600 to-orange-500 p-5 text-white flex justify-between items-center shadow-lg">
-            <div class="flex items-center space-x-3">
-                <div class="bg-white/20 p-2 rounded-lg">
-                    <i class="fas fa-robot text-2xl"></i>
-                </div>
-                <div>
-                    <p class="font-bold italic text-sm leading-none">Qulan AI Assistant</p>
-                    <p class="text-[10px] text-orange-100 mt-1 italic">Онлайн • Көмекке дайын</p>
-                </div>
+ <div id="ai-chat-window" class="hidden absolute bottom-20 right-0 w-[350px] md:w-[400px] bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 overflow-hidden flex flex-col transform transition-all duration-300">
+    <div class="bg-gradient-to-r from-orange-600 to-orange-500 p-5 text-white flex justify-between items-center shadow-lg">
+        <div class="flex items-center space-x-3">
+            <div class="bg-white/20 p-2 rounded-lg">
+                <i class="fas fa-robot text-2xl"></i>
             </div>
-            <button onclick="toggleAIChat()" class="hover:rotate-90 transition-transform duration-300 p-2 text-xl">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        
-        <div id="chat-messages" class="h-96 overflow-y-auto p-5 space-y-4 bg-gray-50/50 text-sm italic">
-            <div class="flex justify-start">
-                <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 max-w-[85%] text-gray-700 leading-relaxed">
-                    Қайырлы күн! ✨ Мен **Qulan AI** көмекшісімін. <br><br>Тауар іздеуге, жеткізу туралы білуге немесе менеджермен байланысуға көмектесе аламын. Не істейміз?
-                </div>
+            <div>
+                <p class="font-bold italic text-sm leading-none">Qulan AI Assistant</p>
+                <p class="text-[10px] text-orange-100 mt-1 italic">Онлайн • Көмекке дайын</p>
             </div>
         </div>
 
-        <div class="p-4 bg-white border-t border-gray-100">
-            <div class="relative flex items-center">
-                <input type="text" id="chat-input" 
-                    class="w-full border-2 border-gray-100 rounded-2xl py-3 pl-4 pr-12 outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-50 transition-all text-sm" 
-                    placeholder="Сұрағыңызды жазыңыз...">
-                <button onclick="sendMessage()" class="absolute right-2 bg-orange-600 text-white w-10 h-10 rounded-xl hover:bg-orange-700 transition flex items-center justify-center">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
+        <div class="flex items-center space-x-1">
+            <button onclick="startOnlineCall()" title="Онлайн қоңырау" class="hover:bg-white/20 p-2 rounded-xl transition-colors group relative">
+                <i class="fas fa-phone-alt text-lg animate-pulse"></i>
+                <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500 border-2 border-white"></span>
+                </span>
+            </button>
+
+            <button onclick="toggleAIChat()" class="hover:rotate-90 hover:bg-white/20 p-2 rounded-xl transition-all duration-300 text-xl">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    
+    <div id="chat-messages" class="h-96 overflow-y-auto p-5 space-y-4 bg-gray-50/50 text-sm italic">
+        <div class="flex justify-start">
+            <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 max-w-[85%] text-gray-700 leading-relaxed">
+                Қайырлы күн! ✨ Мен **Qulan AI** көмекшісімін. <br><br>Тауар іздеуге немесе **онлайн қоңырау** арқылы сөйлесуге көмектесе аламын. Не істейміз?
             </div>
+        </div>
+    </div>
+
+    <div class="p-4 bg-white border-t border-gray-100">
+        <div class="relative flex items-center">
+            <input type="text" id="chat-input" 
+                class="w-full border-2 border-gray-100 rounded-2xl py-3 pl-4 pr-12 outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-50 transition-all text-sm" 
+                placeholder="Сұрағыңызды жазыңыз...">
+            <button onclick="sendMessage()" class="absolute right-2 bg-orange-600 text-white w-10 h-10 rounded-xl hover:bg-orange-700 transition flex items-center justify-center">
+                <i class="fas fa-paper-plane"></i>
+            </button>
         </div>
     </div>
 </div>
@@ -1392,6 +1424,66 @@ window.addEventListener('storage', (e) => {
         localStorage.setItem('global_push_signal', "null");
     }
 });
+
+const adminPeerId = 'qulanshop-admin-123'; // Сенің тұрақты ID-ің
+let peer;
+let currentCall;
+
+// Peer-ді іске қосу
+function initPeer() {
+    peer = new Peer(window.location.href.includes('admin') ? adminPeerId : null);
+    
+    peer.on('open', (id) => {
+        console.log('Менің Peer ID:', id);
+    });
+
+    // Қоңырауды қабылдау (Админ үшін)
+    peer.on('call', (call) => {
+        navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+            call.answer(stream); // Жауап беру
+            showCallUI("Қоңырау қабылданды...");
+            
+            call.on('stream', (remoteStream) => {
+                const audio = new Audio();
+                audio.srcObject = remoteStream;
+                audio.play();
+            });
+            currentCall = call;
+        });
+    });
+}
+
+// Қоңырау шалу (Клиент үшін)
+function startOnlineCall() {
+    document.getElementById('call-modal').classList.remove('hidden');
+    
+    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+        const call = peer.call(adminPeerId, stream);
+        showCallUI("Қоңырау шалынуда...");
+
+        call.on('stream', (remoteStream) => {
+            const audio = new Audio();
+            audio.srcObject = remoteStream;
+            audio.play();
+        });
+        currentCall = call;
+    }).catch(err => {
+        alert("Микрофонға рұқсат беріңіз!");
+        endCall();
+    });
+}
+
+function endCall() {
+    if (currentCall) currentCall.close();
+    document.getElementById('call-modal').classList.add('hidden');
+}
+
+function showCallUI(text) {
+    document.getElementById('call-status').innerText = text;
+}
+
+// Іске қосу
+initPeer();
 
 
 </script>

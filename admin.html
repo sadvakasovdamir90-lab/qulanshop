@@ -239,6 +239,9 @@
                     <button onclick="openTab(event, 'tab-news-manager')" class="sidebar-link w-full flex items-center p-3 rounded-xl hover:bg-slate-800 transition font-bold text-sm">
                    <i class="fas fa-newspaper mr-3 w-5 text-center text-blue-500"></i> Управление новостями
                     </button>
+                    <button onclick="openTab(event, 'tab-ad-manager')" class="sidebar-link w-full flex items-center p-3 rounded-xl hover:bg-slate-800 transition font-bold text-sm">
+                        <i class="fas fa-ad mr-3 w-5 text-center text-orange-500"></i> Реклама и монетизация
+                    </button>
                     
                     <!-- BACKUP БАТЫРМАСЫ (ОСЫ ЖЕРГЕ ҚОЙ) -->
     <div class="pt-4 mt-4 border-t border-slate-800 space-y-2">
@@ -692,6 +695,80 @@
 
     </div>
 
+    <div id="tab-ad-manager" class="tab-content hidden animate-fadeIn">
+    <div class="flex flex-col gap-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-3xl font-black italic uppercase tracking-tighter text-white">Монетизация</h2>
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mt-2">Управление рекламными баннерами (Tengri Style)</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="bg-[#0f172a] p-5 rounded-2xl border border-slate-700">
+        <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest italic mb-1">Просмотры (Views)</p>
+        <h3 id="stat-views" class="text-2xl font-black text-blue-500 italic">0</h3>
+    </div>
+    <div class="bg-[#0f172a] p-5 rounded-2xl border border-slate-700">
+        <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest italic mb-1">Клики (Clicks)</p>
+        <h3 id="stat-clicks" class="text-2xl font-black text-orange-500 italic">0</h3>
+    </div>
+    <div class="bg-[#0f172a] p-5 rounded-2xl border border-slate-700">
+        <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest italic mb-1">Осталось времени</p>
+        <h3 id="stat-timer" class="text-xl font-black text-green-500 italic">--:--</h3>
+    </div>
+</div>
+
+<div class="mb-4">
+    <label class="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest italic mb-2 block">Срок размещения жарнама</label>
+    <select id="ad-duration" class="w-full p-4 rounded-xl bg-[#0f172a] border border-slate-700 text-white font-bold">
+        <option value="1">1 день (Тест)</option>
+        <option value="7">7 дней (Standard)</option>
+        <option value="30">30 дней (Premium)</option>
+    </select>
+</div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <input type="text" id="ad-brand-input" placeholder="Название бренда (напр: O-DD.RU)" class="w-full p-4 rounded-xl bg-[#0f172a] border border-slate-700 text-white">
+    <input type="text" id="ad-btn-text" placeholder="Текст на кнопке (напр: Вызвать специалиста)" class="w-full p-4 rounded-xl bg-[#0f172a] border border-slate-700 text-white">
+</div>
+<input type="text" id="ad-title-input" placeholder="Заголовок рекламы" class="w-full p-4 rounded-xl bg-[#0f172a] border border-slate-700 text-white font-bold">
+<textarea id="ad-desc-input" placeholder="Описание рекламы (кратко)" class="w-full p-4 rounded-xl bg-[#0f172a] border border-slate-700 text-white h-24"></textarea>
+
+        <div class="bg-white/5 p-8 rounded-[2.5rem] border border-white/10 space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest italic mb-2 block">Тип контента</label>
+                    <select id="ad-type" class="w-full p-4 rounded-2xl bg-[#0f172a] border border-slate-700 outline-none text-white font-bold transition-all">
+                        <option value="image">🖼️ Изображение (Static Banner)</option>
+                        <option value="video">🎥 Видео (Auto-play Video)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest italic mb-2 block">Ссылка для перехода (URL)</label>
+                    <input type="text" id="ad-link" placeholder="https://example.com" class="w-full p-4 rounded-2xl bg-[#0f172a] border border-slate-700 text-white outline-none focus:border-orange-500 transition-all">
+                </div>
+            </div>
+            
+
+            <div>
+                <label class="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest italic mb-2 block">Прямая ссылка на файл (Сурет немесе MP4)</label>
+                <input type="text" id="ad-url" placeholder="https://i.imgur.com/example.jpg" class="w-full p-4 rounded-2xl bg-[#0f172a] border border-slate-700 text-white outline-none focus:border-orange-500 transition-all">
+                <p class="text-[9px] text-slate-500 mt-2 ml-2 italic">* Видео болса .mp4 сілтемесін, сурет болса .jpg/.png сілтемесін қойыңыз</p>
+            </div>
+
+            <div class="flex gap-4 pt-4">
+                <button onclick="saveAdCampaign(true)" class="flex-1 bg-orange-600 py-4 rounded-2xl font-black uppercase italic tracking-widest hover:bg-orange-500 transition-all shadow-lg shadow-orange-900/40 text-white">
+                    Запустить рекламу
+                </button>
+                <button onclick="saveAdCampaign(false)" class="flex-1 bg-slate-700 py-4 rounded-2xl font-black uppercase italic text-slate-300 hover:bg-slate-600 transition-all">
+                    Остановить и скрыть
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
    <div id="tab-news-manager" class="tab-content space-y-8">
     <div class="flex justify-between items-center mb-8">
         <div>
@@ -1026,6 +1103,13 @@
         function openTab(evt, tabId) {
         // 1. Барлық табтардың контентін жасыру
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+
+        if (tabId === 'tab-ad-manager') {
+        renderAdStats();
+    } else {
+        // Егер басқа бетке өтсек, таймерді тоқтатып тастаймыз (ресурс үнемдеу үшін)
+        if (activeAdTimer) clearInterval(activeAdTimer);
+    }
         
         // 2. Барлық бүйірлік батырмалардан "active" стилін алып тастау
         document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
@@ -1040,6 +1124,8 @@
             }
         }
 
+        
+
         // 4. Мобильді нұсқада бүйірлік мәзірді жабу
         if (window.innerWidth < 1024) {
             if (typeof toggleSidebar === "function") toggleSidebar();
@@ -1051,6 +1137,7 @@
         if (tabId === 'tab-products') renderProducts();
         if (tabId === 'tab-orders') renderOrders();
         if (tabId === 'tab-promos') renderPromos();
+        
     }
 
             let db = {
@@ -2602,14 +2689,15 @@ function updateAdminMeta() {
     
     if (clock) {
         setInterval(() => {
-            clock.innerText = new Date().toLocaleTimeString('kk-KZ');
+            clock.innerText = new Date().toLocaleTimeString('ru-RU');
         }, 1000);
     }
     
     if (dateInput) {
-        dateInput.value = new Date().toLocaleDateString('kk-KZ', { 
-            day: 'numeric', month: 'long', year: 'numeric' 
-        });
+        const now = new Date();
+        const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+        const formatted = `Сегодня, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}, ${now.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'})}`;
+        dateInput.value = formatted;
     }
 }
 
@@ -2727,6 +2815,89 @@ async function sendPushNotification(title, message) {
         Swal.fire('Сәтті!', 'Хабарлама жіберілді', 'success');
     }
 }
+
+
+function saveAdCampaign(isActive) {
+    const durationDays = parseInt(document.getElementById('ad-duration').value);
+    const now = new Date().getTime();
+    const expireDate = now + (durationDays * 24 * 60 * 60 * 1000); // Күнді миллисекундқа айналдыру
+
+    const data = {
+        active: isActive,
+        type: document.getElementById('ad-type').value,
+        link: document.getElementById('ad-link').value || '#',
+        url: document.getElementById('ad-url').value,
+        brand: document.getElementById('ad-brand-input').value,
+        title: document.getElementById('ad-title-input').value,
+        desc: document.getElementById('ad-desc-input').value,
+        btnText: document.getElementById('ad-btn-text').value,
+        views: 0,
+        clicks: 0,
+        expiresAt: expireDate // Болашақтағы уақыт
+    };
+
+    localStorage.setItem('portal_ad_campaign', JSON.stringify(data));
+    
+    Swal.fire({
+        icon: 'success',
+        title: isActive ? 'Реклама запущена!' : 'Реклама остановлена',
+        confirmButtonColor: '#ea580c'
+    });
+    
+    renderAdStats(); // Бірден статистиканы жаңарту
+}
+
+ let activeAdTimer = null; // Таймерді бақылау үшін жаһандық айнымалы
+
+function renderAdStats() {
+    // 1. Егер бұрыннан жұмыс істеп тұрған таймер болса — өшіреміз
+    if (activeAdTimer) clearInterval(activeAdTimer);
+
+    const adData = JSON.parse(localStorage.getItem('portal_ad_campaign'));
+    
+    // Элементтерді тауып аламыз
+    const viewEl = document.getElementById('stat-views');
+    const clickEl = document.getElementById('stat-clicks');
+    const timerEl = document.getElementById('stat-timer');
+
+    if (!adData || !adData.active) {
+        if (timerEl) timerEl.innerText = "Не активно";
+        return;
+    }
+
+    if (viewEl) viewEl.innerText = adData.views || 0;
+    if (clickEl) clickEl.innerText = adData.clicks || 0;
+
+    // 2. Жаңа таймерді қосамыз
+    const updateTimer = () => {
+        const now = new Date().getTime();
+        const distance = adData.expiresAt - now;
+
+        if (distance < 0) {
+            if (timerEl) {
+                timerEl.innerText = "Срок истек";
+                timerEl.className = "text-xl font-black text-red-500 italic";
+            }
+            clearInterval(activeAdTimer);
+            return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        if (timerEl) {
+            timerEl.innerText = `${days}д ${hours}ч ${minutes}м ${seconds}с`;
+        }
+    };
+
+    updateTimer(); // Бірден іске қосу
+    activeAdTimer = setInterval(updateTimer, 1000); // Таймерді айнымалыға сақтаймыз
+}
+
+
+
         </script>
     </body>
     </html>

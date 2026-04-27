@@ -203,6 +203,17 @@ document.getElementById('chat-input')?.addEventListener('keypress', function (e)
     if (e.key === 'Enter') sendMessage();
 });
 
+window.addEventListener('load', () => {
+        const loader = document.getElementById('global-loader');
+        if (loader) {
+            // Добавляем плавное исчезновение
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 500); // через 0.5 сек полностью убираем из верстки
+        }
+    });
+
 </script>
    
 

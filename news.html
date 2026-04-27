@@ -391,12 +391,6 @@
                 
                 <div id="news-container" class="grid grid-cols-1 md:grid-cols-2 gap-10">
                     </div>
-
-                <div class="pt-10 flex justify-center">
-                    <button class="px-12 py-5 bg-white border border-slate-200 rounded-[2rem] text-[10px] font-black uppercase italic tracking-widest text-slate-500 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all shadow-xl active:scale-95">
-                        Көбірек жүктеу <i class="fas fa-sync-alt ml-2 text-[8px]"></i>
-                    </button>
-                </div>
             </div>
   
 
@@ -433,7 +427,7 @@
                                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                                 <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
                             </span>
-                            <h3 class="text-xs font-black uppercase italic tracking-widest">Соңғы хабарлар</h3>
+                            <h3 class="text-xs font-black italic tracking-widest">Последние новости</h3>
                         </div>
                         <i class="fas fa-bolt text-blue-500 animate-pulse"></i>
                     </div>
@@ -460,6 +454,44 @@
             </aside>
         </div>
     </main>
+
+    <section id="ad-banner-section" class="max-w-7xl mx-auto px-4 md:px-6 mb-12 hidden">
+    <div class="bg-white rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-500">
+        <div class="flex flex-col md:flex-row items-stretch min-h-[220px]">
+            
+            <div id="ad-media-container" class="w-full md:w-[40%] bg-slate-50 relative group overflow-hidden">
+                <div id="ad-content-render" class="w-full h-full"></div>
+                <button id="ad-mute-btn" class="hidden absolute bottom-4 right-4 z-20 w-8 h-8 bg-black/40 backdrop-blur-md rounded-lg text-white flex items-center justify-center">
+                    <i id="mute-icon" class="fas fa-volume-mute text-[10px]"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 p-6 md:p-10 flex flex-col justify-center relative">
+                <div class="absolute top-4 right-6 flex items-center gap-2">
+                    <span class="text-[7px] font-black uppercase tracking-[0.2em] text-slate-300 italic">Реклама</span>
+                    <i class="fas fa-ellipsis-h text-slate-200 text-[10px]"></i>
+                </div>
+
+                <div class="space-y-4">
+                    <p id="ad-brand" class="text-[9px] font-black text-blue-600 uppercase tracking-widest italic leading-none">Brand Name</p>
+                    <h2 id="ad-title" class="text-xl md:text-3xl font-[900] text-slate-900 leading-tight italic uppercase tracking-tighter">
+                        Здесь будет ваш заголовок
+                    </h2>
+                    <p id="ad-desc" class="text-xs md:text-sm text-slate-500 font-bold leading-relaxed line-clamp-2 uppercase">
+                        Описание вашего предложения или услуги в несколько строк для привлечения внимания.
+                    </p>
+                    
+                    <div class="pt-2">
+                        <button id="ad-btn" onclick="" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-xl font-black uppercase italic text-[10px] tracking-widest transition-all active:scale-95 shadow-lg shadow-blue-100">
+                            Узнать больше
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
 
     <footer class="mt-32 py-24 bg-slate-900 text-white">
     <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-16">
@@ -878,7 +910,7 @@ function renderFilteredNews(list) {
                                     <path d="M27.413 14.319 29.667 16.606 18.237 28.106 11.402 21.176 13.646 18.918 18.233 23.499 27.413 14.319Z" fill="white"></path>
                                 </svg>
                             </div>
-                            <p class="text-[8px] font-bold text-slate-400 tracking-wider mt-1 uppercase leading-none">Официальный источник</p>
+                            <p class="text-[8px] font-bold text-slate-400 tracking-wider mt-1 uppercase leading-none">Официальный аккаунт QulanShop</p>
                         </div>
                     </div>
                 </div>
@@ -1002,7 +1034,96 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+// ... бұрынғы кодтарың (updateWeather, loadNews және т.б.)
 
+function loadPortalAdvertising() {
+    const adData = JSON.parse(localStorage.getItem('portal_ad_campaign')) || null;
+    const section = document.getElementById('ad-banner-section');
+    
+    if (!adData || !adData.active) {
+        if (section) section.classList.add('hidden');
+        return;
+    }
+
+    if (section) section.classList.remove('hidden');
+    
+    // Мәтіндерді толтыру
+    const brandEl = document.getElementById('ad-brand');
+    const titleEl = document.getElementById('ad-title');
+    const descEl = document.getElementById('ad-desc');
+    const btnEl = document.getElementById('ad-btn');
+
+    if (brandEl) brandEl.innerText = adData.brand || 'QulanMedia';
+    if (titleEl) titleEl.innerText = adData.title || 'Ваш заголовок';
+    if (descEl) descEl.innerText = adData.desc || '';
+    if (btnEl) {
+        btnEl.innerText = adData.btnText || 'Подробнее';
+        btnEl.onclick = () => window.open(adData.link, '_blank');
+    }
+
+    const container = document.getElementById('ad-content-render');
+    const muteBtn = document.getElementById('ad-mute-btn');
+    if (!container) return;
+    
+    container.innerHTML = "";
+
+    if (adData.type === 'video') {
+        container.innerHTML = `
+            <video id="portal-ad-video" class="w-full h-full object-cover" autoplay loop muted playsinline>
+                <source src="${adData.url}" type="video/mp4">
+            </video>`;
+        if (muteBtn) muteBtn.classList.remove('hidden');
+        const video = document.getElementById('portal-ad-video');
+        if (muteBtn && video) {
+            muteBtn.onclick = () => {
+                video.muted = !video.muted;
+                const icon = document.getElementById('mute-icon');
+                if (icon) icon.className = video.muted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+            };
+        }
+    } else {
+        container.innerHTML = `<img src="${adData.url}" class="w-full h-full object-cover">`;
+        if (muteBtn) muteBtn.classList.add('hidden');
+    }
+}
+
+// 🔥 МІНЕ ОСЫ ЖОЛДЫ ҚОСУ КЕРЕК:
+document.addEventListener('DOMContentLoaded', () => {
+    loadPortalAdvertising(); // Жарнаманы жүктейміз
+    updateWeather();
+    loadNews();
+});
+
+
+// news.html ішіндегі loadPortalAdvertising функциясының ішіне қос:
+
+function trackAdView() {
+    let adData = JSON.parse(localStorage.getItem('portal_ad_campaign'));
+    if (adData && adData.active) {
+        adData.views = (adData.views || 0) + 1;
+        localStorage.setItem('portal_ad_campaign', JSON.stringify(adData));
+    }
+}
+
+function trackAdClick() {
+    let adData = JSON.parse(localStorage.getItem('portal_ad_campaign'));
+    if (adData && adData.active) {
+        adData.clicks = (adData.clicks || 0) + 1;
+        localStorage.setItem('portal_ad_campaign', JSON.stringify(adData));
+        window.open(adData.link, '_blank');
+    }
+}
+
+// Рендеринг кезінде оқиғаларды тіркеу:
+const adSection = document.getElementById('ad-banner-section');
+if (adSection && !adSection.classList.contains('hidden')) {
+    trackAdView(); // Жарнама шыққанда "Просмотр" деп санау
+}
+
+const adBtn = document.getElementById('ad-btn');
+if (adBtn) {
+    adBtn.onclick = trackAdClick; // Батырманы басқанда "Клик" деп санау
+}
     </script>
 </body>
 </html>

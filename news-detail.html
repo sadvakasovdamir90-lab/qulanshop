@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Жаңалықтар | QulanMedia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 font-sans text-slate-800">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <button onclick="history.back()" class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-2xl text-xs font-black uppercase transition-all">
+                <i class="fas fa-arrow-left mr-2"></i> Артқа
+            </button>
+            <h1 class="text-xl font-black italic text-blue-600">QULAN<span class="text-slate-900">MEDIA</span></h1>
+            <div class="w-10"></div> </div>
+    </header>
+    <main class="container mx-auto px-4 py-8 relative">
+    <div id="reading-progress" class="fixed left-0 top-0 h-1 bg-blue-600 z-[2000] transition-all" style="width: 0%"></div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 max-w-7xl mx-auto">
+        
+        <aside class="hidden lg:flex lg:col-span-1 flex-col items-center gap-6 sticky top-32 h-fit">
+            <p class="text-[8px] font-black uppercase text-gray-300 vertical-text rotate-180 mb-2">Share</p>
+            <button onclick="shareWA()" class="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-600 hover:text-white transition-all shadow-sm">
+                <i class="fab fa-whatsapp"></i>
+            </button>
+            <button onclick="shareTG()" class="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all shadow-sm">
+                <i class="fab fa-telegram-plane"></i>
+            </button>
+            <div class="h-px w-6 bg-gray-200 my-2"></div>
+            <button onclick="changeFontSize(1)" class="w-10 h-10 rounded-xl bg-gray-50 text-gray-400 hover:text-blue-600 font-bold">A+</button>
+            <button onclick="changeFontSize(-1)" class="w-10 h-10 rounded-xl bg-gray-50 text-gray-400 hover:text-blue-600 font-bold">A-</button>
+        </aside>
+
+        <div id="news-content" class="lg:col-span-7 animate-modal">
+            </div>
+
+        <aside class="hidden lg:block lg:col-span-4 space-y-8 sticky top-32 h-fit">
+            
+            <div class="bg-blue-600 rounded-[2rem] p-6 text-white shadow-lg shadow-blue-200">
+                <div class="flex items-center gap-4">
+                    <button class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-all">
+                        <i class="fas fa-play text-sm"></i>
+                    </button>
+                    <div>
+                        <p class="text-[10px] font-black uppercase opacity-60">Слушать статью</p>
+                        <p class="text-xs font-bold italic uppercase">Qulan AI Voice</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm">
+                <h3 class="text-[10px] font-black uppercase italic tracking-widest text-blue-600 mb-6">#ТопТақырыптар</h3>
+                <div class="flex flex-wrap gap-2 mb-8">
+                    <span class="px-3 py-1 bg-gray-50 text-[10px] font-bold text-gray-500 rounded-lg border hover:border-blue-200 cursor-pointer transition-all">#Астана</span>
+                    <span class="px-3 py-1 bg-gray-50 text-[10px] font-bold text-gray-500 rounded-lg border hover:border-blue-200 cursor-pointer transition-all">#Токаев</span>
+                    <span class="px-3 py-1 bg-gray-50 text-[10px] font-bold text-gray-500 rounded-lg border hover:border-blue-200 cursor-pointer transition-all">#Политика</span>
+                </div>
+                <div id="sidebar-latest-news" class="space-y-6"></div>
+            </div>
+        </aside>
+    </div>
+</main>
+
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        <div id="news-content" class="animate-modal">
+            <div class="flex flex-col items-center justify-center py-20 opacity-20">
+                <i class="fas fa-spinner fa-spin text-4xl mb-4"></i>
+                <p class="font-black uppercase tracking-widest text-xs">Жүктелуде...</p>
+            </div>
+        </div>
+    </main>
+    
+
+    <script>
+  function loadNewsDetail() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const newsId = urlParams.get('id');
+    
+    // 1. Деректер қорын алу
+    const allNews = JSON.parse(localStorage.getItem('village_news')) || [];
+    
+    // 2. ID бойынша нақты жаңалықты табу
+    const news = allNews.find(n => String(n.id) === String(newsId));
+
+    const container = document.getElementById('news-content');
+    // Sidebar үшін контейнер (егер HTML-де болса)
+    const sidebarContainer = document.getElementById('sidebar-latest-news');
+
+    // 3. Егер жаңалық табылмаса
+    if (!news) {
+        if (container) {
+            container.innerHTML = `
+                <div class="text-center py-20 bg-white rounded-[2rem] border border-gray-100 shadow-sm animate-modal max-w-3xl mx-auto">
+                    <i class="fas fa-exclamation-triangle text-orange-500 text-5xl mb-6"></i>
+                    <h2 class="text-xl font-[900] uppercase italic text-slate-800">Жаңалық табылмады</h2>
+                    <button onclick="location.href='news.html'" class="mt-8 bg-slate-950 text-white px-8 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest">
+                        Тізімге қайту
+                    </button>
+                </div>`;
+        }
+        return;
+    }
+
+    // 4. Деректерді дайындау
+    const displayImage = news.imageUrl || news.image || 'https://via.placeholder.com/800x400?text=QulanMedia';
+    const displayTitle = news.text || news.title || 'Тақырыпсыз жаңалық';
+    const displayContent = news.fullContent || news.content || news.text || 'Мәтін бос...';
+
+    // 5. НЕГІЗГІ МАҚАЛА ИНТЕРФЕЙСІ (Жинақы дизайн)
+    if (container) {
+        container.innerHTML = `
+            <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-gray-100 animate-modal">
+                <div class="relative h-64 md:h-96 overflow-hidden bg-slate-100">
+                    <img src="${displayImage}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/800x400'">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                </div>
+                
+                <div class="p-6 md:p-12">
+                    <div class="flex items-center gap-4 mb-6">
+                        <span class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase italic tracking-widest">
+                            ${news.category || 'Медиа'}
+                        </span>
+                        <span class="text-gray-400 text-[9px] font-bold uppercase italic border-l border-gray-200 pl-4">
+                            <i class="far fa-calendar-alt mr-1.5"></i> ${news.date || 'Күні белгісіз'}
+                        </span>
+                    </div>
+
+                    <h1 class="text-2xl md:text-3xl font-[900] text-slate-900 leading-tight mb-8 italic uppercase tracking-tighter">
+                        ${displayTitle}
+                    </h1>
+
+                    <div class="prose max-w-none text-slate-600 leading-relaxed font-medium italic text-base md:text-lg border-l-2 border-blue-100 pl-5">
+                        ${displayContent.split('\n').map(paragraph => `<p class="mb-5">${paragraph}</p>`).join('')}
+                    </div>
+
+                    <div class="mt-12 pt-8 border-t border-dashed border-gray-200 flex flex-col md:flex-row justify-between items-center gap-8">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <div>
+                                <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1.5">Дереккөз</p>
+                                <div class="flex items-center gap-1.5">
+                                    <p class="font-black italic uppercase text-slate-800 text-sm">QULANSHOP НОВОСТИ</p>
+                                    <svg width="14" height="14" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
+                                        <path d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Z" fill="#0095F6"></path>
+                                        <path d="M27.413 14.319 29.667 16.606 18.237 28.106 11.402 21.176 13.646 18.918 18.233 23.499 27.413 14.319Z" fill="white"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <button onclick="window.open('https://wa.me/?text=' + encodeURIComponent(window.location.href))" 
+                                    class="w-10 h-10 bg-green-50 text-green-600 rounded-xl flex items-center justify-center hover:bg-green-600 hover:text-white transition-all active:scale-90">
+                                <i class="fab fa-whatsapp text-lg"></i>
+                            </button>
+                            <button onclick="window.open('https://t.me/share/url?url=' + encodeURIComponent(window.location.href))" 
+                                    class="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all active:scale-90">
+                                <i class="fab fa-telegram-plane text-lg"></i>
+                            </button>
+                            <button onclick="navigator.clipboard.writeText(window.location.href); alert('Сілтеме көшірілді!')" 
+                                    class="w-10 h-10 bg-gray-50 text-gray-500 rounded-xl flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all active:scale-90">
+                                <i class="fas fa-link"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // 6. SIDEBAR-ҒА БАСҚА ЖАҢАЛЫҚТАРДЫ ЖҮКТЕУ (Оң жақ бөлім)
+    if (sidebarContainer) {
+        const otherNews = allNews.filter(n => String(n.id) !== String(newsId)).slice(-5).reverse();
+        
+        if (otherNews.length > 0) {
+            sidebarContainer.innerHTML = otherNews.map(item => `
+                <a href="news-detail.html?id=${item.id}" class="group flex gap-4 items-center p-2 rounded-2xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100">
+                    <div class="w-16 h-16 shrink-0 rounded-xl overflow-hidden bg-gray-100">
+                        <img src="${item.imageUrl || item.image}" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-500">
+                    </div>
+                    <div class="min-w-0">
+                        <h4 class="text-[11px] font-black text-slate-800 uppercase italic line-clamp-2 leading-tight group-hover:text-blue-600">${item.text}</h4>
+                        <p class="text-[8px] text-gray-400 font-bold uppercase mt-1 italic">${item.date}</p>
+                    </div>
+                </a>
+            `).join('');
+        } else {
+            sidebarContainer.innerHTML = '<p class="text-[10px] text-slate-400 italic">Басқа жаңалықтар әлі жоқ...</p>';
+        }
+    }
+}
+
+// Шрифт өлшемін өзгерту
+function changeFontSize(step) {
+    const prose = document.querySelector('.prose');
+    if (!prose) return;
+    const currentSize = parseFloat(window.getComputedStyle(prose).fontSize);
+    prose.style.fontSize = (currentSize + step) + 'px';
+}
+
+// Оқу барысы (Progress Bar)
+window.onscroll = function() {
+    const progress = document.getElementById("reading-progress");
+    if (progress) {
+        let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        let scrolled = (winScroll / height) * 100;
+        progress.style.width = scrolled + "%";
+    }
+};
+
+window.onload = loadNewsDetail;
+    </script>
+
+    <style>
+        @keyframes modalShow {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-modal { animation: modalShow 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+    </style>
+</body>
+</html>

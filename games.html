@@ -39,7 +39,10 @@
     </style>
 </head>
 <body class="p-4 md:p-6 no-scrollbar">
+    
 
+ <section class="container mx-auto px-4 pb-12">
+    <!-- Жоғарғы панель -->
     <div class="flex items-center justify-between mb-8 pt-4">
         <button onclick="window.location.href='index.html'" class="w-10 h-10 bg-white rounded-2xl shadow-sm flex items-center justify-center text-slate-400 active:scale-90 transition-all">
             <i class="fas fa-arrow-left"></i>
@@ -50,7 +53,27 @@
         </div>
     </div>
 
+    <!-- ТОП ОЙЫНШЫЛАР РЕЙТИНГІ -->
+    <div class="bg-white rounded-[2rem] p-5 md:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 mb-8">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-lg md:text-xl font-black italic text-slate-800 uppercase tracking-tight flex items-center gap-2">
+                <i class="fas fa-trophy text-yellow-500 text-2xl"></i> Үздік ойыншылар
+            </h2>
+            <span class="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full uppercase tracking-widest shadow-sm">
+                Топ 10
+            </span>
+        </div>
+
+        <!-- Рейтинг тізімі (JS арқылы толтырылады) -->
+        <div id="leaderboard-container" class="flex flex-col gap-3">
+            <div class="text-center py-4 text-slate-400 text-xs font-bold uppercase animate-pulse">Жүктелуде...</div>
+        </div>
+    </div>
+    
+    <!-- ОЙЫНДАР ТОРЫ (БӘРІ ОСЫНЫҢ ІШІНДЕ ТҰРУЫ КЕРЕК) -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- 1. КЕЙС -->
         <div onclick="openRoulette()" class="bg-white p-6 rounded-[2rem] border border-orange-50 shadow-sm active:scale-95 transition-transform cursor-pointer relative overflow-hidden group">
             <div class="flex items-center gap-4 relative z-10">
                 <div class="w-16 h-16 bg-orange-600 text-white rounded-[1.5rem] flex items-center justify-center text-3xl shadow-lg shadow-orange-200">
@@ -63,6 +86,7 @@
             </div>
         </div>
 
+        <!-- 2. ВИКТОРИНА -->
         <div onclick="openQuiz()" class="bg-[#0f172a] p-6 rounded-[2rem] border border-slate-800 shadow-xl active:scale-95 transition-transform cursor-pointer relative overflow-hidden group">
             <div class="flex items-center gap-4 relative z-10">
                 <div class="w-16 h-16 bg-blue-600 text-white rounded-[1.5rem] flex items-center justify-center text-3xl shadow-lg shadow-blue-900/50">
@@ -74,31 +98,54 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <div id="roulette-modal" class="fixed inset-0 bg-[#020617]/95 backdrop-blur-md z-50 hidden flex-col items-center justify-center p-4">
-        <button onclick="closeModal('roulette-modal')" class="absolute top-8 right-8 text-white/50 hover:text-white text-2xl"><i class="fas fa-times"></i></button>
         
-        <h2 class="text-3xl font-black italic uppercase text-white mb-2">Бонус <span class="text-orange-500">Кейс</span></h2>
-        <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-10">Бағыңды сынап көр</p>
-
-        <div id="case-container" class="case-container mb-10 max-w-3xl mx-auto">
-            <div class="case-pointer"></div>
-            <div id="case-slider" class="case-slider">
+        <!-- 3. ЖЫЛДАМ ҚҰЛАН (Flappy Bird) -->
+        <div onclick="openFlappy()" class="bg-gradient-to-br from-cyan-400 to-blue-500 p-6 rounded-[2rem] shadow-xl shadow-blue-200 active:scale-95 transition-transform cursor-pointer relative overflow-hidden group">
+            <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/20 rounded-full blur-2xl"></div>
+            <div class="flex items-center gap-4 relative z-10">
+                <div class="w-16 h-16 bg-white/20 text-white backdrop-blur-md rounded-[1.5rem] flex items-center justify-center text-3xl border border-white/30">
+                    <i class="fas fa-kiwi-bird"></i>
                 </div>
+                <div>
+                    <h2 class="text-lg font-black italic uppercase text-white">Жылдам Құлан</h2>
+                    <p class="text-[10px] font-bold text-blue-100 uppercase tracking-widest mt-1">Ұш немесе құла</p>
+                </div>
+            </div>
         </div>
 
-        <button id="spin-btn" onclick="spinRoulette()" class="bg-orange-600 text-white px-12 py-4 rounded-2xl font-black uppercase italic text-sm tracking-widest shadow-lg shadow-orange-600/30 hover:scale-105 transition-all">
-            Кейсті ашу
-        </button>
+        <!-- 4. ТАП-ТАП (ЖАҢА) -->
+        <div onclick="openClicker()" class="bg-white p-6 rounded-[2rem] border border-purple-50 shadow-sm active:scale-95 transition-transform cursor-pointer relative overflow-hidden group">
+            <div class="flex items-center gap-4 relative z-10">
+                <div class="w-16 h-16 bg-purple-500 text-white rounded-[1.5rem] flex items-center justify-center text-3xl shadow-lg shadow-purple-200">
+                    <i class="fas fa-hand-pointer"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-black italic uppercase text-slate-800">Тап-Тап</h2>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Саусағыңды қыздыр</p>
+                </div>
+            </div>
+        </div>
+
     </div>
 
+    <!-- ROULETTE MODAL -->
+    <div id="roulette-modal" class="fixed inset-0 bg-[#020617]/95 backdrop-blur-md z-50 hidden flex-col items-center justify-center p-4">
+        <button onclick="closeModal('roulette-modal')" class="absolute top-8 right-8 text-white/50 hover:text-white text-2xl"><i class="fas fa-times"></i></button>
+        <h2 class="text-3xl font-black italic uppercase text-white mb-2">Бонус <span class="text-orange-500">Кейс</span></h2>
+        <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-10">Бағыңды сынап көр</p>
+        <div id="case-container" class="case-container mb-10 max-w-3xl mx-auto">
+            <div class="case-pointer"></div>
+            <div id="case-slider" class="case-slider"></div>
+        </div>
+        <button id="spin-btn" onclick="spinRoulette()" class="bg-orange-600 text-white px-12 py-4 rounded-2xl font-black uppercase italic text-sm tracking-widest shadow-lg shadow-orange-600/30 hover:scale-105 transition-all">Кейсті ашу</button>
+    </div>
+    
+    <!-- QUIZ MODAL -->
     <div id="quiz-modal" class="fixed inset-0 bg-white z-50 hidden flex-col p-6 overflow-y-auto">
         <div class="flex justify-between items-center mb-6">
             <button onclick="closeModal('quiz-modal')" class="w-10 h-10 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors"><i class="fas fa-arrow-left"></i></button>
             <div class="text-[10px] font-black italic bg-slate-100 px-4 py-2 rounded-xl text-slate-800 tracking-widest uppercase shadow-sm">Сұрақ <span id="q-current" class="text-blue-600">1</span>/10</div>
         </div>
-
         <div class="flex-1 flex flex-col justify-start max-w-md mx-auto w-full pt-4">
             <div class="flex justify-between items-end mb-2">
                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Уақыт</span>
@@ -107,13 +154,356 @@
             <div class="timer-bar-container mb-10 shadow-inner">
                 <div id="quiz-timer-bar" class="timer-bar"></div>
             </div>
-
-            <h2 id="question-text" class="text-2xl md:text-3xl font-black italic text-slate-800 leading-tight mb-8">Сұрақ осында тұрады?</h2>
-            
-            <div id="answers-container" class="space-y-3">
-                </div>
+            <h2 id="question-text" class="text-2xl md:text-3xl font-black italic text-slate-800 leading-tight mb-8">Жүктелуде...</h2>
+            <div id="answers-container" class="space-y-3"></div>
         </div>
     </div>
+
+    <!-- ЖЫЛДАМ ҚҰЛАН MODAL -->
+    <div id="flappy-modal" class="fixed inset-0 bg-[#0f172a]/95 backdrop-blur-md z-50 hidden flex-col items-center justify-center p-4">
+        <button onclick="closeModal('flappy-modal')" class="absolute top-8 right-8 text-white/50 hover:text-white text-3xl z-50"><i class="fas fa-times"></i></button>
+
+        <div class="text-center mb-6">
+            <h2 class="text-3xl md:text-4xl font-black italic uppercase text-white leading-none">Жылдам <span class="text-blue-400">Құлан</span></h2>
+            <p class="text-blue-200 text-xs font-bold uppercase tracking-widest mt-2">Рекорд: <span id="flappy-high-score">0</span></p>
+        </div>
+
+        <!-- Ойын Экраны (Canvas) -->
+        <div class="relative w-full max-w-sm rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(56,189,248,0.3)] border-4 border-slate-700 bg-sky-300">
+            <canvas id="flappyCanvas" width="320" height="480" class="w-full h-auto block cursor-pointer touch-none"></canvas>
+
+            <!-- Ойын алдындағы және кейінгі Мәзір -->
+            <div id="flappy-ui" class="absolute inset-0 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm z-10 transition-opacity">
+                <h3 id="flappy-title" class="text-3xl font-black text-white italic uppercase mb-2 drop-shadow-lg text-center leading-tight">Дайынсың ба?</h3>
+                <p id="flappy-score-text" class="text-white font-bold mb-6 hidden">Ұтқаның: <span id="flappy-current-score" class="text-orange-400 text-3xl">0</span> <i class="fas fa-coins text-orange-400"></i></p>
+                
+                <button onclick="startFlappy()" class="bg-blue-500 hover:bg-blue-400 text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-blue-500/50 active:scale-95 transition-all">
+                    Ойнау
+                </button>
+            </div>
+        </div>
+
+        <p class="text-slate-400 text-[10px] uppercase tracking-widest mt-6 text-center leading-relaxed">
+            Экранды басып секір <br> <span class="text-orange-400">Әр құбыр = +1 Q-Coin</span>
+        </p>
+    </div>
+
+</section>
+
+<!-- Скрипт бөлімі: Осыны файлдың соңына қос -->
+<script>
+function renderLeaderboard() {
+    const container = document.getElementById('leaderboard-container');
+    if(!container) return;
+    container.innerHTML = ''; 
+
+    const activeUser = localStorage.getItem('userPhone'); 
+    let topPlayers = [];
+
+    if (activeUser) {
+        const balanceKey = 'qulan_balance_' + activeUser;
+        const currentBal = parseFloat(localStorage.getItem(balanceKey) || '0');
+        
+        if (currentBal > 0) {
+            topPlayers.push({ 
+                name: "Сен", 
+                phone: activeUser, 
+                score: currentBal, 
+                isMe: true,
+                // Аватарка ретінде әдемі кездейсоқ сурет береміз (немесе профиль суретін қоясың)
+                avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=" + activeUser 
+            });
+        }
+    }
+
+    if (topPlayers.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-6 bg-slate-50 rounded-xl border border-slate-100">
+                <i class="fas fa-ghost text-2xl text-slate-300 mb-2"></i>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Әзірге ешкім жоқ...</p>
+                <p class="text-[10px] text-slate-400 mt-1">Ойын ойнап, бірінші бол!</p>
+            </div>
+        `;
+        return; 
+    }
+
+    topPlayers.forEach((player, index) => {
+        let rankBadge = '';
+        
+        // 1, 2, 3-орындарға арнайы кубоктар/медальдар жасаймыз
+        if (index === 0) { 
+            rankBadge = '<div class="absolute -top-1.5 -left-1.5 w-6 h-6 bg-yellow-400 rounded-full border-2 border-white flex items-center justify-center text-[10px] text-white shadow-sm z-10"><i class="fas fa-trophy"></i></div>'; 
+        } else if (index === 1) { 
+            rankBadge = '<div class="absolute -top-1.5 -left-1.5 w-6 h-6 bg-slate-300 rounded-full border-2 border-white flex items-center justify-center text-[10px] text-white shadow-sm z-10"><i class="fas fa-medal"></i></div>'; 
+        } else if (index === 2) { 
+            rankBadge = '<div class="absolute -top-1.5 -left-1.5 w-6 h-6 bg-orange-400 rounded-full border-2 border-white flex items-center justify-center text-[10px] text-white shadow-sm z-10"><i class="fas fa-medal"></i></div>'; 
+        } else {
+            // Қалған орындар үшін жай ғана дөңгелек ішіндегі сан
+            rankBadge = `<div class="absolute -top-1.5 -left-1.5 w-5 h-5 bg-white rounded-full border border-slate-200 flex items-center justify-center text-[9px] font-bold text-slate-500 shadow-sm z-10">${index + 1}</div>`;
+        }
+
+        let maskedPhone = player.phone;
+        if(maskedPhone && maskedPhone.length >= 10) {
+            maskedPhone = maskedPhone.substring(0, 4) + ' *** ' + maskedPhone.substring(maskedPhone.length - 4);
+        } else {
+            maskedPhone = "Жасырын нөмір";
+        }
+
+        container.innerHTML += `
+            <div class="flex items-center justify-between p-3 rounded-2xl transition-all hover:bg-slate-100 cursor-default ${player.isMe ? 'bg-orange-50/50 border border-orange-100' : 'bg-slate-50 border border-transparent'}">
+                <div class="flex items-center gap-4">
+                    <!-- Аватарка + Орын көрсеткіші (Кубок) -->
+                    <div class="relative">
+                        ${rankBadge}
+                        <img src="${player.avatar}" alt="Аватар" class="w-11 h-11 rounded-full bg-white object-cover border-2 border-slate-100 shadow-sm">
+                    </div>
+                    
+                    <!-- Аты-жөні мен нөмірі -->
+                    <div>
+                        <p class="text-sm font-bold text-slate-800 leading-tight">
+                            ${player.name}
+                        </p>
+                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                            ${maskedPhone}
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Ұпайы -->
+                <div class="text-right">
+                    <p class="text-base font-black text-orange-600 leading-none">${player.score}</p>
+                    <p class="text-[8px] font-bold text-orange-400/70 uppercase tracking-wider mt-1">Q-Coins</p>
+                </div>
+            </div>
+        `;
+    });
+}
+
+document.addEventListener('DOMContentLoaded', renderLeaderboard);
+
+
+// Модаль ашу
+function openFlappy() {
+    const modal = document.getElementById('flappy-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    drawBackground(); // Фонды бірден салып қою
+}
+
+// Ойын айнымалылары
+const canvas = document.getElementById('flappyCanvas');
+const ctx = canvas.getContext('2d');
+const flappyUI = document.getElementById('flappy-ui');
+const flappyTitle = document.getElementById('flappy-title');
+const flappyScoreText = document.getElementById('flappy-score-text');
+const flappyCurrentScore = document.getElementById('flappy-current-score');
+const flappyHighScore = document.getElementById('flappy-high-score');
+
+let frames = 0, score = 0, gameActive = false, reqAnimation;
+let bestScore = localStorage.getItem('flappyBest') || 0;
+flappyHighScore.innerText = bestScore;
+
+// Құлан (Құс)
+// Құлан (Құс) - ФИЗИКАСЫ ЖЕҢІЛДЕТІЛДІ
+const bird = {
+    x: 60, y: 150, radius: 12,
+    gravity: 0.15, // Бұрын 0.25 еді (баяу құлайды)
+    jump: 4.5,     // Бұрын 5.5 еді (жұмсақ секіреді)
+    velocity: 0,
+    draw() {
+        ctx.fillStyle = '#f97316';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(this.x + 4, this.y - 4, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'black';
+        ctx.beginPath();
+        ctx.arc(this.x + 5, this.y - 4, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+    },
+    update() {
+        this.velocity += this.gravity;
+        this.y += this.velocity;
+        
+        if(this.y + this.radius >= canvas.height) {
+            this.y = canvas.height - this.radius;
+            gameOverFlappy();
+        }
+        if(this.y - this.radius <= 0) {
+            this.y = this.radius;
+            this.velocity = 0;
+        }
+    },
+    flap() {
+        this.velocity = -this.jump;
+    }
+};
+
+// Құбырлар (Кедергілер) - ӨТУ ОҢАЙЛАТЫЛДЫ
+const pipes = {
+    position: [],
+    width: 45, 
+    gap: 145, // Бұрын 130 еді (Тесік кеңейді)
+    dx: 1.8,  // Бұрын 2.5 еді (Құбырлар баяу келеді)
+    draw() {
+        ctx.fillStyle = '#22c55e'; 
+        for(let i = 0; i < this.position.length; i++) {
+            let p = this.position[i];
+            ctx.fillRect(p.x, 0, this.width, p.y);
+            ctx.fillRect(p.x, p.y + this.gap, this.width, canvas.height - (p.y + this.gap));
+        }
+    },
+    update() {
+        // Әр 140 кадр сайын (бұрын 100 еді) жаңа құбыр шығады, арақашықтық ұлғайды
+        if(frames % 140 === 0) {
+            this.position.push({
+                x: canvas.width,
+                y: Math.random() * (canvas.height - this.gap - 80) + 40,
+                passed: false
+            });
+        }
+        for(let i = 0; i < this.position.length; i++) {
+            let p = this.position[i];
+            p.x -= this.dx;
+
+            let bottomY = p.y + this.gap;
+            if(bird.x + bird.radius > p.x && bird.x - bird.radius < p.x + this.width && 
+               (bird.y - bird.radius < p.y || bird.y + bird.radius > bottomY)) {
+                gameOverFlappy();
+            }
+
+            if(p.x + this.width < bird.x && !p.passed) {
+                score += 1;
+                p.passed = true;
+            }
+
+            if(p.x + this.width < 0) {
+                this.position.shift();
+                i--;
+            }
+        }
+    },
+    reset() { this.position = []; }
+};
+
+function drawBackground() {
+    ctx.fillStyle = '#7dd3fc'; // Аспан түсі
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function drawScore() {
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 40px sans-serif';
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+    ctx.strokeText(score, canvas.width / 2 - 15, 60);
+    ctx.fillText(score, canvas.width / 2 - 15, 60);
+}
+
+function loopFlappy() {
+    if(!gameActive) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBackground();
+    pipes.draw();
+    pipes.update();
+    bird.draw();
+    bird.update();
+    drawScore();
+    frames++;
+    reqAnimation = requestAnimationFrame(loopFlappy);
+}
+
+function startFlappy() {
+    flappyUI.classList.add('hidden');
+    bird.y = 150;
+    bird.velocity = 0;
+    pipes.reset();
+    score = 0;
+    frames = 0;
+    gameActive = true;
+    loopFlappy();
+}
+
+function gameOverFlappy() {
+    gameActive = false;
+    cancelAnimationFrame(reqAnimation);
+    
+    // Интерфейсті көрсету
+    flappyUI.classList.remove('hidden');
+    flappyTitle.innerHTML = 'Құладың! <br><span class="text-xl">Бірақ берілме!</span>';
+    flappyScoreText.classList.remove('hidden');
+    flappyCurrentScore.innerText = score;
+
+    // Рекордты жаңарту
+    if(score > bestScore) {
+        bestScore = score;
+        localStorage.setItem('flappyBest', bestScore);
+        flappyHighScore.innerText = bestScore;
+    }
+
+    // 💰 БОНУСТЫ ҚАТЫРМАЙ, ҮСТІНЕ ҚОСУ ЛОГИКАСЫ:
+    if(score > 0) {
+        // 1. Базадан барлық қолданушыларды және қазіргі ID-ді аламыз
+        const currentId = localStorage.getItem('currentUserId');
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        let userIdx = users.findIndex(u => String(u.id) === String(currentId));
+
+        if (userIdx !== -1) {
+            // 2. ЕСКІ БОНУСТЫ АЛЫП, ЖАҢА ҰПАЙДЫ ҮСТІНЕ ҚОСАМЫЗ (+=)
+            let currentBonus = Number(users[userIdx].bonus) || 0;
+            users[userIdx].bonus = currentBonus + score; 
+
+            // 3. БАРЛЫҚ ЖЕРДЕ ЖАҢАРТУ (Базада және Сессияда)
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('currentUser', JSON.stringify(users[userIdx]));
+            
+            // 4. ЭКРАНДАҒЫ САНДЫ (оң жақ жоғарыдағы) БІРДЕН ЖАҢАРТУ
+            const balEl = document.getElementById('game-balance');
+            if(balEl) {
+                balEl.innerText = users[userIdx].bonus.toFixed(2);
+            }
+            
+            console.log("Жаңа бонус қосылды! Жалпы:", users[userIdx].bonus);
+        }
+    }
+}
+
+// Басқару (Секіру)
+canvas.addEventListener('mousedown', () => { if(gameActive) bird.flap(); });
+canvas.addEventListener('touchstart', (e) => { 
+    e.preventDefault(); 
+    if(gameActive) bird.flap(); 
+});
+
+
+function syncGameUI() {
+    // 1. Сессиядағы нақты адамды аламыз
+    const userJson = localStorage.getItem('currentUser');
+    if (userJson) {
+        const user = JSON.parse(userJson);
+        // 2. Базадағы нақты бонусты оқимыз
+        const realBonus = user.bonus || 0;
+        
+        // 3. Экрандағы (оң жақ жоғарыдағы) санға жазамыз
+        const display = document.getElementById('game-balance');
+        if (display) {
+            display.innerText = Number(realBonus).toFixed(2);
+        }
+    }
+}
+
+// Бет ашылғанда бірден шақыру
+document.addEventListener('DOMContentLoaded', syncGameUI);
+
+
+</script>
+
+
+    
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="games.js"></script>

@@ -471,6 +471,7 @@ function goToAddressFlow() {
     localStorage.setItem('new_order_signal', 'true');
 
     // --- ЛОГИКА СПИСАНИЯ БОНУСОВ (ЖАҢАРТЫЛДЫ) ---
+ // --- БОНУСТАРДЫ ШЕГЕРУ ЖӘНЕ БАЗАНЫ ЖАҢАРТУ ---
     if (document.getElementById('use-bonuses-toggle')?.checked) {
         let users = JSON.parse(localStorage.getItem('users')) || [];
         const currentId = localStorage.getItem('currentUserId');
@@ -484,14 +485,20 @@ function goToAddressFlow() {
             let discountAmount = baseOrderPrice * (checkoutDiscountPercent / 100);
             let priceBeforeBonus = baseOrderPrice - discountAmount;
 
-            // Нақты қанша бонус жұмсалатынын анықтаймыз (не тауардың бағасы, не барлық бонус)
+            // Нақты қанша бонус жұмсалатынын анықтаймыз
             const usedBonus = Math.min(currentBonus, priceBeforeBonus);
 
-            // Тек жұмсалған бөлігін ғана шегереміз
+            // Тек жұмсалған бөлігін базадан шегереміз
             dbUser.bonus = currentBonus - usedBonus; 
             
+            // Мәліметтерді сақтау
             localStorage.setItem('users', JSON.stringify(users));
             localStorage.setItem('currentUser', JSON.stringify(dbUser));
+            
+            // Синхронизация: басқа беттер бонустың өзгергенін көруі үшін
+            localStorage.setItem('userBonuses', dbUser.bonus); 
+            localStorage.setItem('qulan_balance_' + dbUser.phone, dbUser.bonus);
+
             console.log(`Жұмсалды: ${usedBonus}, Қалды: ${dbUser.bonus} ✅`);
         }
     }

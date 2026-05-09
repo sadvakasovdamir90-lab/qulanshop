@@ -835,6 +835,16 @@
                 </div>
             </div>
 
+                <div>
+    <label class="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-[0.2em] italic mb-3 block text-blue-400">06. Қысқаша аңдатпа (Тізімде көрінетін мәтін)</label>
+    <textarea id="admin-news-text" rows="3" class="w-full bg-[#0f172a] border border-slate-700 p-6 rounded-[2rem] text-sm font-bold text-white outline-none focus:border-blue-500 shadow-inner resize-none" placeholder="Бұл мәтін басты беттегі тізімде көрінеді..."></textarea>
+</div>
+
+<div>
+    <label class="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-[0.2em] italic mb-3 block text-emerald-400">07. Мақаланың толық мәтіні (Full Content)</label>
+    <textarea id="admin-news-full-content" rows="8" class="w-full bg-[#0f172a] border border-slate-700 p-6 rounded-[2.5rem] text-sm font-bold text-white outline-none focus:border-emerald-500 shadow-inner resize-none" placeholder="Жаңалықтың барлық егжей-тегжейін осында жазыңыз..."></textarea>
+</div>
+
             <div>
                 <label class="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-[0.2em] italic mb-3 block text-blue-400">06. Негізгі хабарлама мәтіні</label>
                 <textarea id="admin-news-text" rows="5" class="w-full bg-[#0f172a] border border-slate-700 p-6 rounded-[2.5rem] text-sm font-bold text-white outline-none focus:border-blue-500 shadow-inner resize-none" placeholder="Ауыл тұрғындарына не айтқыңыз келеді? Осында жазыңыз..."></textarea>
@@ -2948,6 +2958,37 @@ function syncThemeSelector() {
     const savedTheme = localStorage.getItem('current_holiday_theme') || 'none';
     const selector = document.getElementById('theme-selector');
     if (selector) selector.value = savedTheme;
+}
+
+
+function addNewNews() {
+    // Формадан мәліметтерді алу
+    const titleInput = document.getElementById('news-title-input'); // Тақырып инпуты
+    const imageInput = document.getElementById('news-image-input'); // Сурет сілтемесі
+    const categorySelect = document.getElementById('news-category-select'); // Категория
+    const contentText = document.getElementById('news-content-textarea'); // Толық мәтін
+
+    // 1. ЖАҢА ЖАҢАЛЫҚ НЫСАНЫ (Сен сұраған код осы жерде)
+    const newNews = {
+        id: Date.now().toString(), // Қайталанбайтын ID жасау
+        text: titleInput.value,
+        imageUrl: imageInput.value,
+        category: categorySelect.value,
+        date: new Date().toLocaleDateString(),
+        fullContent: contentText.value // Толық мәтін осы жерге түседі
+    };
+
+    // 2. БАЗАНЫ ЖАҢАРТУ (village_news деген атпен сақтау маңызды)
+    let allNews = JSON.parse(localStorage.getItem('village_news')) || [];
+    allNews.push(newNews);
+    localStorage.setItem('village_news', JSON.stringify(allNews));
+
+    // 3. ТАЗАЛАУ ЖӘНЕ ХАБАРЛАМА
+    titleInput.value = '';
+    imageInput.value = '';
+    contentText.value = '';
+    
+    Swal.fire('Сәтті!', 'Жаңалық қосылды ✅', 'success');
 }
 
         </script>

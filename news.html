@@ -872,7 +872,7 @@ function toggleSearch() {
 
 
 // 2. Іздеу нәтижелерін рендеринг жасау (Сенің дизайныңмен)
-function renderFilteredNews(list) {
+ function renderFilteredNews(list) {
     const container = document.getElementById('news-container');
     const sidebar = document.getElementById('sidebar-news-list');
     
@@ -887,6 +887,7 @@ function renderFilteredNews(list) {
                 <h3 class="text-xs font-black italic tracking-[0.4em] text-slate-300">Ничего не найдено</h3>
                 <p class="text-[10px] font-bold text-slate-200 mt-2 italic">Попробуйте изменить запрос</p>
             </div>`;
+            
         return;
     }
 
@@ -911,8 +912,12 @@ function renderFilteredNews(list) {
                 </div>`;
         }
 
+        // --- ЖАҢА: ID анықтау ---
+        const newsId = item.id || Date.now(); 
+
         return `
-        <div class="news-card-main group bg-white flex flex-col h-full border border-slate-200 rounded-[2rem] overflow-hidden hover:shadow-2xl transition-all duration-500">
+        <div class="news-card-main group bg-white flex flex-col h-full border border-slate-200 rounded-[2rem] overflow-hidden hover:shadow-2xl transition-all duration-500 cursor-pointer" 
+             onclick="openNews('${newsId}')">
             <div class="relative">
                 ${mediaBlock}
                 <div class="absolute top-5 left-5 z-10">
@@ -927,11 +932,11 @@ function renderFilteredNews(list) {
                     <p class="text-[10px] font-bold text-slate-400 tracking-tight">${item.date}</p>
                 </div>
 
-                <a href="${item.link && item.link !== 'null' ? item.link : '#'}" target="_blank" class="block">
-                    <h3 class="text-lg font-[800] leading-snug text-slate-900 mb-8 hover:text-blue-600 transition-colors italic tracking-tighter">
+                <div class="block">
+                    <h3 class="text-lg font-[800] leading-snug text-slate-900 mb-8 group-hover:text-blue-600 transition-colors italic tracking-tighter">
                         ${item.text}
                     </h3>
-                </a>
+                </div>
 
                 <div class="mt-auto pt-6 border-t border-slate-50 dark:border-slate-800 flex items-center">
                     <div class="flex items-center gap-3">
@@ -953,6 +958,12 @@ function renderFilteredNews(list) {
             </div>
         </div>`;
     }).join('');
+}
+
+// Жаңалықты ашу функциясы (міндетті түрде осылай болсын)
+function openNews(newsId) {
+    window.location.href = `news-detail.html?id=${newsId}`;
+}
 
     // 2. SIDEBAR
     if (sidebar) {
@@ -978,7 +989,7 @@ function renderFilteredNews(list) {
             </a>
         `).join('');
     }
-}
+
 
 function handleSearchInput(value) {
     const hint = document.getElementById('search-hint');
@@ -1209,6 +1220,12 @@ async function loadRealRates() {
 }
 
 document.addEventListener('DOMContentLoaded', loadRealRates);
+
+// Жаңалықты ашу функциясы
+function openNews(newsId) {
+    window.location.href = `news-detail.html?id=${newsId}`;
+
+}
 
 
     </script>

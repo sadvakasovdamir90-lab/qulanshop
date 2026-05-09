@@ -236,3 +236,26 @@ function finishQuiz() {
         });
     }
 }
+
+function updateUserBonus(winScore) {
+    const currentId = localStorage.getItem('currentUserId');
+    if (!currentId) return;
+
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+    let userIdx = users.findIndex(u => String(u.id) === String(currentId));
+
+    if (userIdx !== -1) {
+        // 1. Негізгі базада жаңарту
+        users[userIdx].bonus = (Number(users[userIdx].bonus) || 0) + winScore;
+        localStorage.setItem('users', JSON.stringify(users));
+
+        // 2. Сессияны (currentUser) жаңарту (Профиль көруі үшін)
+        localStorage.setItem('currentUser', JSON.stringify(users[userIdx]));
+
+        // 3. Экрандағы санды лезде өзгерту
+        const balEl = document.getElementById('game-balance');
+        if(balEl) balEl.innerText = users[userIdx].bonus.toFixed(2);
+        
+        console.log("Бонус сақталды: +" + winScore);
+    }
+}

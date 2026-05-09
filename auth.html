@@ -608,9 +608,10 @@ window.handleConfirmCode = function() {
     }
 
 function saveFinalUser() {
-    let users = JSON.parse(localStorage.getItem('users')) || [];
-    const urlParams = new URLSearchParams(window.location.search);
-    const referrerId = urlParams.get('ref');
+    // 1. Деректерді алу және жаңа қолданушыны дайындау
+    let users = JSON.parse(localStorage.getItem('users')) || []; //
+    const urlParams = new URLSearchParams(window.location.search); //[cite: 8]
+    const referrerId = urlParams.get('ref'); // Сілтемедегі шақырушының ID-і[cite: 8]
 
     const newUser = { 
         id: Date.now(), 
@@ -627,46 +628,56 @@ function saveFinalUser() {
         giftCards: [], 
         twoFactorEnabled: false,
         isWelcomed: false 
-    };
+    }; //[cite: 8]
 
-    // 1. ҚҰТТЫҚТАУ ХАБАРЛАМАСЫН ДАЙЫНДАУ (БЕТ АУЫСПАЙ ТҰРЫП САҚТАУ)
+    // 2. ҚҰТТЫҚТАУ ХАБАРЛАМАСЫН ДАЙЫНДАУ
     const welcomePush = {
         id: Date.now(),
         message: `Қош келдіңіз, ${newUser.name}! ✨ QulanShop-ты таңдағаныңызға рахмет. Профиль бөлімінде сіздің жеке әмияныңыз бен бонустарыңыз дайын!`,
         category: "🎉 QULANSHOP",
         link: "profile.html",
         time: new Date().toLocaleTimeString().slice(0, 5)
-    };
+    }; //[cite: 8, 13]
 
     // Хабарламалар тарихына бірден қосамыз
     let notifications = JSON.parse(localStorage.getItem('qulanshop_notifications')) || [];
     notifications.push(welcomePush);
-    localStorage.setItem('qulanshop_notifications', JSON.stringify(notifications));
+    localStorage.setItem('qulanshop_notifications', JSON.stringify(notifications)); //[cite: 13]
 
     // Қолданушыға белгі қою
-    newUser.isWelcomed = true;
+    newUser.isWelcomed = true; //[cite: 8]
 
-    // 2. РЕФЕРАЛ ЖҮЙЕСІ (Өзгеріссіз қалды)
+    // 3. РЕФЕРАЛ ЖҮЙЕСІ (Шақырушыға бонус беру)
     if (referrerId) {
         const refIndex = users.findIndex(u => String(u.id) === String(referrerId));
         if (refIndex !== -1) {
+            // Шақырушының балансына 500 ₸ қосамыз[cite: 1, 8]
             users[refIndex].userBalance = (Number(users[refIndex].userBalance) || 0) + 500;
             users[refIndex].referralEarned = (Number(users[refIndex].referralEarned) || 0) + 500;
             users[refIndex].referralCount = (Number(users[refIndex].referralCount) || 0) + 1;
+            
+            // Рефералдар тарихын жүргізу
             if(!users[refIndex].referralHistory) users[refIndex].referralHistory = [];
-            users[refIndex].referralHistory.push({ from: newUser.name, date: new Date().toLocaleString(), amount: 500 });
+            users[refIndex].referralHistory.push({ 
+                from: newUser.name, 
+                date: new Date().toLocaleString(), 
+                amount: 500 
+            });
+            console.log("Реферал бонусы шақырушыға берілді! ✅");
         }
     }
 
-    // 3. БАЗАҒА САҚТАУ
+    // 4. БАЗАҒА САҚТАУ ЖӘНЕ СИГНАЛ ЖІБЕРУ
     users.push(newUser);
-    localStorage.setItem('users', JSON.stringify(users));
+    localStorage.setItem('users', JSON.stringify(users)); //[cite: 8]
 
-    // 4. НҮКТЕНІ ЖАҒУ СИГНАЛЫ
-    localStorage.setItem('global_push_signal', JSON.stringify(welcomePush));
+    // Нүктені жағу сигналы (Басты беттегі қоңырау үшін)
+    localStorage.setItem('global_push_signal', JSON.stringify(welcomePush)); //[cite: 13, 26]
 
     // 5. ЖҮЙЕГЕ КІРГІЗУ
-    loginUser(newUser); 
+    if (typeof loginUser === 'function') {
+        loginUser(newUser); //[cite: 8]
+    }
 }
 
     window.handleLogin = function() {

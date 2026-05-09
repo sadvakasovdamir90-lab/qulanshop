@@ -1128,29 +1128,40 @@ window.addEventListener('DOMContentLoaded', () => {
     updateNavBalance();  
     renderMyOrders();
 });
-        // --- 1. ТАБТАР ЖҮЙЕСІ ---
-        function showTab(event, tabId) {
-            
-            const currentId = localStorage.getItem('currentUserId');
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-            document.querySelectorAll('.nav-btn').forEach(b => {
-                b.classList.remove('bg-orange-50', 'text-orange-600', 'font-medium');
-                b.classList.add('hover:bg-gray-100');
-                
-            });
-            const activeTab = document.getElementById(tabId);
-            if (activeTab) activeTab.classList.remove('hidden');
-            event.currentTarget.classList.add('bg-orange-50', 'text-orange-600', 'font-medium');
-            event.currentTarget.classList.remove('hover:bg-gray-100');
+     // --- 1. ТАБТАР ЖҮЙЕСІ ---
+function showTab(event, tabId) {
+    const currentId = localStorage.getItem('currentUserId');
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+    document.querySelectorAll('.nav-btn').forEach(b => {
+        b.classList.remove('bg-orange-50', 'text-orange-600', 'font-medium');
+        b.classList.add('hover:bg-gray-100');
+    });
 
-            // --- Сертификаттар табы ашылғанда "NEW" белгісін жоғалту ---
-            if (tabId === 'tab-certificates') {
-                localStorage.setItem('certs_read_' + currentId, 'true');
-                renderCertificates();
-                updateMenuBadges(); 
+    const activeTab = document.getElementById(tabId);
+    if (activeTab) activeTab.classList.remove('hidden');
 
-            }
+    // Тексеру: event нысанының бар екеніне көз жеткізу
+    if (event && event.currentTarget) {
+        event.currentTarget.classList.add('bg-orange-50', 'text-orange-600', 'font-medium');
+        event.currentTarget.classList.remove('hover:bg-gray-100');
+    }
+
+    // --- Сертификаттар табы ашылғанда "NEW" белгісін жоғалту ---
+    if (tabId === 'tab-certificates') {
+        localStorage.setItem('certs_read_' + currentId, 'true');
+        renderCertificates();
+        updateMenuBadges(); 
+    }
+
+    // --- ЖАҢА: РЕФЕРАЛ ТАБЫ АШЫЛҒАНДА СІЛТЕМЕНІ ЖҮКТЕУ ---
+    if (tabId === 'tab-referral') {
+        // Сілтеме мен статистиканы бірден жаңарту
+        if (typeof initReferralSystem === 'function') {
+            initReferralSystem();
         }
+    }
+}
+        
 
         // Кошелекті рендер жасау
 function renderWallet() {
@@ -2296,53 +2307,28 @@ function cancelMyOrder(orderId) {
     });
 }
 
-// Таб ашылғанда тізімді жаңарту
-const originalShowTab = showTab;
-showTab = function(event, tabId) {
-    if (typeof originalShowTab === 'function') originalShowTab(event, tabId);
-    if (tabId === 'tab-orders') renderMyOrders();
-};
 
 
-// Реферал жүйесін іске қосу
-function initReferralSystem() {
-    const userJson = localStorage.getItem('currentUser');
-    if (!userJson) return;
-    const user = JSON.parse(userJson);
-
-    // Ссылканы жасау: Гитхабта 404 бермеуі үшін ең дұрыс жолы
-    const currentUrl = window.location.href;
-    const refLink = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1) + 'auth.html?ref=' + (user.id || '123');
-    
-    const linkInput = document.getElementById('referral-link');
-    if (linkInput) {
-        linkInput.value = refLink;
-    }
-
-    // Статистиканы жаңарту
-    const countDisp = document.getElementById('ref-count-display');
-    const earnedDisp = document.getElementById('ref-earned-display');
-    
-    if (countDisp) countDisp.innerText = user.referralCount || 0;
-    if (earnedDisp) earnedDisp.innerText = (user.referralEarned || 0) + ' ₸';
-}
 
 function copyReferralLink() {
     const linkInput = document.getElementById('referral-link');
     if (!linkInput) return;
     
-    // iPhone мен Android-та 100% көшіру үшін заманауи жолы
     linkInput.select();
-    linkInput.setSelectionRange(0, 99999); // iOS үшін маңызды
+    linkInput.setSelectionRange(0, 99999); // Мобильді құрылғылар үшін
 
-    try {
-        navigator.clipboard.writeText(linkInput.value).then(() => {
-            showCopySuccess();
+    navigator.clipboard.writeText(linkInput.value).then(() => {
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: 'Ссылка скопирована! 🚀',
+            showConfirmButton: false,
+            timer: 1500,
+            background: '#1e293b',
+            color: '#fff'
         });
-    } catch (err) {
-        document.execCommand('copy'); // Ескі браузерлерге арналған қосалқы жол
-        showCopySuccess();
-    }
+    });
 }
 
 // Хабарлама шығару функциясы
@@ -2603,17 +2589,55 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function syncProfileBalance() {
-    // 1. LocalStorage-тан ұпайды аламыз (жоқ болса 0)
-    const currentBalance = localStorage.getItem('qulan_balance') || '0';
-    
-    // 2. Сенің кодындағы нақты ID-ді тауып аламыз
-    const balanceDisplay = document.getElementById('wallet-bonuses');
-    
-    // 3. Форматты бұзбай (мысалы 20 емес, 20.00 етіп) жазамыз
-    if (balanceDisplay) {
-        balanceDisplay.innerText = Number(currentBalance).toFixed(2);
+    const userJson = localStorage.getItem('currentUser');
+    if (userJson) {
+        const user = JSON.parse(userJson);
+        const bonuses = user.bonus || 0; // Нақты базадағы бонус
+        
+        // Картадағы Q-Coins блогы
+        const balanceDisplay = document.getElementById('wallet-bonuses');
+        if (balanceDisplay) {
+            balanceDisplay.innerText = Number(bonuses).toLocaleString();
+        }
+        
+        // Жоғарғы навигациядағы балансты да теңестіру
+        const navBal = document.getElementById('nav-balance');
+        if (navBal) navBal.innerText = Math.floor(bonuses) + ' ₸';
     }
 }
+
+function initReferralSystem() {
+    const userJson = localStorage.getItem('currentUser');
+    if (!userJson) return;
+    
+    const user = JSON.parse(userJson);
+    const linkInput = document.getElementById('referral-link');
+
+    if (linkInput) {
+        // Сілтемені құрастыру (Сенің доменіңе сай)
+        const currentUrl = window.location.href;
+        const basePath = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
+        const refLink = basePath + 'auth.html?ref=' + user.id;
+        
+        // "Загрузка..." деген мәтінді нақты сілтемемен ауыстыру
+        linkInput.value = refLink;
+        console.log("Referral link updated: " + refLink);
+    }
+
+    // Статистиканы жаңарту
+    if (document.getElementById('ref-count-display')) 
+        document.getElementById('ref-count-display').innerText = user.referralCount || 0;
+    if (document.getElementById('ref-earned-display')) 
+        document.getElementById('ref-earned-display').innerText = (user.referralEarned || 0) + ' ₸';
+}
+
+// БӘРІН БІРДЕЙ ЖҮКТЕУ (window.load сенімдірек)
+window.addEventListener('load', () => {
+    loadUserData();
+    renderWallet();
+    updateNavBalance();
+    initReferralSystem(); // Бет ашылғанда бірден іске қосу
+});
 
     </script>
 </html>

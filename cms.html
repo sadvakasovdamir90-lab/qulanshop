@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QulanShop | Супер CMS Басқару Тақтасы</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-slate-950 text-white font-sans pb-20">
+
+    <header class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
+        <div>
+            <h1 class="text-xl font-black italic uppercase text-orange-500">Qulan<span class="text-white">CMS Engine</span></h1>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Бүкіл 46 беттің мәтінін бір жерден басқару</p>
+        </div>
+        <button onclick="location.href='admin.html'" class="bg-slate-800 hover:bg-slate-700 px-5 py-2.5 rounded-xl text-xs font-black uppercase border border-slate-700 transition">
+            <i class="fas fa-arrow-left mr-2"></i> Админ Панель
+        </button>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 mt-8 space-y-6">
+        
+        <div class="bg-slate-900 p-6 rounded-[2rem] border border-slate-800 shadow-xl">
+            <h2 class="text-xs font-black uppercase italic tracking-widest text-orange-500 mb-4"><i class="fas fa-plus-circle mr-2"></i> Жаңадан өзгертетін сөз қосу</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-[9px] font-black uppercase text-slate-500">Кілт сөз (HTML-дегі data-cms аты)</label>
+                    <input type="text" id="new-key" class="w-full h-12 bg-slate-950 border border-slate-800 rounded-xl px-4 text-xs font-mono text-orange-400 mt-1 outline-none focus:border-orange-500" placeholder="мысалы: my_wallet немесе buy_btn">
+                </div>
+                <div>
+                    <label class="text-[9px] font-black uppercase text-slate-500">Сайтта шығатын жаңа мәтін</label>
+                    <input type="text" id="new-value" class="w-full h-12 bg-slate-950 border border-slate-800 rounded-xl px-4 text-xs font-bold text-white mt-1 outline-none focus:border-orange-500" placeholder="мысалы: Менің әмияным">
+                </div>
+            </div>
+            <button onclick="addNewCmsKey()" class="w-full h-12 bg-slate-800 hover:bg-orange-600 rounded-xl font-black uppercase text-[10px] tracking-widest mt-4 transition border border-slate-700 hover:border-orange-500">
+                Тізімге қосу
+            </button>
+        </div>
+
+        <div class="bg-slate-900 p-8 rounded-[2.5rem] border border-slate-800 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-sm font-black uppercase italic tracking-widest text-white">Сайттағы белсенді мәтіндер тізімі:</h2>
+                <span class="text-[9px] font-bold bg-slate-800 text-slate-400 px-3 py-1 rounded-full uppercase tracking-wider">Жеке деректер қорғалған 🛡️</span>
+            </div>
+
+            <div class="space-y-5" id="dynamic-cms-container">
+                <div class="text-center py-8 text-slate-600 italic text-xs">Әзірге өзгертілген мәтіндер жоқ. Жоғарыдан қосыңыз...</div>
+            </div>
+
+            <button onclick="saveAllCmsTexts()" class="w-full h-14 bg-orange-600 hover:bg-orange-700 rounded-2xl font-black uppercase italic tracking-widest text-sm mt-8 transition active:scale-95 shadow-xl shadow-orange-950/20">
+                <i class="fas fa-cloud-upload-alt mr-2"></i> Бүкіл Сайтта Жарқ Еткізіп Өзгерту
+            </button>
+        </div>
+
+    </main>
+
+    <script>
+        // Әдепкі бойынша ең жиі өзгеретін базалық кілттер
+        const defaultFields = {
+            "nav_wallet": "Мой кошелек",
+            "btn_save": "Сохранить изменения",
+            "cart_title": "Моя корзина",
+            "checkout_btn": "Оформить заказ"
+        };
+
+        // Бет ашылғанда мәліметтерді инпуттарға шығару
+        window.onload = renderCmsFields;
+
+        function renderCmsFields() {
+            const container = document.getElementById('dynamic-cms-container');
+            let saved = JSON.parse(localStorage.getItem('qulan_global_cms'));
+            
+            // Егер жад бос болса, базалық өрістерді сақтап қоямыз
+            if (!saved) {
+                localStorage.setItem('qulan_global_cms', JSON.stringify(defaultFields));
+                saved = defaultFields;
+            }
+
+            const keys = Object.keys(saved);
+            if(keys.length === 0) {
+                container.innerHTML = `<div class="text-center py-8 text-slate-600 italic text-xs">Тізім бос...</div>`;
+                return;
+            }
+
+            container.innerHTML = keys.map(key => `
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-850 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <span class="text-[9px] font-mono text-orange-500 bg-orange-950/30 px-2 py-0.5 rounded-md border border-orange-900/40">ID: ${key}</span>
+                    </div>
+                    <div class="flex-1 max-w-xl flex gap-2">
+                        <input type="text" data-cms-key="${key}" value="${saved[key]}" class="w-full h-11 bg-slate-900 border border-slate-800 rounded-xl px-4 text-xs font-bold text-white outline-none focus:border-orange-500">
+                        <button onclick="deleteCmsKey('${key}')" class="w-11 h-11 bg-red-950/30 border border-red-900/30 hover:bg-red-600 rounded-xl text-red-400 hover:text-white transition flex items-center justify-center shrink-0">
+                            <i class="fas fa-trash-alt text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Жаңа кілт қосу
+        function addNewCmsKey() {
+            const keyInput = document.getElementById('new-key');
+            const valInput = document.getElementById('new-value');
+            const key = keyInput.value.trim().toLowerCase();
+            const val = valInput.value.trim();
+
+            if(!key || !val) {
+                Swal.fire({ icon: 'error', title: 'Қате!', text: 'Екі өрістің де ішін толтырыңыз.', background: '#111827', color: '#fff' });
+                return;
+            }
+
+            let saved = JSON.parse(localStorage.getItem('qulan_global_cms')) || {};
+            saved[key] = val;
+            localStorage.setItem('qulan_global_cms', JSON.stringify(saved));
+
+            keyInput.value = "";
+            valInput.value = "";
+            renderCmsFields();
+            
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Жаңа өріс қосылды!', showConfirmButton: false, timer: 1500, background: '#1f2937', color: '#fff' });
+        }
+
+        // Кілтті өшіру
+        function deleteCmsKey(key) {
+            let saved = JSON.parse(localStorage.getItem('qulan_global_cms')) || {};
+            delete saved[key];
+            localStorage.setItem('qulan_global_cms', JSON.stringify(saved));
+            renderCmsFields();
+        }
+
+        // Барлық өзгерістерді бірден сақтау
+        function saveAllCmsTexts() {
+            let saved = {};
+            document.querySelectorAll('[data-cms-key]').forEach(input => {
+                const key = input.getAttribute('data-cms-key');
+                saved[key] = input.value.trim();
+            });
+
+            localStorage.setItem('qulan_global_cms', JSON.stringify(saved));
+
+            Swal.fire({
+                icon: 'success',
+                title: 'БҮКІЛ САЙТ ЖАҢАРДЫ! 🚀',
+                text: 'Өзгертілген мәтіндер барлық 46 бетте іске қосылды. Жеке деректер аман-есен өз орнында қалды.',
+                confirmButtonColor: '#ea580c',
+                background: '#111827',
+                color: '#fff'
+            });
+        }
+    </script>
+</body>
+</html>

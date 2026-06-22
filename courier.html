@@ -135,33 +135,40 @@ function sendReceipt(orderId) {
 }
 
 // 3. КАРТАНЫ АШУ
+// 3. КАРТАНЫ АШУ (Нағыз ресми Google Maps сілтемесі)
 function openMap(address) {
-    // Құланотпес ауылының контекстін қосып іздеу
     const query = encodeURIComponent("село Кулан, " + address);
-    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+    // Кез келген құрылғыда Картаны нақты ашатын ресми формат
+    window.open("https://www.google.com/maps?q=" + query, '_blank');
 }
 
-        function finishDelivery(orderId) {
-            if (!confirm("Тапсырыс жеткізілді деп белгілейсіз бе?")) return;
+function finishDelivery(orderId) {
+    if (!confirm("Тапсырыс жеткізілді деп белгілейсіз бе?")) return;
 
-            let orders = JSON.parse(localStorage.getItem('orders')) || [];
-            let users = JSON.parse(localStorage.getItem('users')) || [];
-            const index = orders.findIndex(o => String(o.id) === String(orderId));
+    let orders = JSON.parse(localStorage.getItem('orders')) || [];
+    const index = orders.findIndex(o => String(o.id) === String(orderId));
 
-            if (index !== -1) {
-                // Статусты "Completed" деп өзгерту
-                orders[index].status = 'completed';
-                
-                // Бонус және қарыз логикасын Админдегідей осы жерде де іске қосуға болады
-                // Немесе оны Админ өзі қабылдап (Approve) жасауына болады
-                
-                localStorage.setItem('orders', JSON.stringify(orders));
-                renderCourierOrders();
-                alert("Керемет! Тапсырыс аяқталды. ✅");
-            }
-        }
+    if (index !== -1) {
+        orders[index].status = 'completed';
+        localStorage.setItem('orders', JSON.stringify(orders));
+        renderCourierOrders();
+        alert("Керемет! Тапсырыс аяқталды. ✅");
+    }
+}
 
-        window.onload = renderCourierOrders;
+// 🔥 ШЕКСІЗ АЙНАЛУДЫ ТОҚТАТУ ЖӘНЕ БЕТТІ АШУ 🔥
+window.onload = () => {
+    renderCourierOrders(); // Тапсырыстарды жүктеу
+    
+    // Айналып тұрған ақ лоадерді автоматты түрде жабу
+    const loader = document.getElementById('global-loader');
+    if (loader) {
+        loader.classList.add('opacity-0'); // Плавный жоғалу эффекті
+        setTimeout(() => {
+            loader.style.display = 'none'; // Элементті толық өшіру
+        }, 500);
+    }
+};
     </script>
 
     <script src="./script-rassylka.js"></script>

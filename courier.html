@@ -134,12 +134,13 @@ function sendReceipt(orderId) {
     window.open(`https://wa.me/${phone}?text=${receiptText}`, '_blank');
 }
 
-// 3. КАРТАНЫ АШУ
-// 3. КАРТАНЫ АШУ (Нағыз ресми Google Maps сілтемесі)
+// 3. КАРТАНЫ АШУ (Нағыз ресми Google Maps форматы)
 function openMap(address) {
+    // Ауыл контекстін қосып, картадан іздеуге дайындау
     const query = encodeURIComponent("село Кулан, " + address);
-    // Кез келген құрылғыда Картаны нақты ашатын ресми формат
-    window.open("https://www.google.com/maps?q=" + query, '_blank');
+    
+    // 🎯 НАҚТЫ ТҮЗЕТУ: Телефонда да, компьютерде हूглі картаны 100% ашатын ресми формат
+    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
 }
 
 function finishDelivery(orderId) {
@@ -156,17 +157,17 @@ function finishDelivery(orderId) {
     }
 }
 
-// 🔥 ШЕКСІЗ АЙНАЛУДЫ ТОҚТАТУ ЖӘНЕ БЕТТІ АШУ 🔥
+// 🎯 НАҚТЫ ТҮЗЕТУ: ШЕКСІЗ АЙНАЛУДЫ ТОҚТАТУ ЖӘНЕ БЕТТІ АШУ
 window.onload = () => {
     renderCourierOrders(); // Тапсырыстарды жүктеу
     
-    // Айналып тұрған ақ лоадерді автоматты түрде жабу
+    // Айналып тұратын ақ лоадерді автоматты түрде жауып, бетті көрсету
     const loader = document.getElementById('global-loader');
     if (loader) {
-        loader.classList.add('opacity-0'); // Плавный жоғалу эффекті
+        loader.classList.add('opacity-0');
         setTimeout(() => {
-            loader.style.display = 'none'; // Элементті толық өшіру
-        }, 500);
+            loader.style.display = 'none';
+        }, 500); // Плавный жоғалу эффектісі
     }
 };
     </script>

@@ -1,289 +1,725 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Музыка — QulanShop</title>
+    <title>Qulan Music — Слушай лучшее</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body { font-family: sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
-        
-        .glass-player {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { qulan: '#ea580c', spotify: '#1db954', spotdark: '#181818', spothover: '#282828' } } }
         }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark .custom-scroll::-webkit-scrollbar-thumb { background: #334155; }
         
-        /* Дөңгелек пластинка анимациясы */
-        .music-spin { animation: spin 5s linear infinite; }
+        .glass-panel { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        
+        /* ПРЕМИУМ ШКАЛАЛАР (Прогресс және Дыбыс) */
+        .premium-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 100%; background: transparent; cursor: pointer; position: absolute; z-index: 10; opacity: 0; }
+        .slider-visual-track { position: relative; width: 100%; height: 4px; background: rgba(148, 163, 184, 0.3); border-radius: 4px; transition: height 0.2s ease; }
+        .slider-wrapper:hover .slider-visual-track { height: 6px; }
+        .slider-visual-fill { position: absolute; top: 0; left: 0; height: 100%; background: #ea580c; border-radius: 4px; pointer-events: none;}
+        .dark .slider-visual-fill { background: #1db954; } /* Spotify Green in Dark mode */
+        .slider-visual-thumb { position: absolute; top: 50%; transform: translate(-50%, -50%) scale(0); width: 14px; height: 14px; background: white; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.4); transition: transform 0.2s; pointer-events: none; }
+        .slider-wrapper:hover .slider-visual-thumb { transform: translate(-50%, -50%) scale(1); }
+
+        /* ОКОШКО АНИМАЦИЯСЫ */
+        #deviceModal, #full-player { transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s; }
+        #full-player { transform: translateY(100%); }
+        #full-player.active { transform: translateY(0); }
+
+        .spin-slow { animation: spin 8s linear infinite; }
         .paused { animation-play-state: paused; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        
-        /* Скролл жасыру */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        
-        /* Прогресс-бар дизайны */
-        input[type=range] {
-            -webkit-appearance: none;
-            width: 100%;
-            background: transparent;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 10px; width: 10px;
-            border-radius: 50%;
-            background: #ec4899; /* pink-500 */
-            cursor: pointer;
-            margin-top: -3px;
-        }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%; height: 4px;
-            cursor: pointer;
-            background: #fce7f3; /* pink-100 */
-            border-radius: 4px;
-        }
     </style>
 </head>
-<body class="text-gray-800 pb-32">
+<body class="overflow-hidden bg-[#f8fafc] text-slate-800 dark:bg-[#121212] dark:text-slate-100 transition-colors duration-300">
 
-    <!-- Бас киім (Header) -->
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
-            <button onclick="location.href='index.html'" class="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-500 hover:text-pink-500 hover:bg-pink-50 transition active:scale-95">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            <h1 class="text-xl font-black text-pink-500 italic uppercase tracking-widest">Qulan Music</h1>
-            <div class="w-10"></div>
-        </div>
-    </header>
+    <audio id="main-audio"></audio>
 
-    <main class="container mx-auto px-4 mt-6 max-w-lg relative">
-        
-        <!-- ІЗДЕУ ЖҮЙЕСІ (ПОИСК) -->
-        <div class="relative mb-6">
-            <input type="text" id="search-input" 
-                class="w-full bg-white border-2 border-pink-100 rounded-2xl py-4 pl-12 pr-16 outline-none focus:border-pink-500 transition-all font-bold text-sm shadow-sm" 
-                placeholder="Найти песню или артиста...">
-            <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-pink-300 text-lg"></i>
-            <button onclick="searchMusic()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-pink-500 text-white w-10 h-10 rounded-xl hover:bg-pink-600 transition flex items-center justify-center shadow-md active:scale-90">
-                <i class="fas fa-arrow-right"></i>
-            </button>
-        </div>
+    <div class="flex h-screen w-full">
 
-        <!-- Баннер -->
-        <div class="bg-gradient-to-br from-pink-500 to-purple-600 rounded-[2rem] p-8 text-white shadow-xl shadow-pink-200/50 mb-8 relative overflow-hidden flex items-center justify-between">
-            <div class="relative z-10">
-                <h2 class="text-3xl font-black italic uppercase mb-1 leading-none tracking-tighter">Мировые<br>Хиты</h2>
-                <p class="text-[10px] text-pink-100 font-black uppercase tracking-widest mt-2">Apple Music API</p>
-            </div>
-            <i class="fas fa-compact-disc text-8xl opacity-20 absolute -right-6 -bottom-6 animate-spin" style="animation-duration: 10s;"></i>
-        </div>
-
-        <!-- ЖҮКТЕЛУ БЕЛГІСІ -->
-        <div id="loader" class="hidden text-center py-10">
-            <i class="fas fa-spinner fa-spin text-3xl text-pink-500"></i>
-            <p class="text-xs font-bold text-gray-400 mt-3 uppercase tracking-widest">Ищем треки...</p>
-        </div>
-
-        <!-- ТРЕКТЕР ТІЗІМІ -->
-        <div class="space-y-3 mb-24" id="track-list">
-            <!-- Тректер осы жерге JavaScript арқылы түседі -->
-        </div>
-    </main>
-
-    <!-- ҚАЛҚЫМАЛЫ ПЛЕЕР (FLOATING PLAYER) -->
-    <div class="fixed bottom-4 left-4 right-4 max-w-lg mx-auto z-50 transform translate-y-32 transition-transform duration-500" id="floating-player">
-        <div class="glass-player border border-white/60 p-3 rounded-[2rem] shadow-[0_20px_40px_rgba(236,72,153,0.15)]">
-            
-            <!-- Прогресс бар -->
-            <div class="px-3 mb-2 flex items-center gap-2">
-                <span id="current-time" class="text-[9px] font-bold text-gray-400">0:00</span>
-                <input type="range" id="progress-bar" value="0" max="100" onchange="seekMusic()">
-                <span id="duration-time" class="text-[9px] font-bold text-gray-400">0:30</span>
+        <aside class="hidden md:flex flex-col w-64 bg-white/80 dark:bg-black glass-panel border-r border-gray-200 dark:border-white/5 z-40 fixed h-full pt-6 pb-32 shadow-sm transition-colors duration-300">
+            <div class="px-6 mb-8 flex items-center justify-between cursor-pointer" onclick="location.href='index.html'">
+                <div class="flex items-center gap-3">
+                    <button class="w-10 h-10 bg-orange-50 dark:bg-spothover rounded-full flex items-center justify-center text-orange-500 dark:text-white">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h1 class="text-xl font-black text-orange-600 dark:text-white italic uppercase tracking-widest leading-none">Qulan<br>Music</h1>
+                </div>
             </div>
 
-            <div class="flex items-center justify-between px-2 pb-1">
-                <div class="flex items-center gap-3 w-[60%]">
-                    <div class="relative w-12 h-12 shrink-0">
-                        <img id="player-cover" src="" class="w-12 h-12 rounded-full object-cover border-2 border-pink-500 shadow-md music-spin paused">
-                        <div class="absolute inset-0 rounded-full border border-white/50"></div>
-                        <div class="absolute inset-0 m-auto w-3 h-3 bg-white rounded-full border border-gray-200"></div>
+            <div class="px-4 mb-6">
+                <button onclick="toggleTheme()" class="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-gray-100 dark:bg-spothover text-slate-600 dark:text-slate-300 font-bold transition-all hover:bg-gray-200 dark:hover:bg-gray-800">
+                    <span class="flex items-center gap-3"><i class="fas fa-moon dark:hidden"></i><i class="fas fa-sun hidden dark:inline text-yellow-400"></i> Тема</span>
+                </button>
+            </div>
+
+            <nav class="flex-1 px-4 space-y-2">
+                <button onclick="switchView('home')" id="pc-nav-home" class="pc-nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl bg-orange-50 dark:bg-spothover text-orange-600 dark:text-white font-bold transition-all border border-transparent">
+                    <i class="fas fa-home text-lg w-6"></i> Главная
+                </button>
+                <button onclick="switchView('search')" id="pc-nav-search" class="pc-nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:text-white font-bold transition-all border border-transparent">
+                    <i class="fas fa-search text-lg w-6"></i> Поиск
+                </button>
+                <button onclick="switchView('library')" id="pc-nav-library" class="pc-nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:text-white font-bold transition-all border border-transparent">
+                    <i class="fas fa-list-ul text-lg w-6"></i> Медиатека
+                </button>
+            </nav>
+        </aside>
+
+        <header class="md:hidden bg-white/90 dark:bg-[#121212]/90 glass-panel border-b border-gray-100 dark:border-white/5 fixed top-0 w-full z-30 transition-colors duration-300">
+            <div class="px-4 h-16 flex items-center justify-between">
+                <button onclick="location.href='index.html'" class="w-10 h-10 bg-orange-50 dark:bg-spothover rounded-full flex items-center justify-center text-orange-500 dark:text-white">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1 class="text-lg font-black text-orange-600 dark:text-white italic uppercase tracking-widest absolute left-1/2 transform -translate-x-1/2">Qulan Music</h1>
+                <button onclick="toggleTheme()" class="w-10 h-10 rounded-full bg-orange-50 dark:bg-spothover flex items-center justify-center text-orange-500 dark:text-white">
+                    <i class="fas fa-moon dark:hidden"></i><i class="fas fa-sun hidden dark:inline"></i>
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-1 w-full md:ml-64 h-full overflow-y-auto custom-scroll pt-20 md:pt-8 px-4 md:px-8 pb-40 md:pb-32 transition-colors relative z-10">
+            <div class="max-w-5xl mx-auto">
+                
+                <div id="view-home" class="view-section">
+                    <h2 class="text-3xl font-black italic uppercase tracking-tighter mb-6 text-slate-800 dark:text-white hidden md:block">Главная</h2>
+                    
+                    <div class="bg-gradient-to-br from-orange-500 to-rose-500 dark:from-[#1db954] dark:to-teal-700 rounded-[2rem] p-8 text-white shadow-xl mb-10 relative overflow-hidden flex items-center justify-between">
+                        <div class="relative z-10">
+                            <h3 class="text-3xl md:text-5xl font-black italic uppercase mb-2 leading-none tracking-tighter">Топ<br>Чарты</h3>
+                            <p class="text-xs font-bold uppercase tracking-widest mt-2 opacity-80">Популярное прямо сейчас</p>
+                        </div>
+                        <i class="fas fa-headphones-alt text-[8rem] opacity-20 absolute -right-4 -bottom-4 -rotate-12"></i>
                     </div>
-                    <div class="truncate">
-                        <h4 id="player-title" class="font-black text-sm text-gray-800 leading-tight truncate">Название</h4>
-                        <p id="player-artist" class="text-[10px] text-pink-500 font-bold italic truncate">Артист</p>
+
+                    <h3 class="text-lg md:text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight italic mb-6">Горячие Хиты (Deezer)</h3>
+                    
+                    <div id="home-loader" class="py-10 text-center"><i class="fas fa-spinner fa-spin text-3xl text-orange-500 dark:text-spotify"></i></div>
+                    <div id="home-feed" class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-10"></div>
+                </div>
+
+                <div id="view-search" class="view-section hidden">
+                    <h2 class="text-3xl font-black italic uppercase tracking-tighter mb-6 text-slate-800 dark:text-white hidden md:block">Поиск</h2>
+                    
+                    <div class="relative mb-6 group">
+                        <input type="text" id="searchInput" oninput="debounceSearch()" class="w-full bg-white dark:bg-spothover border-2 border-gray-200 dark:border-transparent rounded-[2rem] py-4 pl-14 pr-6 outline-none focus:border-orange-500 dark:focus:border-white transition-all font-bold text-base text-slate-700 dark:text-slate-200 shadow-sm" placeholder="Искать трек или артиста...">
+                        <i class="fas fa-search absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 text-xl group-focus-within:text-orange-500 dark:group-focus-within:text-white transition-colors"></i>
+                    </div>
+
+                    <div id="search-loader" class="py-10 text-center hidden"><i class="fas fa-spinner fa-spin text-3xl text-orange-500 dark:text-spotify"></i></div>
+                    
+                    <div id="searchResults" class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-10">
+                        <div class="col-span-full p-10 text-center border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-3xl text-gray-400 dark:text-slate-500">
+                            <i class="fas fa-search text-5xl mb-4 opacity-50"></i>
+                            <p class="font-bold uppercase tracking-widest text-xs">Начните вводить текст</p>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="flex items-center gap-3">
-                    <button onclick="prevTrack()" class="text-gray-400 hover:text-pink-500 transition text-lg active:scale-90"><i class="fas fa-step-backward"></i></button>
-                    <button onclick="togglePlay()" class="w-12 h-12 bg-pink-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-pink-200 hover:scale-105 active:scale-95 transition">
-                        <i id="play-pause-icon" class="fas fa-pause"></i>
+
+                <div id="view-library" class="view-section hidden">
+                    <h2 class="text-3xl font-black italic uppercase tracking-tighter mb-8 text-slate-800 dark:text-white">
+                        Моя медиатека
+                    </h2>
+                    <div id="library-feed" class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-10"></div>
+                </div>
+            </div>
+        </main>
+
+        <div class="hidden md:flex fixed bottom-0 left-0 right-0 h-[90px] bg-white dark:bg-spotdark border-t border-gray-200 dark:border-[#282828] items-center justify-between px-4 z-[100] transition-colors duration-300">
+            
+            <div class="flex items-center gap-4 w-[30%] min-w-[180px]">
+                <img id="deskCover" src="https://ui-avatars.com/api/?name=QM&background=ea580c&color=fff" class="w-14 h-14 rounded object-cover shadow-sm border border-gray-100 dark:border-transparent cursor-pointer hover:opacity-80 transition" onclick="openFullScreenPlayer()">
+                <div class="overflow-hidden flex flex-col justify-center">
+                    <h4 id="deskTitle" class="font-bold text-[14px] text-slate-800 dark:text-white truncate hover:underline cursor-pointer" onclick="openFullScreenPlayer()">Нет трека</h4>
+                    <p id="deskArtist" class="text-[11px] text-slate-500 dark:text-[#b3b3b3] hover:text-slate-800 dark:hover:text-white truncate hover:underline cursor-pointer">Выберите песню</p>
+                </div>
+                <button onclick="toggleLikeCurrent()" class="text-gray-400 dark:text-[#b3b3b3] hover:text-orange-500 dark:hover:text-white ml-2 transition"><i id="deskLikeIcon" class="far fa-heart text-lg"></i></button>
+            </div>
+
+            <div class="flex flex-col items-center justify-center w-[40%] max-w-[722px]">
+                <div class="flex items-center gap-6 mb-2">
+                    <button onclick="toggleShuffle()" id="deskShuffleBtn" class="text-gray-400 dark:text-[#b3b3b3] hover:text-orange-500 dark:hover:text-white transition"><i class="fas fa-random"></i></button>
+                    <button onclick="prevTrack()" class="text-gray-600 dark:text-[#b3b3b3] hover:text-orange-500 dark:hover:text-white text-xl transition"><i class="fas fa-step-backward"></i></button>
+                    
+                    <button onclick="togglePlay()" class="w-8 h-8 flex items-center justify-center bg-orange-600 dark:bg-white text-white dark:text-black rounded-full hover:scale-105 transition-transform active:scale-95 shadow-md">
+                        <i id="deskPlayIcon" class="fas fa-play ml-1 text-sm"></i>
                     </button>
-                    <button onclick="nextTrack()" class="text-gray-400 hover:text-pink-500 transition text-lg active:scale-90"><i class="fas fa-step-forward"></i></button>
+                    
+                    <button onclick="nextTrack()" class="text-gray-600 dark:text-[#b3b3b3] hover:text-orange-500 dark:hover:text-white text-xl transition"><i class="fas fa-step-forward"></i></button>
+                    <button class="text-gray-400 dark:text-[#b3b3b3] hover:text-orange-500 dark:hover:text-white transition"><i class="fas fa-redo-alt"></i></button>
+                </div>
+                
+                <div class="w-full flex items-center gap-2 group slider-wrapper">
+                    <span id="deskCurrentTime" class="text-[11px] font-bold text-slate-500 dark:text-[#b3b3b3] w-10 text-right">0:00</span>
+                    <div class="relative flex-1 h-4 flex items-center">
+                        <input type="range" id="deskProgressSlider" min="0" max="100" value="0" step="0.1" class="premium-slider">
+                        <div class="slider-visual-track">
+                            <div id="deskProgressFill" class="slider-visual-fill" style="width: 0%;"></div>
+                            <div id="deskProgressThumb" class="slider-visual-thumb" style="left: 0%;"></div>
+                        </div>
+                    </div>
+                    <span id="deskTotalTime" class="text-[11px] font-bold text-slate-500 dark:text-[#b3b3b3] w-10">0:00</span>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-4 w-[30%] min-w-[180px] text-gray-500 dark:text-[#b3b3b3]">
+                <button class="hover:text-slate-800 dark:hover:text-white transition"><i class="fas fa-list-ul"></i></button>
+                <button onclick="toggleDeviceModal()" class="hover:text-slate-800 dark:hover:text-white transition hover:scale-110 active:text-orange-500 dark:active:text-[#1ed760] relative">
+                    <i class="fas fa-laptop-house"></i>
+                    <span class="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full border border-white dark:border-spotdark hidden" id="deviceActiveDot"></span>
+                </button>
+                
+                <div class="flex items-center gap-2 w-24 group slider-wrapper">
+                    <button class="hover:text-slate-800 dark:hover:text-white transition"><i class="fas fa-volume-up text-sm"></i></button>
+                    <div class="relative flex-1 h-4 flex items-center">
+                        <input type="range" id="deskVolumeSlider" min="0" max="1" step="0.01" value="1" class="premium-slider">
+                        <div class="slider-visual-track">
+                            <div id="deskVolumeFill" class="slider-visual-fill" style="width: 100%;"></div>
+                            <div id="deskVolumeThumb" class="slider-visual-thumb" style="left: 100%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="openFullScreenPlayer()" class="hover:text-slate-800 dark:hover:text-white transition"><i class="fas fa-expand-alt"></i></button>
+            </div>
+        </div>
+
+        <div id="mob-player" class="md:hidden fixed bottom-[4.5rem] left-2 right-2 bg-white/95 dark:bg-spothover/95 backdrop-blur-xl border border-gray-200/50 dark:border-white/10 rounded-2xl px-4 py-3 flex flex-col shadow-lg z-40 transform translate-y-48 transition-transform cursor-pointer" onclick="openFullScreenPlayer()">
+            <div class="w-full flex items-center gap-3 mb-2" onclick="event.stopPropagation()">
+                <div class="relative flex-1 h-3 flex items-center group slider-wrapper">
+                    <input type="range" id="mobProgressSlider" min="0" max="100" value="0" step="0.1" class="premium-slider">
+                    <div class="slider-visual-track !h-1">
+                        <div id="mobProgressFill" class="slider-visual-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex items-center justify-between w-full">
+                <div class="flex items-center gap-3 w-2/3 pr-2">
+                    <img id="mobCover" src="https://ui-avatars.com/api/?name=QM" class="w-10 h-10 rounded-full object-cover spin-slow paused border border-orange-200 dark:border-transparent">
+                    <div class="overflow-hidden flex-1">
+                        <h4 id="mobTitle" class="font-bold text-[13px] text-slate-900 dark:text-white truncate">Нет трека</h4>
+                        <p id="mobArtist" class="text-[11px] text-slate-500 dark:text-[#b3b3b3] truncate">Выберите песню</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-end gap-3 w-1/3" onclick="event.stopPropagation()">
+                    <button onclick="toggleDeviceModal()" class="text-gray-400 dark:text-[#b3b3b3] hover:text-orange-500 dark:hover:text-white text-lg"><i class="fas fa-laptop-house"></i></button>
+                    <button class="w-9 h-9 flex items-center justify-center bg-orange-600 dark:bg-white text-white dark:text-black rounded-full shadow-md" onclick="togglePlay()">
+                        <i id="mobPlayIcon" class="fas fa-play ml-0.5 text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <nav class="md:hidden bg-white/95 dark:bg-[#121212]/95 glass-panel border-t border-gray-100 dark:border-white/5 fixed bottom-0 left-0 right-0 z-30 pb-safe transition-colors duration-300">
+            <div class="flex justify-around p-2">
+                <button onclick="switchView('home')" id="mob-nav-home" class="mob-nav-btn text-orange-600 dark:text-white active w-20 py-2 flex flex-col items-center gap-1 transition-colors">
+                    <i class="fas fa-home text-xl"></i><span class="text-[9px] font-bold uppercase tracking-wider">Главная</span>
+                </button>
+                <button onclick="switchView('search')" id="mob-nav-search" class="mob-nav-btn text-gray-400 dark:text-[#b3b3b3] hover:text-orange-500 dark:hover:text-white w-20 py-2 flex flex-col items-center gap-1 transition-colors">
+                    <i class="fas fa-search text-xl"></i><span class="text-[9px] font-bold uppercase tracking-wider">Поиск</span>
+                </button>
+                <button onclick="switchView('library')" id="mob-nav-library" class="mob-nav-btn text-gray-400 dark:text-[#b3b3b3] hover:text-orange-500 dark:hover:text-white w-20 py-2 flex flex-col items-center gap-1 transition-colors">
+                    <i class="fas fa-book-open text-xl"></i><span class="text-[9px] font-bold uppercase tracking-wider">Медиатека</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <div id="full-player" class="fixed inset-0 z-[200] bg-white dark:bg-[#121212] flex flex-col transition-transform duration-300">
+        <div class="absolute inset-0 z-0 overflow-hidden">
+            <img id="full-bg-img" src="" class="w-full h-full object-cover opacity-20 blur-3xl scale-125">
+            <div class="absolute inset-0 bg-white/60 dark:bg-[#121212]/80 backdrop-blur-3xl"></div>
+        </div>
+
+        <div class="relative z-10 flex-1 flex flex-col p-6 pb-10 max-w-md mx-auto w-full">
+            <div class="flex justify-between items-center mb-8 pt-4">
+                <button onclick="closeFullScreenPlayer()" class="w-10 h-10 rounded-full bg-white dark:bg-spothover shadow-sm border border-gray-100 dark:border-transparent flex items-center justify-center active:scale-90 text-gray-500 dark:text-white">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-[#b3b3b3]">Сейчас играет</span>
+                <button onclick="toggleDeviceModal()" class="w-10 h-10 rounded-full bg-white dark:bg-spothover shadow-sm border border-gray-100 dark:border-transparent flex items-center justify-center text-gray-500 dark:text-white"><i class="fas fa-laptop-house"></i></button>
+            </div>
+
+            <div class="w-full aspect-square rounded-xl overflow-hidden shadow-2xl mb-8 border border-gray-100 dark:border-transparent" id="full-cover-container">
+                <img id="full-cover" src="" class="w-full h-full object-cover">
+            </div>
+
+            <div class="flex justify-between items-end mb-6">
+                <div class="overflow-hidden pr-4">
+                    <h2 id="full-title" class="text-2xl font-black text-slate-800 dark:text-white truncate">Название</h2>
+                    <p id="full-artist" class="text-orange-500 dark:text-[#b3b3b3] font-bold text-sm truncate mt-1">Артист</p>
+                </div>
+                <button onclick="toggleLikeCurrent()" class="text-2xl active:scale-75 transition-transform shrink-0 w-12 h-12 flex items-center justify-center text-gray-400 dark:text-[#b3b3b3] hover:text-orange-500 dark:hover:text-white">
+                    <i id="full-likeIcon" class="far fa-heart"></i>
+                </button>
+            </div>
+
+            <div class="mb-8 w-full flex flex-col gap-2">
+                <div class="relative w-full h-4 flex items-center group slider-wrapper">
+                    <input type="range" id="full-progressSlider" min="0" max="100" value="0" step="0.1" class="premium-slider">
+                    <div class="slider-visual-track">
+                        <div id="full-progressFill" class="slider-visual-fill" style="width: 0%;"></div>
+                        <div id="full-progressThumb" class="slider-visual-thumb" style="left: 0%;"></div>
+                    </div>
+                </div>
+                <div class="flex justify-between w-full">
+                    <span id="full-current-time" class="text-[11px] font-bold text-slate-500 dark:text-[#b3b3b3]">0:00</span>
+                    <span id="full-total-time" class="text-[11px] font-bold text-slate-500 dark:text-[#b3b3b3]">0:00</span>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center px-2 mb-auto">
+                <button onclick="toggleShuffle()" id="full-shuffleBtn" class="text-gray-400 dark:text-[#b3b3b3] hover:text-orange-500 dark:hover:text-white text-xl transition active:scale-90"><i class="fas fa-random"></i></button>
+                <button onclick="prevTrack()" class="text-slate-800 dark:text-white text-3xl active:scale-75 transition"><i class="fas fa-step-backward"></i></button>
+                
+                <button onclick="togglePlay()" class="w-20 h-20 bg-orange-600 dark:bg-white text-white dark:text-black rounded-full flex items-center justify-center text-3xl shadow-lg active:scale-95 transition">
+                    <i id="full-playIcon" class="fas fa-play ml-1"></i>
+                </button>
+                
+                <button onclick="nextTrack()" class="text-slate-800 dark:text-white text-3xl active:scale-75 transition"><i class="fas fa-step-forward"></i></button>
+                <button class="text-gray-400 dark:text-[#b3b3b3] hover:text-orange-500 dark:hover:text-white text-xl transition active:scale-90"><i class="fas fa-redo-alt"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="deviceModal" class="fixed bottom-24 right-4 md:right-8 w-80 bg-white dark:bg-[#282828] rounded-xl shadow-2xl z-[300] border border-gray-100 dark:border-transparent opacity-0 transform translate-y-4 pointer-events-none transition-all duration-300">
+        <div class="p-4 border-b border-gray-100 dark:border-white/10 flex justify-between items-center">
+            <h3 class="font-bold text-lg text-slate-800 dark:text-white">Connect</h3>
+            <i class="fas fa-times cursor-pointer text-gray-400 dark:text-[#b3b3b3] hover:text-slate-800 dark:hover:text-white transition" onclick="toggleDeviceModal()"></i>
+        </div>
+        
+        <div class="p-2">
+            <div class="flex items-center gap-3 p-3 bg-orange-50 dark:bg-white/10 rounded-lg cursor-pointer text-orange-600 dark:text-[#1ed760]">
+                <i class="fas fa-laptop text-xl w-6 text-center"></i>
+                <span class="font-bold text-sm">Этот браузер</span>
+            </div>
+        </div>
+
+        <div class="p-4 pt-2 pb-2">
+            <p class="text-[10px] font-bold text-gray-400 dark:text-[#b3b3b3] mb-3 uppercase tracking-widest">Доступные устройства</p>
+            
+            <div class="flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-white/10 rounded-lg cursor-pointer transition group" onclick="connectDevice(this)">
+                <svg class="w-6 h-6 fill-current text-gray-400 dark:text-[#b3b3b3] group-hover:text-slate-800 dark:group-hover:text-white" viewBox="0 0 24 24"><path d="M16 11.5a2.5 2.5 0 0 0 5 0v-4a2.5 2.5 0 0 0-5 0v4zm-12 0a2.5 2.5 0 0 0 5 0v-4a2.5 2.5 0 0 0-5 0v4zm15.5 3a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm-15 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zM8 19h8v2H8v-2z"/></svg>
+                <div>
+                    <p class="font-bold text-sm text-slate-800 dark:text-white">AirPods Pro (Дамир)</p>
+                    <p class="text-[10px] text-gray-400 dark:text-[#b3b3b3] status-text">Bluetooth</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-white/10 rounded-lg cursor-pointer transition group mt-1" onclick="connectDevice(this)">
+                <i class="fas fa-mobile-alt text-xl text-gray-400 dark:text-[#b3b3b3] w-6 text-center group-hover:text-slate-800 dark:group-hover:text-white"></i>
+                <div>
+                    <p class="font-bold text-sm text-slate-800 dark:text-white">iPhone 15 Pro</p>
+                    <p class="text-[10px] text-gray-400 dark:text-[#b3b3b3] status-text">AirPlay</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-white/10 rounded-lg cursor-pointer transition group mt-1" onclick="connectDevice(this)">
+                <i class="fas fa-tv text-xl text-gray-400 dark:text-[#b3b3b3] w-6 text-center group-hover:text-slate-800 dark:group-hover:text-white"></i>
+                <div>
+                    <p class="font-bold text-sm text-slate-800 dark:text-white">Smart TV</p>
+                    <p class="text-[10px] text-gray-400 dark:text-[#b3b3b3] status-text">Wi-Fi</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- АУДИО ОБЪЕКТІСІ (Көрінбейді) -->
-    <audio id="audio-player"></audio>
+   <script>
+    // --- 1. ТАҚЫРЫП ЖӘНЕ НАВИГАЦИЯ ---
+    function toggleTheme() {
+        document.documentElement.classList.toggle('dark');
+        const isDark = document.documentElement.classList.contains('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        switchView(document.getElementById('view-home').classList.contains('hidden') ? (document.getElementById('view-search').classList.contains('hidden') ? 'library' : 'search') : 'home');
+    }
+    if (localStorage.getItem('theme') === 'light') document.documentElement.classList.remove('dark');
 
-    <script>
-        // Негізгі айнымалылар
-        const audio = document.getElementById('audio-player');
-        const progressBar = document.getElementById('progress-bar');
-        const playPauseIcon = document.getElementById('play-pause-icon');
-        const coverImg = document.getElementById('player-cover');
+    function switchView(viewId) {
+        document.getElementById('view-home').classList.add('hidden');
+        document.getElementById('view-search').classList.add('hidden');
+        document.getElementById('view-library').classList.add('hidden');
+        document.getElementById('view-' + viewId).classList.remove('hidden');
         
-        let playlist = []; // Ізделген әндер осында сақталады
-        let currentTrackIndex = 0;
-        let isPlaying = false;
-
-        // 1. БЕТ ЖҮКТЕЛГЕНДЕ БІРДЕН "KAZAKH" ӘНДЕРІН ШЫҒАРУ
-        window.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('search-input').value = "Jah Khalib"; // Бастапқы іздеу
-            searchMusic();
+        const isDark = document.documentElement.classList.contains('dark');
+        document.querySelectorAll('.pc-nav-btn').forEach(btn => {
+            btn.className = `pc-nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold transition-all border border-transparent ${isDark ? 'text-slate-400 hover:bg-spothover hover:text-white' : 'text-gray-500 hover:bg-gray-50 hover:text-orange-500'}`;
         });
+        const pcBtn = document.getElementById('pc-nav-' + viewId);
+        if(pcBtn) pcBtn.className = `pc-nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold transition-all border border-transparent ${isDark ? 'bg-spothover text-white' : 'bg-orange-50 text-orange-600'}`;
+        
+        document.querySelectorAll('.mob-nav-btn').forEach(btn => {
+            btn.className = `mob-nav-btn ${isDark ? 'text-[#b3b3b3]' : 'text-gray-400'} w-20 py-2 flex flex-col items-center gap-1 transition-colors`;
+        });
+        const mobBtn = document.getElementById('mob-nav-' + viewId);
+        if(mobBtn) mobBtn.className = `mob-nav-btn ${isDark ? 'text-white' : 'text-orange-600'} w-20 py-2 flex flex-col items-center gap-1 transition-colors`;
 
-        // 2. ІЗДЕУ ЖҮЙЕСІ (APPLE ITUNES API)
-        async function searchMusic() {
-            const query = document.getElementById('search-input').value.trim();
-            if (!query) return;
+        if(viewId === 'library') renderLibrary();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-            document.getElementById('track-list').innerHTML = "";
-            document.getElementById('loader').classList.remove('hidden');
+    // --- 2. DEEZER API (НАҒЫЗ ИНТЕРНЕТТЕН МУЗЫКА ТАРТУ) ---
+    let currentQueue = []; 
+    let originalQueue = []; 
+    let currentTrackIndex = 0;
+    let currentTrackObj = null;
 
-            try {
-                // Apple-дың ресми музыка іздеу API-і
-                const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=25`;
-                const response = await fetch(url);
-                const data = await response.json();
+    // Басты бетке "Чарт" шығару
+    window.addEventListener('DOMContentLoaded', () => { 
+        const script = document.createElement('script');
+        script.src = `https://api.deezer.com/chart/0/tracks?limit=20&output=jsonp&callback=handleDeezerChart`;
+        document.body.appendChild(script);
+    });
 
-                playlist = data.results; // Нәтижені сақтаймыз
-                renderPlaylist();
-            } catch (error) {
-                document.getElementById('track-list').innerHTML = `<p class="text-center text-red-500 font-bold text-sm py-10">Ошибка подключения к интернету.</p>`;
-            } finally {
-                document.getElementById('loader').classList.add('hidden');
-            }
+    window.handleDeezerChart = function(data) {
+        document.getElementById('home-loader').classList.add('hidden');
+        renderTrackList(data.data, 'home-feed');
+    }
+
+    // Іздеу
+    let searchTimeout;
+    function debounceSearch() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(searchDeezer, 800);
+    }
+
+    function searchDeezer() {
+        const query = document.getElementById('searchInput').value.trim();
+        const resultsContainer = document.getElementById('searchResults');
+        const loader = document.getElementById('search-loader');
+        
+        if (query.length < 2) {
+            resultsContainer.innerHTML = `<div class="col-span-full p-10 text-center border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-3xl text-gray-400 dark:text-slate-500"><i class="fas fa-search text-5xl mb-4 opacity-50"></i><p class="font-bold">Начните вводить текст</p></div>`;
+            return;
         }
 
-        // Инпут ішінде Enter басса іздеу
-        document.getElementById('search-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') searchMusic();
-        });
+        resultsContainer.innerHTML = '';
+        loader.classList.remove('hidden');
 
-        // 3. ТІЗІМДІ ЭКРАНҒА ШЫҒАРУ
-        function renderPlaylist() {
-            const container = document.getElementById('track-list');
-            if (playlist.length === 0) {
-                container.innerHTML = `<p class="text-center text-gray-400 font-bold text-sm py-10 italic">Ничего не найдено...</p>`;
-                return;
-            }
+        const script = document.createElement('script');
+        script.src = `https://api.deezer.com/search?q=${encodeURIComponent(query)}&limit=30&output=jsonp&callback=handleDeezerSearch`;
+        document.body.appendChild(script);
+    }
 
-            container.innerHTML = playlist.map((track, index) => {
-                // Сапалы сурет алу үшін URL-ды сәл өзгертеміз (100x100 -> 300x300)
-                const hqImage = track.artworkUrl100.replace('100x100bb', '300x300bb');
-                
-                return `
-                <div onclick="playTrack(${index})" class="flex items-center justify-between bg-white p-3 rounded-2xl shadow-sm border border-gray-100 hover:border-pink-300 cursor-pointer transition group active:scale-95">
-                    <div class="flex items-center gap-4 w-[85%]">
-                        <img src="${hqImage}" class="w-14 h-14 rounded-xl object-cover shadow-sm">
-                        <div class="truncate w-full">
-                            <h4 class="font-bold text-sm text-gray-800 truncate">${track.trackName}</h4>
-                            <p class="text-[10px] text-gray-400 font-black uppercase tracking-wider truncate">${track.artistName}</p>
+    window.handleDeezerSearch = function(data) {
+        document.getElementById('search-loader').classList.add('hidden');
+        if (!data.data || data.data.length === 0) {
+            document.getElementById('searchResults').innerHTML = `<p class="col-span-full text-center text-slate-500 font-bold mt-10">Ничего не найдено :(</p>`;
+            return;
+        }
+        renderTrackList(data.data, 'searchResults');
+    }
+
+    // Рендер
+    function renderTrackList(apiTracks, containerId) {
+        const container = document.getElementById(containerId);
+        
+        // Deezer объектісін өзіміздің форматқа айналдырамыз
+        const tracks = apiTracks.map(t => ({
+            id: t.id,
+            title: t.title,
+            artist: t.artist.name,
+            img: t.album.cover_medium,
+            url: t.preview // 30 сек. превью (Кейін осы жерді толық mp3-ге ауыстырамыз)
+        }));
+
+        // Тізімді глобалды айнымалыға сақтап қоямыз (Очередь үшін)
+        if (containerId === 'home-feed') window.homeTracks = tracks;
+        if (containerId === 'searchResults') window.searchTracks = tracks;
+
+        container.innerHTML = tracks.map((track, index) => {
+            const trackStr = encodeURIComponent(JSON.stringify(track));
+            const isLiked = likedSongs.some(s => s.id === track.id);
+            const isDark = document.documentElement.classList.contains('dark');
+            const heartClass = isLiked ? (isDark ? 'fas fa-heart text-[#1db954]' : 'fas fa-heart text-orange-500') : 'far fa-heart text-gray-400 dark:text-[#b3b3b3]';
+            
+            return `
+                <div class="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-transparent border border-gray-100 dark:border-transparent hover:bg-orange-50 dark:hover:bg-white/10 transition-all group cursor-pointer" onclick="playQueue('${containerId}', ${index})">
+                    <div class="flex items-center gap-4 w-3/4">
+                        <div class="w-12 h-12 rounded flex-shrink-0 relative overflow-hidden shadow-sm">
+                            <img src="${track.img}" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><i class="fas fa-play text-white text-sm"></i></div>
+                        </div>
+                        <div class="truncate">
+                            <h4 class="font-bold text-[14px] text-slate-800 dark:text-white truncate">${track.title}</h4>
+                            <p class="text-[12px] text-slate-500 dark:text-[#b3b3b3] truncate">${track.artist}</p>
                         </div>
                     </div>
-                    <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-pink-100 transition mr-1">
-                        <i class="fas fa-play text-gray-400 group-hover:text-pink-500 text-xs pl-0.5"></i>
-                    </div>
-                </div>`;
-            }).join('');
+                    <button onclick="event.stopPropagation(); currentTrackObj = JSON.parse(decodeURIComponent('${trackStr}')); toggleLikeFromList(this);" class="p-2 hover:scale-110 transition"><i class="${heartClass} text-lg"></i></button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // --- 3. АУДИО ОЙНАТҚЫШ ЖӘНЕ SHUFFLE ---
+    const audio = document.getElementById('main-audio');
+    let isPlaying = false;
+    let isShuffleOn = false;
+
+    function playQueue(containerId, index) {
+        if (containerId === 'home-feed') currentQueue = [...window.homeTracks];
+        else if (containerId === 'searchResults') currentQueue = [...window.searchTracks];
+        else if (containerId === 'library-feed') currentQueue = [...likedSongs];
+        
+        originalQueue = [...currentQueue]; 
+        if(isShuffleOn) shuffleArray(currentQueue);
+        
+        const targetTrackId = originalQueue[index].id;
+        currentTrackIndex = currentQueue.findIndex(t => t.id === targetTrackId);
+        
+        loadAndPlayCurrent();
+    }
+
+    function loadAndPlayCurrent() {
+        if (currentQueue.length === 0) return;
+        const track = currentQueue[currentTrackIndex];
+        currentTrackObj = track;
+
+        audio.src = track.url;
+        audio.play().then(() => {
+            isPlaying = true; updatePlayIcons();
+            document.getElementById('playerCover').classList.remove('paused');
+            document.getElementById('mobCover').classList.remove('paused');
+        }).catch(err => { isPlaying = false; updatePlayIcons(); });
+        
+        // UI жаңарту (ПК)
+        document.getElementById('deskTitle').innerText = track.title;
+        document.getElementById('deskArtist').innerText = track.artist;
+        document.getElementById('deskCover').src = track.img;
+        
+        // UI жаңарту (Мобильді)
+        document.getElementById('mobTitle').innerText = track.title;
+        document.getElementById('mobArtist').innerText = track.artist;
+        document.getElementById('mobCover').src = track.img;
+        document.getElementById('mob-player').classList.remove('translate-y-48');
+        
+        // UI жаңарту (Толық экран)
+        document.getElementById('full-title').innerText = track.title;
+        document.getElementById('full-artist').innerText = track.artist;
+        document.getElementById('full-cover').src = track.img.replace('cover_medium', 'cover_xl'); // Үлкен сурет
+        document.getElementById('full-bg-img').src = track.img;
+        
+        updateLikeIcons();
+    }
+
+    function togglePlay() {
+        if (!audio.src) return;
+        if (isPlaying) { 
+            audio.pause(); 
+            document.getElementById('playerCover').classList.add('paused');
+            document.getElementById('mobCover').classList.add('paused');
+        } else { 
+            audio.play(); 
+            document.getElementById('playerCover').classList.remove('paused');
+            document.getElementById('mobCover').classList.remove('paused');
         }
+        isPlaying = !isPlaying;
+        updatePlayIcons();
+    }
 
-        // 4. ӘНДІ ОЙНАТУ ФУНКЦИЯСЫ
-        function playTrack(index) {
-            currentTrackIndex = index;
-            const track = playlist[index];
-            const hqImage = track.artworkUrl100.replace('100x100bb', '300x300bb');
+    function updatePlayIcons() {
+        const pClass = "fas fa-pause"; const plClass = "fas fa-play ml-1";
+        document.getElementById('deskPlayIcon').className = isPlaying ? pClass : plClass;
+        document.getElementById('mobPlayIcon').className = isPlaying ? "fas fa-pause text-xs" : "fas fa-play ml-0.5 text-xs";
+        document.getElementById('full-playIcon').className = isPlaying ? pClass : plClass;
+    }
 
-            // Плеерге мәліметтерді қою
-            document.getElementById('player-title').innerText = track.trackName;
-            document.getElementById('player-artist').innerText = track.artistName;
-            coverImg.src = hqImage;
+    function nextTrack() {
+        if (currentQueue.length === 0) return;
+        currentTrackIndex = (currentTrackIndex + 1) % currentQueue.length;
+        loadAndPlayCurrent();
+    }
+    function prevTrack() {
+        if (currentQueue.length === 0) return;
+        currentTrackIndex = (currentTrackIndex - 1 + currentQueue.length) % currentQueue.length;
+        loadAndPlayCurrent();
+    }
+    audio.addEventListener('ended', nextTrack);
 
-            // Аудионы іске қосу
-            audio.src = track.previewUrl; // 30 секундтық ресми превью
-            audio.play();
-            isPlaying = true;
-            updatePlayIcon();
-
-            // Плеерді төменнен шығару (бір рет қана)
-            document.getElementById('floating-player').classList.remove('translate-y-32');
-            
-            // Дөңгелек пластинканы айналдыру
-            coverImg.classList.remove('paused');
+    function toggleShuffle() {
+        isShuffleOn = !isShuffleOn;
+        const iconD = document.getElementById('deskShuffleBtn');
+        const iconF = document.getElementById('full-shuffleBtn');
+        const isDark = document.documentElement.classList.contains('dark');
+        const activeClass = isDark ? 'text-[#1db954]' : 'text-orange-500';
+        
+        if (isShuffleOn) {
+            iconD.className = `${activeClass} transition`; iconF.className = `${activeClass} transition active:scale-90`;
+            const currentTrack = currentQueue[currentTrackIndex];
+            shuffleArray(currentQueue);
+            currentTrackIndex = currentQueue.findIndex(t => t.id === currentTrack.id);
+        } else {
+            iconD.className = `text-gray-400 dark:text-[#b3b3b3] hover:text-orange-500 dark:hover:text-white transition`;
+            iconF.className = `text-gray-400 dark:text-[#b3b3b3] hover:text-orange-500 dark:hover:text-white transition active:scale-90`;
+            const currentTrack = currentQueue[currentTrackIndex];
+            currentQueue = [...originalQueue];
+            currentTrackIndex = currentQueue.findIndex(t => t.id === currentTrack.id);
         }
-
-        // 5. PLAY / PAUSE БАСҚАРУ
-        function togglePlay() {
-            if (!audio.src) return;
-            
-            if (isPlaying) {
-                audio.pause();
-                coverImg.classList.add('paused'); // Айналуды тоқтату
-            } else {
-                audio.play();
-                coverImg.classList.remove('paused'); // Айналуды жалғастыру
-            }
-            isPlaying = !isPlaying;
-            updatePlayIcon();
+    }
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
         }
+    }
 
-        function updatePlayIcon() {
-            playPauseIcon.className = isPlaying ? "fas fa-pause" : "fas fa-play ml-1";
-        }
+    // --- ПРОГРЕСС ЖӘНЕ ДАУЫС КӨЛЕМІ ---
+    function formatTime(seconds) {
+        if (isNaN(seconds)) return "0:00";
+        const min = Math.floor(seconds / 60); const sec = Math.floor(seconds % 60);
+        return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+    }
 
-        // 6. КЕЛЕСІ / АЛДЫҢҒЫ ТРЕК
-        function nextTrack() {
-            let nextIndex = currentTrackIndex + 1;
-            if (nextIndex >= playlist.length) nextIndex = 0; // Тізім бітсе басынан бастайды
-            playTrack(nextIndex);
-        }
+    function setupSlider(sliderId, fillId, thumbId, actionType, timeId, totalId) {
+        const slider = document.getElementById(sliderId);
+        const fill = document.getElementById(fillId);
+        const thumb = document.getElementById(thumbId);
+        if(!slider) return;
+        let isDragging = false;
 
-        function prevTrack() {
-            let prevIndex = currentTrackIndex - 1;
-            if (prevIndex < 0) prevIndex = playlist.length - 1;
-            playTrack(prevIndex);
-        }
-
-        // 7. ПРОГРЕСС-БАРДЫ ЖАНДАНДЫРУ
-        audio.addEventListener('timeupdate', () => {
-            if (audio.duration) {
-                const progressPercent = (audio.currentTime / audio.duration) * 100;
-                progressBar.value = progressPercent;
-                document.getElementById('current-time').innerText = formatTime(audio.currentTime);
+        slider.addEventListener('input', (e) => {
+            const percent = actionType === 'volume' ? (e.target.value * 100) : e.target.value;
+            if(fill) fill.style.width = percent + '%';
+            if(thumb) thumb.style.left = percent + '%';
+            if (actionType === 'time' && timeId) {
+                isDragging = true;
+                if (audio.duration) document.getElementById(timeId).innerText = formatTime((percent / 100) * audio.duration);
             }
         });
 
-        // Ән біткенде автоматты түрде келесіге өту
-        audio.addEventListener('ended', nextTrack);
+        slider.addEventListener('change', (e) => {
+            if (actionType === 'time') {
+                if (audio.duration) audio.currentTime = (e.target.value / 100) * audio.duration;
+                isDragging = false;
+            } else if (actionType === 'volume') {
+                audio.volume = e.target.value;
+            }
+        });
 
-        // Таймлайннан айналдыру (перемотка)
-        function seekMusic() {
-            const seekTime = (progressBar.value / 100) * audio.duration;
-            audio.currentTime = seekTime;
+        if (actionType === 'time') {
+            audio.addEventListener('timeupdate', () => {
+                if (audio.duration && !isDragging) {
+                    const percent = (audio.currentTime / audio.duration) * 100;
+                    slider.value = percent;
+                    if(fill) fill.style.width = percent + '%';
+                    if(thumb) thumb.style.left = percent + '%';
+                    if(timeId) document.getElementById(timeId).innerText = formatTime(audio.currentTime);
+                    if(totalId) document.getElementById(totalId).innerText = formatTime(audio.duration);
+                }
+            });
         }
+    }
 
-        // Уақытты 0:00 форматына келтіру
-        function formatTime(seconds) {
-            const min = Math.floor(seconds / 60);
-            const sec = Math.floor(seconds % 60);
-            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+    // ПК прогресс
+    setupSlider('deskProgressSlider', 'deskProgressFill', 'deskProgressThumb', 'time', 'deskCurrentTime', 'deskTotalTime');
+    // ПК дыбыс
+    setupSlider('deskVolumeSlider', 'deskVolumeFill', 'deskVolumeThumb', 'volume');
+    // Мобильді прогресс
+    setupSlider('mobProgressSlider', 'mobProgressFill', null, 'time');
+    // Толық прогресс
+    setupSlider('full-progressSlider', 'full-progressFill', 'full-progressThumb', 'time', 'full-current-time', 'full-total-time');
+
+    // Плеерді ашу / жабу
+    function openFullScreenPlayer() { document.getElementById('full-player').classList.add('active'); }
+    function closeFullScreenPlayer() { document.getElementById('full-player').classList.remove('active'); }
+
+    // --- ҚҰРЫЛҒЫ ҚОСУ (CONNECT DEVICES) ---
+    function toggleDeviceModal() {
+        const modal = document.getElementById('deviceModal');
+        if (modal.classList.contains('pointer-events-none')) {
+            modal.classList.remove('pointer-events-none');
+            modal.classList.remove('opacity-0', 'translate-y-4');
+        } else {
+            modal.classList.add('opacity-0', 'translate-y-4');
+            setTimeout(() => { modal.classList.add('pointer-events-none'); }, 300);
         }
+    }
 
-    </script>
+    function connectDevice(elem) {
+        // Барлық құрылғылардан жасыл мәтінді алып тастау
+        document.querySelectorAll('.status-text').forEach(el => {
+            el.innerHTML = el.getAttribute('data-default') || 'Bluetooth';
+            el.className = 'text-[10px] text-gray-400 dark:text-[#b3b3b3] status-text';
+        });
+        
+        // Таңдалған құрылғыға жасыл "Подключено" қою
+        const statusEl = elem.querySelector('.status-text');
+        if(!statusEl.getAttribute('data-default')) statusEl.setAttribute('data-default', statusEl.innerHTML);
+        
+        const isDark = document.documentElement.classList.contains('dark');
+        const greenColor = isDark ? 'text-[#1db954]' : 'text-green-500';
+        statusEl.innerHTML = `<i class="fas fa-check-circle mr-1"></i>Подключено`;
+        statusEl.className = `text-[10px] ${greenColor} font-bold status-text`;
+        
+        // Басты батырмада жасыл нүкте жағу
+        const dot = document.getElementById('deviceActiveDot');
+        if(dot) dot.classList.remove('hidden');
+
+        setTimeout(() => { toggleDeviceModal(); }, 600);
+    }
+
+    // --- МЕДИАТЕКА (ЛЮБИМЫЕ) ---
+    let likedSongs = JSON.parse(localStorage.getItem('qulan_music_liked')) || [];
+
+    function toggleLikeFromList(btnElem) {
+        if (!currentTrackObj) return;
+        processLike(currentTrackObj);
+        
+        const isDark = document.documentElement.classList.contains('dark');
+        const activeColor = isDark ? 'text-[#1db954]' : 'text-orange-500';
+        const defaultColor = isDark ? 'text-[#b3b3b3]' : 'text-gray-400';
+        
+        const icon = btnElem.querySelector('i');
+        icon.className = likedSongs.some(s => s.id === currentTrackObj.id) ? `fas fa-heart ${activeColor} text-lg` : `far fa-heart ${defaultColor} text-lg`;
+        
+        updateLikeIcons();
+        if(activeView === 'library') renderLibrary();
+    }
+
+    function toggleLikeCurrent() {
+        if (!currentTrackObj) return;
+        processLike(currentTrackObj);
+        updateLikeIcons();
+        if(activeView === 'library') renderLibrary();
+    }
+
+    function processLike(track) {
+        const existsIndex = likedSongs.findIndex(s => s.id === track.id);
+        if(existsIndex !== -1) likedSongs.splice(existsIndex, 1);
+        else likedSongs.unshift(track);
+        localStorage.setItem('qulan_music_liked', JSON.stringify(likedSongs));
+    }
+
+    function updateLikeIcons() {
+        if (!currentTrackObj) return;
+        const isLiked = likedSongs.some(s => s.id === currentTrackObj.id);
+        const isDark = document.documentElement.classList.contains('dark');
+        const activeColor = isDark ? 'text-[#1db954]' : 'text-orange-500';
+        const defaultColor = isDark ? 'text-[#b3b3b3]' : 'text-gray-400';
+        
+        const fIcon = document.getElementById('full-likeIcon');
+        const dIcon = document.getElementById('deskLikeIcon');
+        if(fIcon) fIcon.className = isLiked ? `fas fa-heart ${activeColor}` : `far fa-heart ${defaultColor}`;
+        if(dIcon) dIcon.className = isLiked ? `fas fa-heart ${activeColor} text-lg` : `far fa-heart ${defaultColor} text-lg`;
+    }
+
+    function renderLibrary() {
+        const container = document.getElementById('library-feed');
+        if(likedSongs.length === 0) {
+            container.innerHTML = `<div class="col-span-full py-24 text-center opacity-40"><i class="fas fa-heart-broken text-7xl mb-6 text-gray-300"></i><p class="font-black uppercase tracking-widest text-xs text-gray-400">Медиатека пуста</p></div>`;
+            return;
+        }
+        renderTrackList(likedSongs, 'library-feed');
+    }
+</script>
 </body>
 </html>

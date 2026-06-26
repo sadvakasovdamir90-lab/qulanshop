@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Музыка — QulanShop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
+        
+        .glass-player {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        
+        /* Дөңгелек пластинка анимациясы */
+        .music-spin { animation: spin 5s linear infinite; }
+        .paused { animation-play-state: paused; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        
+        /* Скролл жасыру */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        /* Прогресс-бар дизайны */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 10px; width: 10px;
+            border-radius: 50%;
+            background: #ec4899; /* pink-500 */
+            cursor: pointer;
+            margin-top: -3px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px;
+            cursor: pointer;
+            background: #fce7f3; /* pink-100 */
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="text-gray-800 pb-32">
+
+    <!-- Бас киім (Header) -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+            <button onclick="location.href='index.html'" class="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-500 hover:text-pink-500 hover:bg-pink-50 transition active:scale-95">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1 class="text-xl font-black text-pink-500 italic uppercase tracking-widest">Qulan Music</h1>
+            <div class="w-10"></div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 mt-6 max-w-lg relative">
+        
+        <!-- ІЗДЕУ ЖҮЙЕСІ (ПОИСК) -->
+        <div class="relative mb-6">
+            <input type="text" id="search-input" 
+                class="w-full bg-white border-2 border-pink-100 rounded-2xl py-4 pl-12 pr-16 outline-none focus:border-pink-500 transition-all font-bold text-sm shadow-sm" 
+                placeholder="Найти песню или артиста...">
+            <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-pink-300 text-lg"></i>
+            <button onclick="searchMusic()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-pink-500 text-white w-10 h-10 rounded-xl hover:bg-pink-600 transition flex items-center justify-center shadow-md active:scale-90">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- Баннер -->
+        <div class="bg-gradient-to-br from-pink-500 to-purple-600 rounded-[2rem] p-8 text-white shadow-xl shadow-pink-200/50 mb-8 relative overflow-hidden flex items-center justify-between">
+            <div class="relative z-10">
+                <h2 class="text-3xl font-black italic uppercase mb-1 leading-none tracking-tighter">Мировые<br>Хиты</h2>
+                <p class="text-[10px] text-pink-100 font-black uppercase tracking-widest mt-2">Apple Music API</p>
+            </div>
+            <i class="fas fa-compact-disc text-8xl opacity-20 absolute -right-6 -bottom-6 animate-spin" style="animation-duration: 10s;"></i>
+        </div>
+
+        <!-- ЖҮКТЕЛУ БЕЛГІСІ -->
+        <div id="loader" class="hidden text-center py-10">
+            <i class="fas fa-spinner fa-spin text-3xl text-pink-500"></i>
+            <p class="text-xs font-bold text-gray-400 mt-3 uppercase tracking-widest">Ищем треки...</p>
+        </div>
+
+        <!-- ТРЕКТЕР ТІЗІМІ -->
+        <div class="space-y-3 mb-24" id="track-list">
+            <!-- Тректер осы жерге JavaScript арқылы түседі -->
+        </div>
+    </main>
+
+    <!-- ҚАЛҚЫМАЛЫ ПЛЕЕР (FLOATING PLAYER) -->
+    <div class="fixed bottom-4 left-4 right-4 max-w-lg mx-auto z-50 transform translate-y-32 transition-transform duration-500" id="floating-player">
+        <div class="glass-player border border-white/60 p-3 rounded-[2rem] shadow-[0_20px_40px_rgba(236,72,153,0.15)]">
+            
+            <!-- Прогресс бар -->
+            <div class="px-3 mb-2 flex items-center gap-2">
+                <span id="current-time" class="text-[9px] font-bold text-gray-400">0:00</span>
+                <input type="range" id="progress-bar" value="0" max="100" onchange="seekMusic()">
+                <span id="duration-time" class="text-[9px] font-bold text-gray-400">0:30</span>
+            </div>
+
+            <div class="flex items-center justify-between px-2 pb-1">
+                <div class="flex items-center gap-3 w-[60%]">
+                    <div class="relative w-12 h-12 shrink-0">
+                        <img id="player-cover" src="" class="w-12 h-12 rounded-full object-cover border-2 border-pink-500 shadow-md music-spin paused">
+                        <div class="absolute inset-0 rounded-full border border-white/50"></div>
+                        <div class="absolute inset-0 m-auto w-3 h-3 bg-white rounded-full border border-gray-200"></div>
+                    </div>
+                    <div class="truncate">
+                        <h4 id="player-title" class="font-black text-sm text-gray-800 leading-tight truncate">Название</h4>
+                        <p id="player-artist" class="text-[10px] text-pink-500 font-bold italic truncate">Артист</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <button onclick="prevTrack()" class="text-gray-400 hover:text-pink-500 transition text-lg active:scale-90"><i class="fas fa-step-backward"></i></button>
+                    <button onclick="togglePlay()" class="w-12 h-12 bg-pink-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-pink-200 hover:scale-105 active:scale-95 transition">
+                        <i id="play-pause-icon" class="fas fa-pause"></i>
+                    </button>
+                    <button onclick="nextTrack()" class="text-gray-400 hover:text-pink-500 transition text-lg active:scale-90"><i class="fas fa-step-forward"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- АУДИО ОБЪЕКТІСІ (Көрінбейді) -->
+    <audio id="audio-player"></audio>
+
+    <script>
+        // Негізгі айнымалылар
+        const audio = document.getElementById('audio-player');
+        const progressBar = document.getElementById('progress-bar');
+        const playPauseIcon = document.getElementById('play-pause-icon');
+        const coverImg = document.getElementById('player-cover');
+        
+        let playlist = []; // Ізделген әндер осында сақталады
+        let currentTrackIndex = 0;
+        let isPlaying = false;
+
+        // 1. БЕТ ЖҮКТЕЛГЕНДЕ БІРДЕН "KAZAKH" ӘНДЕРІН ШЫҒАРУ
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('search-input').value = "Jah Khalib"; // Бастапқы іздеу
+            searchMusic();
+        });
+
+        // 2. ІЗДЕУ ЖҮЙЕСІ (APPLE ITUNES API)
+        async function searchMusic() {
+            const query = document.getElementById('search-input').value.trim();
+            if (!query) return;
+
+            document.getElementById('track-list').innerHTML = "";
+            document.getElementById('loader').classList.remove('hidden');
+
+            try {
+                // Apple-дың ресми музыка іздеу API-і
+                const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=25`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                playlist = data.results; // Нәтижені сақтаймыз
+                renderPlaylist();
+            } catch (error) {
+                document.getElementById('track-list').innerHTML = `<p class="text-center text-red-500 font-bold text-sm py-10">Ошибка подключения к интернету.</p>`;
+            } finally {
+                document.getElementById('loader').classList.add('hidden');
+            }
+        }
+
+        // Инпут ішінде Enter басса іздеу
+        document.getElementById('search-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchMusic();
+        });
+
+        // 3. ТІЗІМДІ ЭКРАНҒА ШЫҒАРУ
+        function renderPlaylist() {
+            const container = document.getElementById('track-list');
+            if (playlist.length === 0) {
+                container.innerHTML = `<p class="text-center text-gray-400 font-bold text-sm py-10 italic">Ничего не найдено...</p>`;
+                return;
+            }
+
+            container.innerHTML = playlist.map((track, index) => {
+                // Сапалы сурет алу үшін URL-ды сәл өзгертеміз (100x100 -> 300x300)
+                const hqImage = track.artworkUrl100.replace('100x100bb', '300x300bb');
+                
+                return `
+                <div onclick="playTrack(${index})" class="flex items-center justify-between bg-white p-3 rounded-2xl shadow-sm border border-gray-100 hover:border-pink-300 cursor-pointer transition group active:scale-95">
+                    <div class="flex items-center gap-4 w-[85%]">
+                        <img src="${hqImage}" class="w-14 h-14 rounded-xl object-cover shadow-sm">
+                        <div class="truncate w-full">
+                            <h4 class="font-bold text-sm text-gray-800 truncate">${track.trackName}</h4>
+                            <p class="text-[10px] text-gray-400 font-black uppercase tracking-wider truncate">${track.artistName}</p>
+                        </div>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-pink-100 transition mr-1">
+                        <i class="fas fa-play text-gray-400 group-hover:text-pink-500 text-xs pl-0.5"></i>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // 4. ӘНДІ ОЙНАТУ ФУНКЦИЯСЫ
+        function playTrack(index) {
+            currentTrackIndex = index;
+            const track = playlist[index];
+            const hqImage = track.artworkUrl100.replace('100x100bb', '300x300bb');
+
+            // Плеерге мәліметтерді қою
+            document.getElementById('player-title').innerText = track.trackName;
+            document.getElementById('player-artist').innerText = track.artistName;
+            coverImg.src = hqImage;
+
+            // Аудионы іске қосу
+            audio.src = track.previewUrl; // 30 секундтық ресми превью
+            audio.play();
+            isPlaying = true;
+            updatePlayIcon();
+
+            // Плеерді төменнен шығару (бір рет қана)
+            document.getElementById('floating-player').classList.remove('translate-y-32');
+            
+            // Дөңгелек пластинканы айналдыру
+            coverImg.classList.remove('paused');
+        }
+
+        // 5. PLAY / PAUSE БАСҚАРУ
+        function togglePlay() {
+            if (!audio.src) return;
+            
+            if (isPlaying) {
+                audio.pause();
+                coverImg.classList.add('paused'); // Айналуды тоқтату
+            } else {
+                audio.play();
+                coverImg.classList.remove('paused'); // Айналуды жалғастыру
+            }
+            isPlaying = !isPlaying;
+            updatePlayIcon();
+        }
+
+        function updatePlayIcon() {
+            playPauseIcon.className = isPlaying ? "fas fa-pause" : "fas fa-play ml-1";
+        }
+
+        // 6. КЕЛЕСІ / АЛДЫҢҒЫ ТРЕК
+        function nextTrack() {
+            let nextIndex = currentTrackIndex + 1;
+            if (nextIndex >= playlist.length) nextIndex = 0; // Тізім бітсе басынан бастайды
+            playTrack(nextIndex);
+        }
+
+        function prevTrack() {
+            let prevIndex = currentTrackIndex - 1;
+            if (prevIndex < 0) prevIndex = playlist.length - 1;
+            playTrack(prevIndex);
+        }
+
+        // 7. ПРОГРЕСС-БАРДЫ ЖАНДАНДЫРУ
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration) {
+                const progressPercent = (audio.currentTime / audio.duration) * 100;
+                progressBar.value = progressPercent;
+                document.getElementById('current-time').innerText = formatTime(audio.currentTime);
+            }
+        });
+
+        // Ән біткенде автоматты түрде келесіге өту
+        audio.addEventListener('ended', nextTrack);
+
+        // Таймлайннан айналдыру (перемотка)
+        function seekMusic() {
+            const seekTime = (progressBar.value / 100) * audio.duration;
+            audio.currentTime = seekTime;
+        }
+
+        // Уақытты 0:00 форматына келтіру
+        function formatTime(seconds) {
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+
+    </script>
+</body>
+</html>
